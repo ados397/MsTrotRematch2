@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">트롯투표 리매치W</string>
+    <string name="api_key">AIzaSyBpnA7k1IhucLSjsNTvwP0PSLS7vk8fBvQ</string>
+    <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
+    <string name="default_notification_channel_name" translatable="true">Weather</string>
+    <string name="msg_token_fmt" translatable="false">InstanceID Token: %s</string>
+    <string name="admob_app_id">ca-app-pub-1859147676618347~5870203385</string>
+    <string name="admob_banner_ad_unit_id">ca-app-pub-1859147676618347/2788922085</string>
+    <string name="admob_banner_ad_unit_id_for_test">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="admob_Interstitial_ad_unit_id">ca-app-pub-1859147676618347/5678631694</string>
+    <string name="admob_Interstitial_ad_unit_id_for_test">ca-app-pub-3940256099942544/1033173712</string>
+    <string name="admob_Reward_ad_id">ca-app-pub-1859147676618347/9945357373</string>
+    <string name="admob_Reward_ad_id_for_test">ca-app-pub-3940256099942544/5224354917</string>
+    <string name="cauly_ad_unit_id_play_store">avhXxFUQ</string>
+    <string name="cauly_ad_unit_id_one_store">avhXxFUQ</string>
+    <string name="cauly_ad_unit_id_for_test">CAULY</string>
+    <string name="facebook_Reward_ad_id">291696078707763_291699465374091</string>
+    <string name="adtype_admob">admob</string>
+    <string name="adtype_cauly">cauly</string>
+    <string name="adtype_adfit">adfit</string>
+    <string name="adtype_facebook">facebook</string>
+    <string name="adtype_unity">unity</string>
+</resources>

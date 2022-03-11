@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_layout"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".HallOfFameActivity">
+
+    <RelativeLayout
+        android:id="@+id/img_layout"
+        android:layout_width="match_parent"
+        android:layout_height="380dp">
+
+        <ImageView
+            android:id="@+id/img_rank_background"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitXY"
+            android:src="@drawable/spotlight_s1_main" />
+
+        <RelativeLayout
+            android:id="@+id/layout_title"
+            android:background="@drawable/btn_round4"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp"
+            android:padding="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:id="@+id/img_title"
+                android:src="@drawable/halloffame_title"
+                android:layout_width="275dp"
+                android:layout_height="71dp"/>
+        </RelativeLayout>
+
+        <ImageView
+            android:id="@+id/img_season_logo"
+            android:src="@drawable/season1_logo"
+            android:layout_below="@+id/layout_title"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="3dp"
+            android:layout_width="140.4dp"
+            android:layout_height="19.6dp"/>
+
+        <Button
+            android:id="@+id/button_title"
+            android:text="- 투표 순위 -"
+            android:textColor="#ddffffff"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:background="@drawable/btn_round3"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/img_season_logo"
+            android:layout_marginTop="5dp"
+            android:layout_width="230dp"
+            android:layout_height="32dp"/>
+
+        <ImageView
+            android:id="@+id/img_left"
+            android:src="@drawable/left_arrow"
+            android:layout_centerVertical="true"
+            android:layout_width="50dp"
+            android:layout_height="50dp"/>
+
+        <ImageView
+            android:id="@+id/img_right"
+            android:src="@drawable/right_arrow"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_width="50dp"
+            android:layout_height="50dp"/>
+
+        <include layout="@layout/profile_item"
+            android:id="@+id/profile_rank_no2"
+            android:layout_toLeftOf="@+id/profile_rank_no1"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="23dp"
+            android:layout_marginRight="5dp"
+            android:layout_width="80dp"
+            android:layout_height="150dp"/>
+        <include layout="@layout/profile_item"
+            android:id="@+id/profile_rank_no1"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="23dp"
+            android:layout_width="100dp"
+            android:layout_height="180dp"/>
+        <include layout="@layout/profile_item"
+            android:id="@+id/profile_rank_no3"
+            android:layout_toRightOf="@id/profile_rank_no1"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="23dp"
+            android:layout_marginLeft="5dp"
+            android:layout_width="70dp"
+            android:layout_height="130dp"/>
+
+        <TextView
+            android:id="@+id/text_other_season"
+            android:text="다른 시즌 명예의 전당"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:layout_margin="5dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </RelativeLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerview_rank"
+        android:layout_below="@id/img_layout"
+        android:layout_above="@+id/layout_adview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+    <RelativeLayout
+        android:id="@+id/layout_adview"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+        <com.fsn.cauly.CaulyAdView
+            xmlns:app="http://schemas.android.com/apk/res/com.ados.mstrotrematch2"
+            android:id="@+id/xmladview"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            app:appcode="avhXxFUQ"
+            app:effect="RightSlide"
+            app:dynamicReloadInterval="true"
+            app:reloadInterval="20"
+            app:bannerHeight="Fixed_50"
+            android:visibility="gone"
+            />
+        <com.google.android.gms.ads.AdView
+            xmlns:ads="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/adView_admob"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true"
+            ads:adSize="BANNER"
+            android:visibility="gone"
+            app:adUnitId="@string/admob_banner_ad_unit_id">
+        </com.google.android.gms.ads.AdView>
+        <com.kakao.adfit.ads.ba.BannerAdView
+            android:id="@+id/adView_kakao"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"/>
+    </RelativeLayout>
+
+</RelativeLayout>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="wrap_content"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:background="#321E8F"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <RelativeLayout
+            android:id="@+id/layout_ticket"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentTop="true"
+            android:layout_margin="10dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:layout_width="350dp"
+            android:layout_height="130dp">
+            <ImageView
+                android:id="@+id/img_ticket"
+                android:src="@drawable/ticekt"
+                android:scaleType="fitXY"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </RelativeLayout>
+        <TextView
+            android:id="@+id/text_msg"
+            android:text="이벤트 티켓이 1장 도착했습니다."
+            android:textColor="#DDFFF319"
+            android:textStyle="bold"
+            android:layout_centerHorizontal="true"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_below="@id/layout_ticket"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/text_timer"
+            android:text="(00:00:00 후 사라 집니다.)"
+            android:textColor="#DDE176FA"
+            android:textStyle="bold"
+            android:textSize="12sp"
+            android:layout_below="@+id/text_msg"
+            android:layout_centerHorizontal="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/text_count"
+            android:text="아니오를 누르면 재접속 시 수령 가능합니다."
+            android:textColor="#ddA78FFF"
+            android:textStyle="bold"
+            android:layout_below="@+id/text_timer"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:background="#CAB326"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+        <Button
+            android:id="@+id/button_ok"
+            android:text="네"
+            android:textColor="#ddffffff"
+            android:background="@drawable/btn_round"
+            android:layout_marginTop="7dp"
+            android:layout_marginRight="7dp"
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"/>
+        <Button
+            android:id="@+id/button_cancel"
+            android:text="아니오"
+            android:textColor="#ddffffff"
+            android:background="@drawable/btn_round"
+            android:layout_marginTop="7dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"/>
+    </LinearLayout>
+
+
+</LinearLayout>

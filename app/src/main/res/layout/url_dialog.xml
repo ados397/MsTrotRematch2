@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="wrap_content"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/img_preview"
+            android:scaleType="fitCenter"
+            android:layout_width="match_parent"
+            android:layout_height="400dp"/>
+        <TextView
+            android:id="@+id/text_url"
+            android:text="URL"
+            android:layout_margin="7dp"
+            android:layout_below="@+id/img_preview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <EditText
+            android:id="@+id/edit_url"
+            android:textSize="12sp"
+            android:inputType="text"
+            android:layout_below="@+id/img_preview"
+            android:layout_toRightOf="@+id/text_url"
+            android:layout_marginRight="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </RelativeLayout>
+
+
+    <LinearLayout
+        android:background="#5244CD"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+        <Button
+            android:id="@+id/button_preview"
+            android:text="미리보기"
+            android:textColor="#ddffffff"
+            android:background="@drawable/btn_round"
+            android:layout_marginTop="7dp"
+            android:layout_marginRight="7dp"
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"/>
+        <Button
+            android:id="@+id/button_ok"
+            android:text="확인"
+            android:textColor="#ddffffff"
+            android:background="@drawable/btn_round"
+            android:layout_marginTop="7dp"
+            android:layout_marginRight="7dp"
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"/>
+        <Button
+            android:id="@+id/button_cancel_url"
+            android:text="취소"
+            android:textColor="#ddffffff"
+            android:background="@drawable/btn_round"
+            android:layout_marginTop="7dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"/>
+    </LinearLayout>
+
+</LinearLayout>

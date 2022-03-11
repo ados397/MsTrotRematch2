@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/vote_item_layout"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="150dp"
+    android:layout_marginTop="8dp"
+    android:weightSum="10"
+    >
+
+    <ImageView
+        android:id="@+id/img_profile"
+        android:src="@mipmap/ic_launcher"
+        android:layout_weight="8"
+        android:adjustViewBounds="true"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"/>
+    <TextView
+        android:id="@+id/text_name"
+        android:text="이름"
+        android:textSize="12sp"
+        android:textColor="#ddffffff"
+        android:layout_weight="1.2"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"/>
+    <TextView
+        android:id="@+id/text_count"
+        android:text="득표수"
+        android:textSize="10sp"
+        android:textColor="#ffd93d"
+        android:layout_weight="0.8"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"/>
+    <View
+        android:background="#DDD8FF"
+        android:layout_below="@+id/img_profile"
+        android:layout_marginTop="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"/>
+
+</LinearLayout>

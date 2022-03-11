@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="wrap_content"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:background="#262A35"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/img_profile"
+            android:src="@drawable/profile055"
+            android:layout_margin="10dp"
+            android:layout_width="100dp"
+            android:layout_height="135dp"/>
+
+        <TextView
+            android:id="@+id/text_msg1"
+            android:text="ㅇㅇㅇ님에게"
+            android:textColor="#ddffffff"
+            android:textStyle="bold"
+            android:layout_marginTop="20dp"
+            android:layout_toRightOf="@id/img_profile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:id="@+id/text_msg2"
+            android:text="투표 하시겠습니까?"
+            android:textColor="#ddffffff"
+            android:textStyle="bold"
+            android:layout_below="@+id/text_msg1"
+            android:layout_toRightOf="@id/img_profile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <!--<TextView
+            android:id="@+id/text_rank"
+            android:text="현재 순위 : 0위"
+            android:textColor="#ddffffff"
+            android:textStyle="bold"
+            android:layout_below="@+id/text_msg2"
+            android:layout_toRightOf="@id/img_profile"
+            android:layout_marginTop="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>-->
+        <TextView
+            android:id="@+id/text_count"
+            android:text="현재 득표수 : 00"
+            android:textColor="#ddA78FFF"
+            android:textStyle="bold"
+            android:layout_below="@+id/text_msg2"
+            android:layout_toRightOf="@id/img_profile"
+            android:layout_marginTop="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <LinearLayout
+            android:id="@+id/layout_multi_count"
+            android:visibility="gone"
+            android:layout_below="@+id/text_count"
+            android:layout_toRightOf="@id/img_profile"
+            android:layout_marginTop="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/button_minus"
+                android:text="-"
+                android:background="@drawable/btn_circle"
+                android:layout_width="30dp"
+                android:layout_height="30dp"/>
+            <TextView
+                android:id="@+id/text_input_count"
+                android:text="1"
+                android:background="@drawable/btn_circle2"
+                android:textColor="@color/colorAccent"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_width="50dp"
+                android:layout_height="30dp"/>
+            <Button
+                android:id="@+id/button_plus"
+                android:text="+"
+                android:background="@drawable/btn_circle"
+                android:layout_width="30dp"
+                android:layout_height="30dp"/>
+            <Button
+                android:id="@+id/button_max"
+                android:text="MAX"
+                android:background="@drawable/btn_circle"
+                android:layout_marginLeft="5dp"
+                android:layout_width="50dp"
+                android:layout_height="30dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_input_desc"
+            android:layout_below="@+id/text_count"
+            android:layout_toRightOf="@id/img_profile"
+            android:layout_marginTop="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:id="@+id/img_lock"
+                android:src="@drawable/lock"
+                android:layout_gravity="center"
+                android:layout_width="30dp"
+                android:layout_height="30dp"/>
+            <TextView
+                android:id="@+id/text_input_desc"
+                android:text="오늘 광고를 3 회 더 보면 다중 투표가 활성화 됩니다."
+                android:textColor="#EEFFD600"
+                android:textStyle="bold"
+                android:layout_below="@+id/text_count"
+                android:layout_toRightOf="@id/img_profile"
+                android:layout_marginRight="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:background="#5244CD"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+        <Button
+            android:id="@+id/button_ok"
+            android:text="네"
+            android:textColor="#ddffffff"
+            android:background="@drawable/btn_round"
+            android:layout_marginTop="7dp"
+            android:layout_marginRight="7dp"
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"/>
+        <Button
+            android:id="@+id/button_cancel"
+            android:text="아니오"
+            android:textColor="#ddffffff"
+            android:background="@drawable/btn_round"
+            android:layout_marginTop="7dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"/>
+    </LinearLayout>
+
+
+</LinearLayout>

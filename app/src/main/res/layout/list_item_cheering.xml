@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/cheering_item_layout"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="3dp">
+
+    <ImageView
+        android:id="@+id/img_profile"
+        android:src="@mipmap/ic_launcher"
+        android:scaleType="fitXY"
+        android:layout_marginLeft="10dp"
+        android:layout_width="40dp"
+        android:layout_height="50dp"/>
+    <TextView
+        android:id="@+id/text_title"
+        android:text="제목"
+        android:textColor="#262A35"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:singleLine="true"
+        android:ellipsize = "end"
+        android:layout_toRightOf="@id/img_profile"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <TextView
+        android:id="@+id/text_content"
+        android:text="게시글 내용"
+        android:textColor="#262A35"
+        android:textSize="10sp"
+        android:singleLine="true"
+        android:ellipsize = "end"
+        android:layout_toRightOf="@id/img_profile"
+        android:layout_below="@+id/text_title"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <TextView
+        android:id="@+id/text_name"
+        android:text="홍길동"
+        android:textSize="9sp"
+        android:layout_toRightOf="@id/img_profile"
+        android:layout_below="@+id/text_content"
+        android:layout_marginTop="2dp"
+        android:layout_marginLeft="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <TextView
+        android:id="@+id/text_time"
+        android:text=""
+        android:textSize="9sp"
+        android:layout_toRightOf="@id/text_name"
+        android:layout_below="@+id/text_content"
+        android:layout_marginTop="2dp"
+        android:layout_marginLeft="4dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <ImageView
+        android:id="@+id/img_like"
+        android:src="@drawable/like"
+        android:layout_below="@id/text_content"
+        android:layout_toLeftOf="@+id/text_like_count"
+        android:layout_marginTop="2dp"
+        android:layout_marginRight="5dp"
+        android:layout_width="16dp"
+        android:layout_height="16dp"/>
+    <TextView
+        android:id="@+id/text_like_count"
+        android:text="0000"
+        android:textSize="9sp"
+        android:textColor="#0097CE"
+        android:layout_below="@id/text_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="4dp"
+        android:layout_marginRight="20dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <ImageView
+        android:id="@+id/img_dislike"
+        android:src="@drawable/dislike"
+        android:layout_below="@id/text_content"
+        android:layout_toLeftOf="@+id/text_dislike_count"
+        android:layout_marginTop="2dp"
+        android:layout_marginRight="5dp"
+        android:layout_width="16dp"
+        android:layout_height="16dp"/>
+    <TextView
+        android:id="@+id/text_dislike_count"
+        android:text="0000"
+        android:textSize="9sp"
+        android:textColor="#EF2AC1"
+        android:layout_below="@id/text_content"
+        android:layout_marginTop="2dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="5dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <View
+        android:background="#E7D9FC"
+        android:layout_below="@+id/img_like"
+        android:layout_marginTop="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"/>
+
+</RelativeLayout>
