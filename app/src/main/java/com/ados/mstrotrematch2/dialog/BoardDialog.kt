@@ -44,7 +44,7 @@ class BoardDialog(context: Context, val item: BoardDTO, val parentActivity: Acti
             var seasonDTO = documentSnapshot?.toObject(SeasonDTO::class.java)
 
             // 시즌 변경 작업
-            //seasonDTO?.seasonNum = 5
+            //seasonDTO?.seasonNum = 6
             if (seasonDTO?.seasonNum == 5) {
                 cheeringboardCollectionName = "cheeringboard_s5"
             }

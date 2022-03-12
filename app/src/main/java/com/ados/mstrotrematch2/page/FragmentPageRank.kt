@@ -296,7 +296,7 @@ class FragmentPageRank : Fragment(), OnRankItemClickListener {
             var seasonDTO = documentSnapshot?.toObject(SeasonDTO::class.java)
 
             // 시즌 변경 작업
-            //seasonDTO?.seasonNum = 5
+            //seasonDTO?.seasonNum = 6
             //text_season_end_date.visibility = View.GONE
             //button_refresh.visibility = View.GONE
             var rank_background_img = R.drawable.spotlight_s6_main

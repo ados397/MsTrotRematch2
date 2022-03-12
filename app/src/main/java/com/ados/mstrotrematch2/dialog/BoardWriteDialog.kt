@@ -40,7 +40,7 @@ class BoardWriteDialog(context: Context) : Dialog(context), View.OnClickListener
             var seasonDTO = documentSnapshot?.toObject(SeasonDTO::class.java)
 
             // 시즌 변경 작업
-            //seasonDTO?.seasonNum = 5
+            //seasonDTO?.seasonNum = 6
             if (seasonDTO?.seasonNum == 5) {
                 cheeringboardCollectionName = "cheeringboard_s5"
             }

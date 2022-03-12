@@ -132,6 +132,15 @@
                 android:layout_marginBottom="25dp"
                 android:layout_width="110dp"
                 android:layout_height="40dp"/>
+            <Button
+                android:id="@+id/button_hottime_special"
+                android:text="🎉스페셜 티켓"
+                android:textColor="#ddffffff"
+                android:textSize="12sp"
+                android:background="@drawable/btn_round3"
+                android:layout_marginBottom="25dp"
+                android:layout_width="110dp"
+                android:layout_height="40dp"/>
         </LinearLayout>
         <LinearLayout
             android:id="@+id/layout_ticket_hottime2"

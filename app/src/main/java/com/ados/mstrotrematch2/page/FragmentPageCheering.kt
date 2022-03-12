@@ -95,7 +95,7 @@ class FragmentPageCheering : Fragment(), OnCheeringItemClickListener {
             peopleCollectionName = "people_cheering"
 
             // 시즌 변경 작업
-            //seasonDTO?.seasonNum = 5
+            //seasonDTO?.seasonNum = 6
             var rank_background_img = R.drawable.spotlight_s6_cheering
             var season_logo_img = R.drawable.season6_logo
             if (seasonDTO?.seasonNum == 5) {

@@ -104,7 +104,7 @@ class HallOfFameActivity : AppCompatActivity(), OnRankItemClickListener, OnCheer
             seasonDTO = documentSnapshot?.toObject(SeasonDTO::class.java)
 
             // 시즌 변경 작업
-            //seasonDTO?.seasonNum = 5
+            //seasonDTO?.seasonNum = 6
 
             selectedSeason = "season_${seasonDTO?.seasonNum!!.minus(1)}"
 
@@ -364,7 +364,7 @@ class HallOfFameActivity : AppCompatActivity(), OnRankItemClickListener, OnCheer
         /*firestore?.collection("people")?.get()?.addOnSuccessListener { result ->
             for (document in result) {
                 var person = document.toObject(RankDTO::class.java)!!
-                firestore?.collection("season_result")?.document("season_4")?.collection("vote")?.document(person.docname!!)?.set(person)
+                firestore?.collection("season_result")?.document("season_5")?.collection("vote")?.document(person.docname!!)?.set(person)
             }
         }
             ?.addOnFailureListener { exception ->
@@ -375,7 +375,7 @@ class HallOfFameActivity : AppCompatActivity(), OnRankItemClickListener, OnCheer
         /*firestore?.collection("people_cheering")?.get()?.addOnSuccessListener { result ->
             for (document in result) {
                 var person = document.toObject(RankDTO::class.java)!!
-                firestore?.collection("season_result")?.document("season_4")?.collection("cheering")?.document(person.docname!!)?.set(person)
+                firestore?.collection("season_result")?.document("season_5")?.collection("cheering")?.document(person.docname!!)?.set(person)
             }
         }
             ?.addOnFailureListener { exception ->
