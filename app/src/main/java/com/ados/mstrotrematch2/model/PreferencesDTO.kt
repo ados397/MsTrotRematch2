@@ -39,3 +39,11 @@ data class UpdateDTO (var version : String? = null,
                       var maintainance : Boolean? = false,
                       var maintainanceTitle : String? = null,
                       var maintainanceDesc : String? = null)
+
+data class NoticeDTO (
+    val title : String? = null,
+    val content : String? = null,
+    val imageUrl: String? = null,
+    val packageName: String? = null,
+    val visibility: Boolean? = false
+) {}

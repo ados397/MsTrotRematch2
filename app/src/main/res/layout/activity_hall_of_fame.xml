@@ -58,18 +58,18 @@
 
         <ImageView
             android:id="@+id/img_left"
-            android:src="@drawable/left_arrow"
-            android:layout_centerVertical="true"
             android:layout_width="50dp"
-            android:layout_height="50dp"/>
+            android:layout_height="50dp"
+            android:layout_centerVertical="true"
+            android:src="@drawable/left_arrow" />
 
         <ImageView
             android:id="@+id/img_right"
-            android:src="@drawable/right_arrow"
-            android:layout_centerVertical="true"
-            android:layout_alignParentRight="true"
             android:layout_width="50dp"
-            android:layout_height="50dp"/>
+            android:layout_height="50dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/right_arrow" />
 
         <include layout="@layout/profile_item"
             android:id="@+id/profile_rank_no2"
@@ -97,14 +97,17 @@
 
         <TextView
             android:id="@+id/text_other_season"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="5dp"
             android:text="다른 시즌 명예의 전당"
             android:textColor="#FFFFFF"
-            android:textStyle="bold"
-            android:layout_margin="5dp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:textStyle="bold" />
     </RelativeLayout>
 
     <androidx.recyclerview.widget.RecyclerView

@@ -191,6 +191,8 @@ class FragmentPageMusic : Fragment(), OnMusicItemClickListener {
                     api.q += "tv"*/
                 when (person.name) {
                     "김수빈" -> api.q += " 트로트"
+                    "김다현" -> api.q += " 트로트"
+                    "명지" -> api.q += " 트로트"
                     //"이찬원" -> api.q += " 공식 채널"
                     //"김희재" -> api.q += " HEEJAE"
                     //"정동원" -> api.q += "tv"

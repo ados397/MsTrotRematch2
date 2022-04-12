@@ -6,13 +6,10 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageInfo
 import android.net.Uri
-import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.provider.Settings
 import android.view.View
 import android.view.Window
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
@@ -21,7 +18,9 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.viewpager.widget.ViewPager
 import com.ados.mstrotrematch2.dialog.NoticeDialog
+import com.ados.mstrotrematch2.dialog.NoticeSubDialog
 import com.ados.mstrotrematch2.dialog.QuestionDialog
+import com.ados.mstrotrematch2.model.NoticeDTO
 import com.ados.mstrotrematch2.model.QuestionDTO
 import com.ados.mstrotrematch2.model.UpdateDTO
 import com.ados.mstrotrematch2.page.FragmentPageCheering
@@ -37,8 +36,8 @@ import com.google.android.material.tabs.TabLayout
 import com.google.firebase.firestore.FirebaseFirestore
 import com.kakao.adfit.ads.AdListener
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.notice_dialog.*
 import kotlinx.android.synthetic.main.notice_dialog.button_cancel
+import kotlinx.android.synthetic.main.notice_sub_dialog.button_notice_ok
 import kotlinx.android.synthetic.main.question_dialog.*
 
 class MainActivity : AppCompatActivity() {
@@ -109,6 +108,7 @@ class MainActivity : AppCompatActivity() {
             })
 
             showNoticeDialog()
+            showNoticeSubDialog()
 
             // 토큰 ID 획득
             /*FirebaseInstanceId.getInstance().instanceId
@@ -167,6 +167,26 @@ class MainActivity : AppCompatActivity() {
         dialog.button_cancel.setOnClickListener { // No
             dialog.dismiss()
         }
+    }
+
+    fun showNoticeSubDialog() {
+        firestore?.collection("preferences")?.document("notice")?.get()?.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                var noticeDTO = task.result.toObject(NoticeDTO::class.java)!!
+                if (noticeDTO.visibility!!) {
+                    val dialog = NoticeSubDialog(this)
+                    dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+                    dialog.setCanceledOnTouchOutside(false)
+                    dialog.noticeDTO = noticeDTO
+                    dialog.show()
+
+                    dialog.button_notice_ok.setOnClickListener { // No
+                        dialog.dismiss()
+                    }
+                }
+            }
+        }
+
     }
 
     fun InitAd() {

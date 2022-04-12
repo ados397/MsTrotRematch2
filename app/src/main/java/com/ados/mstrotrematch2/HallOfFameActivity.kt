@@ -353,7 +353,7 @@ class HallOfFameActivity : AppCompatActivity(), OnRankItemClickListener, OnCheer
         /*firestore?.collection("news")?.get()?.addOnSuccessListener { result ->
             for (document in result) {
                 var person = document.toObject(NewsDTO::class.java)!!
-                firestore?.collection("season_result")?.document("season_4")?.collection("news")?.document()?.set(person)
+                firestore?.collection("season_result")?.document("season_5")?.collection("news")?.document()?.set(person)
             }
         }
             ?.addOnFailureListener { exception ->

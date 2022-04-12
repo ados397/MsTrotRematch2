@@ -12,4 +12,9 @@
     <color name="colorAccent">#D81B60</color>
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorWeakPurple">#ddA78FFF</color>
+    <color name="report_dialog">#202023</color>
+    <color name="report_dialog_sub">#2B2B2E</color>
+    <color name="report_text_content">#DADDE0</color>
+    <color name="text_disable">#8E8E8E</color>
+    <color name="edit_text">#FAF6FF</color>
 </resources>
