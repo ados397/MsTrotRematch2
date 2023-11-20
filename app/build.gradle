@@ -1,23 +1,17 @@
-plugins {
-    id 'com.android.application'
-    id 'kotlin-android'
-}
-
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.google.gms.google-services'
 
 android {
-    compileSdkVersion 30
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.ados.mstrotrematch2"
-        minSdkVersion 21
-        targetSdkVersion 30
-        multiDexEnabled true
-        versionCode 19
-        versionName "1.19"
+        minSdk 21
+        targetSdk 33
+        versionCode 32
+        versionName "1.2.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -35,35 +29,76 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {
-
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'androidx.core:core-ktx:1.3.2'
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'com.google.android.material:material:1.2.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    implementation 'com.google.firebase:firebase-firestore-ktx:22.0.1'
+    implementation platform('com.google.firebase:firebase-bom:25.12.0')
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation 'androidx.core:core-ktx:1.6.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
+    implementation 'com.google.firebase:firebase-storage-ktx'
+    implementation 'com.google.firebase:firebase-analytics:21.2.0'
+    implementation 'com.google.android.play:core-ktx:1.8.1'
+    implementation 'com.google.firebase:firebase-storage:20.1.0'
     testImplementation 'junit:junit:4.+'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
-
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     implementation platform('com.google.firebase:firebase-bom:26.0.0')
-    implementation 'com.google.firebase:firebase-analytics'
-    implementation 'com.google.firebase:firebase-firestore:22.0.0'
-    implementation 'com.google.firebase:firebase-messaging:21.0.0'
-    implementation 'com.google.android.gms:play-services-ads:19.5.0'
-    implementation 'com.fsn.cauly:cauly-sdk:3.5.12'
-    implementation "com.kakao.adfit:ads-base:$adfit_version"
-    implementation "org.jetbrains.anko:anko:$anko_version"
-    implementation 'com.facebook.android:audience-network-sdk:6.+'
-
     implementation 'com.pierfrancescosoffritti.androidyoutubeplayer:core:10.0.3'
+    implementation "org.jetbrains.anko:anko:$anko_version"
     implementation 'androidx.legacy:legacy-support-v4:1.0.0' // DrawerLayout
+    implementation 'com.google.android.material:material:1.4.0' // NavigationView
+    implementation ('com.google.firebase:firebase-auth:21.0.3') {
+        exclude group: 'com.google.android.gms', module: 'play-services-safetynet'
+    }
+    implementation 'com.google.firebase:firebase-firestore:24.1.0'
+    implementation 'com.google.firebase:firebase-messaging:23.0.4'
+    implementation 'com.google.android.gms:play-services-ads:20.6.0'
+    implementation 'com.github.bumptech.glide:glide:4.15.0'
     implementation("com.squareup.okhttp3:okhttp:4.3.1")
     implementation 'com.google.code.gson:gson:2.8.6'
-    implementation 'androidx.work:work-runtime:2.3.0'
-    implementation 'com.github.bumptech.glide:glide:4.10.0'
-    implementation "androidx.recyclerview:recyclerview:1.2.0-alpha03"
+    //implementation 'androidx.work:work-runtime:2.3.0'
+    implementation 'androidx.work:work-runtime-ktx:2.7.1'
+    implementation 'com.fsn.cauly:cauly-sdk:3.5.25'
+    implementation "com.google.android.gms:play-services-ads-identifier:$play_service_version"
+    implementation 'com.google.android.gms:play-services-appset:16.0.0'
+    implementation "com.kakao.adfit:ads-base:$adfit_version"
+    implementation 'androidx.viewpager2:viewpager2:1.0.0'
+    //implementation 'com.facebook.android:audience-network-sdk:6.+'
+
+    // Billing
+    def billing_version = "5.1.0"
+    implementation "com.android.billingclient:billing:$billing_version"
+    implementation "com.android.billingclient:billing-ktx:$billing_version"
+
+    def lifecycle_version = '2.5.1'
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
+    // ViewModel - 라이프 사이클
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+    // LiveData - 데이터의 변경 사항을 알 수 있음
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
+
+    // 뷰모델 생성하기 쉽게 해줌
+    implementation 'androidx.fragment:fragment-ktx:1.5.5'
+    implementation "androidx.activity:activity-ktx:1.2.0"
+    implementation 'com.getkeepsafe.taptargetview:taptargetview:1.13.3'
+
+    // 구글 로그인
+    implementation 'com.google.android.gms:play-services-location:21.0.1'
+    implementation 'com.google.android.gms:play-services-auth:20.4.1'
+
+    // 앱 업데이트 매니저
+    implementation 'com.google.android.play:core:1.10.3'
+
+    // 원형 이미지
+    implementation 'de.hdodenhof:circleimageview:3.1.0'
+
+    // 권한 쉽게 적용
+    implementation 'io.github.ParkSangGwon:tedpermission-normal:3.3.0'
 }

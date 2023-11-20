@@ -10,39 +10,46 @@ import android.net.Uri
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.view.View
-import com.ados.mstrotrematch2.R
+import com.ados.mstrotrematch2.databinding.NoticeSubDialogBinding
 import com.ados.mstrotrematch2.model.NoticeDTO
 import com.bumptech.glide.Glide
-import kotlinx.android.synthetic.main.notice_sub_dialog.*
 
 class NoticeSubDialog(context: Context) : Dialog(context), View.OnClickListener {
-    private val layout = R.layout.notice_sub_dialog
+    lateinit var binding: NoticeSubDialogBinding
+
     var noticeDTO: NoticeDTO? = null
+    var isStopToday = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(layout)
+        binding = NoticeSubDialogBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
         window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
-        text_content.movementMethod = ScrollingMovementMethod.getInstance()
+        binding.textContent.movementMethod = ScrollingMovementMethod.getInstance()
         //text_notice_link.paintFlags = Paint.UNDERLINE_TEXT_FLAG
         if (noticeDTO != null) {
-            text_title.text = noticeDTO?.title
+            binding.textTitle.text = noticeDTO?.title
             //text_time.text = SimpleDateFormat("yyyy.MM.dd HH:mm").format(noticeDTO?.time!!)
-            text_content.text = noticeDTO?.content?.replace("\\n","\n")
+            binding.textContent.text = noticeDTO?.content?.replace("\\n","\n")
 
             if (!noticeDTO?.imageUrl.isNullOrEmpty()) {
-                Glide.with(context).load(noticeDTO?.imageUrl).fitCenter().into(img_notice)
-                img_notice.visibility = View.VISIBLE
+                Glide.with(context).load(noticeDTO?.imageUrl).optionalFitCenter().into(binding.imgNotice)
+                binding.imgNotice.visibility = View.VISIBLE
             } else {
-                img_notice.visibility = View.GONE
+                binding.imgNotice.visibility = View.GONE
             }
 
-            img_notice.setOnClickListener {
+            binding.imgNotice.setOnClickListener {
                 callStore()
             }
-            button_notice_link.setOnClickListener {
+            binding.buttonNoticeLink.setOnClickListener {
                 callStore()
+            }
+
+            binding.checkboxStopToday.setOnCheckedChangeListener { compoundButton, b ->
+                isStopToday = b
             }
         }
     }

@@ -6,32 +6,32 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import com.ados.mstrotrematch2.R
+import com.ados.mstrotrematch2.databinding.UrlDialogBinding
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
-import kotlinx.android.synthetic.main.event_dialog.button_ok
-import kotlinx.android.synthetic.main.url_dialog.*
 
 class UrlDialog(context: Context) : Dialog(context), View.OnClickListener {
 
-    private val layout = R.layout.url_dialog
+    lateinit var binding: UrlDialogBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(layout)
+        binding = UrlDialogBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         init()
 
-        button_ok.setOnClickListener {
+        binding.buttonOk.setOnClickListener {
 
         }
 
-        button_preview.setOnClickListener {
-            Glide.with(img_preview.context).load(edit_url.text.toString()).apply(
-                RequestOptions().fitCenter()).into(img_preview)
+        binding.buttonPreview.setOnClickListener {
+            Glide.with(binding.imgPreview.context).load(binding.editUrl.text.toString()).apply(
+                RequestOptions().optionalFitCenter()).into(binding.imgPreview)
         }
     }
 
     private fun init() {
-        button_ok.setOnClickListener(this)
+        binding.buttonOk.setOnClickListener(this)
 
         //text_msg.text = event.title?.replace("\\n","\n")
     }

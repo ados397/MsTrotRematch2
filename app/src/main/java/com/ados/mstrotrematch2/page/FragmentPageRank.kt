@@ -1,239 +1,118 @@
 package com.ados.mstrotrematch2.page
 
-
+import android.content.Context
 import android.os.Bundle
+import android.util.TypedValue.COMPLEX_UNIT_DIP
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.widget.Toast
-import androidx.annotation.Dimension
+import androidx.activity.OnBackPressedCallback
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.ados.mstrotrematch2.dialog.LoadingDialog
 import com.ados.mstrotrematch2.MainActivity
 import com.ados.mstrotrematch2.R
+import com.ados.mstrotrematch2.adapter.OnRankItemClickListener
+import com.ados.mstrotrematch2.adapter.RecyclerViewAdapterRank
+import com.ados.mstrotrematch2.databinding.FragmentPageRankBinding
 import com.ados.mstrotrematch2.dialog.AdminDialog
 import com.ados.mstrotrematch2.dialog.DonationStatusDialog
+import com.ados.mstrotrematch2.firebase.FirebaseRepository
+import com.ados.mstrotrematch2.firebase.FirebaseViewModel
 import com.ados.mstrotrematch2.model.RankDTO
-import com.ados.mstrotrematch2.model.SeasonDTO
 import com.bumptech.glide.Glide
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
-import kotlinx.android.synthetic.main.donation_status_dialog.button_ok
-import kotlinx.android.synthetic.main.fragment_fragment_page_rank.*
-import kotlinx.android.synthetic.main.fragment_fragment_page_rank.button_refresh
-import kotlinx.android.synthetic.main.fragment_fragment_page_rank.profile_rank_no1
-import kotlinx.android.synthetic.main.fragment_fragment_page_rank.profile_rank_no2
-import kotlinx.android.synthetic.main.fragment_fragment_page_rank.profile_rank_no3
-import kotlinx.android.synthetic.main.notice_dialog.*
-import kotlinx.android.synthetic.main.profile_item.view.*
 import java.text.DecimalFormat
+import java.text.NumberFormat
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.concurrent.timer
 
+// TODO: Rename parameter arguments, choose names that match
+// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+private const val ARG_PARAM1 = "param1"
+private const val ARG_PARAM2 = "param2"
+
+/**
+ * A simple [Fragment] subclass.
+ * Use the [FragmentPageRank.newInstance] factory method to
+ * create an instance of this fragment.
+ */
 class FragmentPageRank : Fragment(), OnRankItemClickListener {
+    // TODO: Rename and change types of parameters
+    private var param1: String? = null
+    private var param2: String? = null
+
+    private var _binding: FragmentPageRankBinding? = null
+    private val binding get() = _binding!!
 
     var decimalFormat: DecimalFormat = DecimalFormat("###,###")
+    private val firebaseViewModel : FirebaseViewModel by viewModels()
+    private lateinit var callback: OnBackPressedCallback
 
-    var firestore : FirebaseFirestore? = null
     private var peopleTop3 : ArrayList<RankDTO> = arrayListOf()
     private var peopleOther : ArrayList<RankDTO> = arrayListOf()
     lateinit var recyclerView : RecyclerView
 
     private var isrefresh = true
+    private lateinit var currentDate : String // 12시 지나서 날짜 변경을 체크하기 위한 변수
 
-    var loadingDialog : LoadingDialog? = null
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            param1 = it.getString(ARG_PARAM1)
+            param2 = it.getString(ARG_PARAM2)
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        //return inflater.inflate(R.layout.fragment_fragment_page_rank, container, false)
+        _binding = FragmentPageRankBinding.inflate(inflater, container, false)
+        var rootView = binding.root.rootView
 
-        var rootView = inflater.inflate(R.layout.fragment_fragment_page_rank, container, false)
         recyclerView = rootView.findViewById(R.id.recyclerview_rank!!)as RecyclerView
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        var index : Int = 1
-        firestore = FirebaseFirestore.getInstance()
+        currentDate = SimpleDateFormat("yyyyMMdd").format(Date())
 
-        /*firestore?.collection("people")?.orderBy("count", Query.Direction.DESCENDING)?.addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-            peopleTop3.clear()
-            peopleOther.clear()
-            if(querySnapshot == null)return@addSnapshotListener
-
-            index = 1
-            // document 수만큼 획득
-            for(snapshot in querySnapshot){
-                var person = snapshot.toObject(RankDTO::class.java)!!
-                if (index < 4) { // Top 3 저장
-                    peopleTop3.add(person)
-                    ShowTop3()
-                }
-                else { // 4위 부터 저장
-                    peopleOther.add(person)
-                }
-                index++
-            }
-            recyclerView.adapter =
-                RecyclerViewAdapterRank(
-                    peopleOther
-                )
-        }*/
+        observePeople()
         refreshPeople()
 
-        /*var names : ArrayList<String> = arrayListOf(
+        // 시즌 변경 작업
+        // 김태수(10), 박경래(19) 삭제
+        /*
+        var index : Int = 1
+        var names : ArrayList<String> = arrayListOf(
             "강태관","강화","고재근","구자명","김경민","김수찬","김인석","김재혁","김중연","김태수",
             "김호중","김희재","나무","나태주","남승민","노지훈","류지광","미스터붐박스","박경래","삼식이",
             "신성","신인선","안성훈","양지원","영기","영탁","오샘","옥진욱","유호","이대원",
             "이도진","이재식","이찬원","임도형","임영웅","장민호","정동원","정호","천명훈","최대성",
-            "최윤하","최정훈","추혁진","한강","허민영","홍잠언","황윤성"
+            "최윤하","최정훈","추혁진","한강","허민영","홍잠언","황윤성","박군","신유","진해성"
         )
         var index2 : Int = 1
         for (name in names){
             var docname = String.format("no%05d",index2)
-            var person = RankDTO(String.format("profile%02d",index2), name, 100, docname)
+            var person = RankDTO(String.format("profile%02d",index2), name, 0, docname)
             firestore?.collection("people")?.document(docname)?.set(person)
             index2++
         }*/
 
-
-        //recyclerView.adapter = MyRankRecyclerViewAdapter(peopleOther)
-        /*var names : ArrayList<String> = arrayListOf(
-                "가야송"
-                ,"강동혜"
-                ,"강보미"
-                ,"강예빈"
-                ,"강유진"
-                ,"강혜연"
-                ,"공소원"
-                ,"권미희"
-                ,"김가현"
-                ,"김나현"
-                ,"김나현"
-                ,"김다나"
-                ,"김다현"
-                ,"김명선"
-                ,"김사은"
-                ,"김설아"
-                ,"김성은"
-                ,"김소유"
-                ,"김수빈"
-                ,"김수연"
-                ,"김양희"
-                ,"김연지"
-                ,"김은빈"
-                ,"김의영"
-                ,"김지수"
-                ,"김지율"
-                ,"김태연"
-                ,"김현경"
-                ,"김현정"
-                ,"나리"
-                ,"나비"
-                ,"나혜연"
-                ,"누이들"
-                ,"류원정"
-                ,"뤼니 킴"
-                ,"마리아"
-                ,"명지"
-                ,"문서연"
-                ,"미스둥이"
-                ,"박슬기"
-                ,"박주희"
-                ,"박해수"
-                ,"방세옥"
-                ,"방수정"
-                ,"버블디아"
-                ,"배혜지"
-                ,"백수정"
-                ,"백장미"
-                ,"변혜진"
-                ,"별사랑"
-                ,"서예림"
-                ,"성민지"
-                ,"소유미"
-                ,"송유진"
-                ,"송하예"
-                ,"신가윤"
-                ,"손"
-                ,"아트윈스"
-                ,"안은주"
-                ,"애슐리"
-                ,"양양"
-                ,"양지은"
-                ,"연예진"
-                ,"영지"
-                ,"오서영"
-                ,"오승연"
-                ,"오승은"
-                ,"오희선"
-                ,"우현정"
-                ,"윤희"
-                ,"윤태화"
-                ,"은가은"
-                ,"이보경"
-                ,"이소원"
-                ,"이승연"
-                ,"이예은"
-                ,"이재은"
-                ,"이하은"
-                ,"이희민"
-                ,"임다애"
-                ,"임서원"
-                ,"장서윤"
-                ,"장하온"
-                ,"장태희"
-                ,"장향희"
-                ,"전영랑"
-                ,"전유진"
-                ,"전향진"
-                ,"정은주"
-                ,"정해진"
-                ,"정혜"
-                ,"조혜령"
-                ,"주미"
-                ,"진달래"
-                ,"찬미찬송"
-                ,"채은정"
-                ,"최설화"
-                ,"최은비"
-                ,"최형선"
-                ,"태하"
-                ,"트윈걸스"
-                ,"파스텔걸스"
-                ,"하나"
-                ,"하서정"
-                ,"하이량"
-                ,"한초임"
-                ,"허윤아"
-                ,"허찬미"
-                ,"혜진이"
-                ,"홍지윤"
-                ,"황승아"
-                ,"황우림"
-        )
-
-        var index2 : Int = 1
+        /*
+        index2 = 1
         for (name in names){
             var docname = String.format("no%05d",index2)
-            var person = RankDTO(String.format("profile%03d",index2), name, 0, docname)
-            firestore?.collection("people")?.document(docname)?.set(person)
+            var person = RankDTO(String.format("profile%02d",index2), name, 0, docname)
+            firestore?.collection("people_cheering")?.document(docname)?.set(person)
             index2++
         }*/
 
-        /*firestore?.collection("people")?.get()?.addOnSuccessListener { result ->
-            for (document in result) {
-                var person = document.toObject(RankDTO::class.java)!!
-                person.count = 0
-                firestore?.collection("people_back")?.document(person.docname.toString())?.set(person)
-            }
-        }
-                ?.addOnFailureListener { exception ->
-
-                }*/
         // 시즌 변경 작업
         /*firestore?.collection("people_back")?.get()?.addOnSuccessListener { result ->
             for (document in result) {
@@ -246,82 +125,218 @@ class FragmentPageRank : Fragment(), OnRankItemClickListener {
 
                 }*/
 
-        /*var person = RankDTO("profile113", "송가인", 0, "no00113")
-        firestore?.collection("people_back")?.document(person.docname.toString())?.set(person)
 
-        var person2 = RankDTO("profile114", "정미애", 0, "no00114")
-        firestore?.collection("people_back")?.document(person2.docname.toString())?.set(person2)
+        //recyclerView.adapter = MyRankRecyclerViewAdapter(peopleOther)
 
-        var person3 = RankDTO("profile115", "홍자", 0, "no00115")
-        firestore?.collection("people_back")?.document(person3.docname.toString())?.set(person3)
+        //val firestore = FirebaseFirestore.getInstance()
+        // 불타는 트롯맨 가수 추가 (15명)
+        /*var names : ArrayList<String> = arrayListOf(
+            "강설민","공훈","김정민","민수현","박민수","손태진","에녹","이수호"
+            ,"임성현","장동열","전종혁","정다한","최상","춘길","황영웅"
+        )
+        var index : Int = 101 // 불타는 트롯맨은 101부터 시작
+        for (name in names){
+            var docname = String.format("no%05d",index)
+            var person = RankDTO(String.format("profile%02d",index), name, 0, docname)
+            firestore?.collection("people2")?.document(docname)?.set(person)
+            index++
+        }*/
 
-        var person4 = RankDTO("profile116", "정다경", 0, "no00116")
-        firestore?.collection("people_back")?.document(person4.docname.toString())?.set(person4)
+        // 미스터트롯2 가수 추가 (18명)
+        /*var names : ArrayList<String> = arrayListOf(
+            "고정우","김용필","나상도","마커스강","박서진","박성온","박세욱","박지현","성리"
+            ,"손빈아","송민준","재하","진욱","진해성","천재원","최수호","최우진","황민호"
+        )
+        var index : Int = 201 // 미스터트롯2는 201부터 시작
+        for (name in names){
+            var docname = String.format("no%05d",index)
+            var person = RankDTO(String.format("profile%03d",index), name, 0, docname)
+            firestore?.collection("people2")?.document(docname)?.set(person)
+            index++
+        }*/
 
-        var person5 = RankDTO("profile117", "김나희", 0, "no00117")
-        firestore?.collection("people_back")?.document(person5.docname.toString())?.set(person5)*/
+
 
         return rootView
     }
 
-    fun refreshPeople() {
-        loading()
-        var index : Int = 1
-        firestore?.collection("people")?.orderBy("count", Query.Direction.DESCENDING)?.get()?.addOnSuccessListener { result ->
-            peopleTop3.clear()
-            peopleOther.clear()
+    override fun onDestroyView() {
+        _binding = null
+        super.onDestroyView()
+    }
 
-            index = 1
-            for (document in result) {
-                var person = document.toObject(RankDTO::class.java)!!
-                if (index < 4) { // Top 3 저장
-                    peopleTop3.add(person)
-                    ShowTop3()
-                }
-                else { // 4위 부터 저장
-                    peopleOther.add(person)
-                }
-                index++
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                (activity as MainActivity?)?.backPressed()
             }
-            recyclerView.adapter = RecyclerViewAdapterRank(peopleOther, this)
         }
-            ?.addOnFailureListener { exception ->
+        requireActivity().onBackPressedDispatcher.addCallback(this, callback)
+    }
 
+    override fun onDetach() {
+        super.onDetach()
+        callback.remove()
+    }
+
+    private fun observePeople() {
+        firebaseViewModel.peopleDTOs.observe(viewLifecycleOwner) {
+            if (firebaseViewModel.peopleDTOs.value != null) {
+                peopleTop3 = firebaseViewModel.peopleDTOs.value!!
+                peopleOther = firebaseViewModel.peopleDTOs.value!!.clone() as ArrayList<RankDTO>
+                peopleOther.subList(0, 3).clear()
+
+                ShowTop3()
+                recyclerView.adapter = RecyclerViewAdapterRank(peopleOther, this)
+                (activity as MainActivity?)?.loadingEnd()
             }
-        loadingEnd()
+        }
+    }
+
+    private fun refreshPeople() {
+        (activity as MainActivity?)?.loading()
+        firebaseViewModel.getPeople(FirebaseRepository.PeopleOrder.COUNT_DESC)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        firestore?.collection("preferences")?.document("season")?.addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
-            var seasonDTO = documentSnapshot?.toObject(SeasonDTO::class.java)
-
-            // 시즌 변경 작업
-            //seasonDTO?.seasonNum = 6
-            //text_season_end_date.visibility = View.GONE
-            //button_refresh.visibility = View.GONE
-            var rank_background_img = R.drawable.spotlight_s6_main
-            var season_logo_img = R.drawable.season6_logo
-            if (seasonDTO?.seasonNum!! == 5) {
-                rank_background_img = R.drawable.spotlight_s5_main
-                season_logo_img = R.drawable.season5_logo
+        val seasonDTO = (activity as MainActivity?)?.getSeason()!!
+        if (seasonDTO != null) {
+            //seasonDTO.seasonNum = 2 // @ 시즌 변경
+            var imgBackgroundName = "spotlight_new_s${seasonDTO.seasonNum}_main"
+            var imageID = resources.getIdentifier(imgBackgroundName, "drawable", requireContext().packageName)
+            if (imageID > 0) {
+                Glide.with(binding.imgRankBackground.context)
+                    .asBitmap()
+                    .load(imageID) ///feed in path of the image
+                    .optionalFitCenter()
+                    .into(binding.imgRankBackground)
             }
-            Glide.with(img_rank_background.context)
-                .asBitmap()
-                .load(rank_background_img) ///feed in path of the image
-                .fitCenter()
-                .into(img_rank_background)
-            Glide.with(img_season_logo.context)
-                .asBitmap()
-                .load(season_logo_img) ///feed in path of the image
-                .fitCenter()
-                .into(img_season_logo)
 
-            text_season_end_date.text = seasonDTO?.endDate
+            var imgSeasonLogoName = "new_season${seasonDTO.seasonNum}_logo"
+            imageID = resources.getIdentifier(imgSeasonLogoName, "drawable", requireContext().packageName)
+            if (imageID > 0) {
+                Glide.with(binding.imgSeasonLogo.context)
+                    .asBitmap()
+                    .load(imageID) ///feed in path of the image
+                    .optionalFitCenter()
+                    .into(binding.imgSeasonLogo)
+            }
+
+            binding.textSeasonEndDate.text = seasonDTO.endDate
+
+
+            checkDDay()
         }
 
-        button_refresh.setOnClickListener {
-            if (isrefresh == false) {
-                Toast.makeText(getActivity(),"새로고침은 5초에 한 번 가능합니다.", Toast.LENGTH_SHORT).show()
+        dateCheckTimer()
+
+        //adapter 추가
+        //recyclerview_rank.adapter = MyRankRecyclerViewAdapter()
+        //레이아웃 매니저 추가
+        //recyclerview_rank.layoutManager = LinearLayoutManager(view)
+        //recyclerview_rank.layoutManager = RelativeLayoutManager(this)
+
+        //binding.profileRankNo1.imgRank.setImageResource(R.drawable.crown_gold)
+        //binding.profileRankNo2.imgRank.setImageResource(R.drawable.crown_silver)
+        //binding.profileRankNo3.imgRank.setImageResource(R.drawable.crown_bronze)
+        Glide.with(binding.profileRankNo1.imgRank.context)
+            .asBitmap()
+            .load(R.drawable.crown_gold) ///feed in path of the image
+            .optionalFitCenter()
+            .into(binding.profileRankNo1.imgRank)
+        Glide.with(binding.profileRankNo2.imgRank.context)
+            .asBitmap()
+            .load(R.drawable.crown_silver) ///feed in path of the image
+            .optionalFitCenter()
+            .into(binding.profileRankNo2.imgRank)
+        Glide.with(binding.profileRankNo3.imgRank.context)
+            .asBitmap()
+            .load(R.drawable.crown_bronze) ///feed in path of the image
+            .optionalFitCenter()
+            .into(binding.profileRankNo3.imgRank)
+
+        Glide.with(binding.imgHallOfFame.context)
+            .asBitmap()
+            .load(R.drawable.hall_of_fame_button) ///feed in path of the image
+            .optionalFitCenter()
+            .into(binding.imgHallOfFame)
+
+        /*var imageID = context?.resources?.getIdentifier(peopleTop3[0].image, "drawable", context?.packageName)
+        if (imageID != null) {
+            binding.profileRankNo1.imgProfile.setImageResource(imageID)
+        }
+        imageID = context?.resources?.getIdentifier(peopleTop3[1].image, "drawable", context?.packageName)
+        if (imageID != null) {
+            binding.profileRankNo2.imgProfile.setImageResource(imageID)
+        }
+        imageID = context?.resources?.getIdentifier(peopleTop3[2].image, "drawable", context?.packageName)
+        if (imageID != null) {
+            binding.profileRankNo3.imgProfile.setImageResource(imageID)
+        }*/
+
+        binding.profileRankNo1.root.visibility = View.GONE
+        binding.profileRankNo2.root.visibility = View.GONE
+        binding.profileRankNo3.root.visibility = View.GONE
+
+        binding.profileRankNo1.textRank.text = "현재  1위"
+        binding.profileRankNo1.textRank.setTextSize(COMPLEX_UNIT_DIP, 15.5f)
+        binding.profileRankNo1.textName.setTextSize(COMPLEX_UNIT_DIP, 19.0f)
+        binding.profileRankNo1.textCount.setTextSize(COMPLEX_UNIT_DIP, 16.0f)
+        Glide.with(binding.profileRankNo1.imgLineTop.context)
+            .asBitmap()
+            .load(R.drawable.gold_line_top) ///feed in path of the image
+            .optionalFitCenter()
+            .into(binding.profileRankNo1.imgLineTop)
+
+        binding.profileRankNo2.textRank.text = "현재  2위"
+        binding.profileRankNo2.textRank.setTextSize(COMPLEX_UNIT_DIP, 14.0f)
+        binding.profileRankNo2.textName.setTextSize(COMPLEX_UNIT_DIP, 17.0f)
+        binding.profileRankNo2.textCount.setTextSize(COMPLEX_UNIT_DIP, 14.0f)
+        Glide.with(binding.profileRankNo2.imgLineTop.context)
+            .asBitmap()
+            .load(R.drawable.red_line_top) ///feed in path of the image
+            .optionalFitCenter()
+            .into(binding.profileRankNo2.imgLineTop)
+
+        binding.profileRankNo3.textRank.text = "현재  3위"
+        binding.profileRankNo3.textRank.setTextSize(COMPLEX_UNIT_DIP, 13.0f)
+        binding.profileRankNo3.textName.setTextSize(COMPLEX_UNIT_DIP, 16.0f)
+        binding.profileRankNo3.textCount.setTextSize(COMPLEX_UNIT_DIP, 13.0f)
+        Glide.with(binding.profileRankNo3.imgLineTop.context)
+            .asBitmap()
+            .load(R.drawable.blue_line_top) ///feed in path of the image
+            .optionalFitCenter()
+            .into(binding.profileRankNo3.imgLineTop)
+
+        binding.profileRankNo1.root.setOnClickListener {
+            callDonationStatusDialog(peopleTop3[0], 1)
+        }
+        binding.profileRankNo2.root.setOnClickListener {
+            callDonationStatusDialog(peopleTop3[1], 2)
+        }
+        binding.profileRankNo3.root.setOnClickListener {
+            callDonationStatusDialog(peopleTop3[2], 3)
+        }
+
+        binding.buttonAdmin.visibility = View.GONE // 관리자모드
+        binding.buttonAdmin.setOnClickListener {
+            val dialog = AdminDialog(requireContext())
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+            dialog.setCanceledOnTouchOutside(false)
+            dialog.show()
+            dialog.binding.buttonOk.setOnClickListener { // OK
+                dialog.dismiss()
+            }
+        }
+
+        binding.imgHallOfFame.setOnClickListener {
+            (activity as MainActivity?)!!.callHallOfFameActivity()
+        }
+
+        binding.buttonRefresh.setOnClickListener {
+            if (!isrefresh) {
+                Toast.makeText(requireActivity(),"새로고침은 5초에 한 번 가능합니다.", Toast.LENGTH_SHORT).show()
             } else {
                 isrefresh = false
 
@@ -339,192 +354,169 @@ class FragmentPageRank : Fragment(), OnRankItemClickListener {
             }
         }
 
-        img_hall_of_fame.setOnClickListener {
-            (activity as MainActivity?)!!.callHallOfFameActivity()
-        }
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            if (!isrefresh) {
+                Toast.makeText(requireActivity(),"새로고침은 5초에 한 번 가능합니다.", Toast.LENGTH_SHORT).show()
+                binding.swipeRefreshLayout.isRefreshing = false
+            } else {
+                isrefresh = false
 
-        //adapter 추가
-        //recyclerview_rank.adapter = MyRankRecyclerViewAdapter()
-        //레이아웃 매니저 추가
-        //recyclerview_rank.layoutManager = LinearLayoutManager(view)
-        //recyclerview_rank.layoutManager = RelativeLayoutManager(this)
+                var second = 1;
+                timer(period = 1000)
+                {
+                    if (second > 5) {
+                        cancel()
+                        isrefresh = true
+                    }
+                    second++
+                }
 
-        //profile_rank_no1.img_rank.setImageResource(R.drawable.crown_gold)
-        //profile_rank_no2.img_rank.setImageResource(R.drawable.crown_silver)
-        //profile_rank_no3.img_rank.setImageResource(R.drawable.crown_bronze)
-        Glide.with(profile_rank_no1.img_rank.context)
-            .asBitmap()
-            .load(R.drawable.crown_gold) ///feed in path of the image
-            .fitCenter()
-            .into(profile_rank_no1.img_rank)
-        Glide.with(profile_rank_no2.img_rank.context)
-            .asBitmap()
-            .load(R.drawable.crown_silver) ///feed in path of the image
-            .fitCenter()
-            .into(profile_rank_no2.img_rank)
-        Glide.with(profile_rank_no3.img_rank.context)
-            .asBitmap()
-            .load(R.drawable.crown_bronze) ///feed in path of the image
-            .fitCenter()
-            .into(profile_rank_no3.img_rank)
-
-        Glide.with(img_hall_of_fame.context)
-            .asBitmap()
-            .load(R.drawable.hall_of_fame_button) ///feed in path of the image
-            .fitCenter()
-            .into(img_hall_of_fame)
-
-        /*var imageID = context?.resources?.getIdentifier(peopleTop3[0].image, "drawable", context?.packageName)
-        if (imageID != null) {
-            profile_rank_no1.img_profile.setImageResource(imageID)
-        }
-        imageID = context?.resources?.getIdentifier(peopleTop3[1].image, "drawable", context?.packageName)
-        if (imageID != null) {
-            profile_rank_no2.img_profile.setImageResource(imageID)
-        }
-        imageID = context?.resources?.getIdentifier(peopleTop3[2].image, "drawable", context?.packageName)
-        if (imageID != null) {
-            profile_rank_no3.img_profile.setImageResource(imageID)
-        }*/
-
-        profile_rank_no1.visibility = View.GONE
-        profile_rank_no2.visibility = View.GONE
-        profile_rank_no3.visibility = View.GONE
-
-        profile_rank_no1.text_rank.text = "현재  1위"
-        profile_rank_no1.text_rank.setTextSize(Dimension.SP, 10.toFloat())
-        profile_rank_no1.text_name.setTextSize(Dimension.SP, 10.toFloat())
-        profile_rank_no1.text_count.setTextSize(Dimension.SP, 10.toFloat())
-
-        profile_rank_no2.text_rank.text = "현재  2위"
-        profile_rank_no2.text_rank.setTextSize(Dimension.SP, 9.toFloat())
-        profile_rank_no2.text_name.setTextSize(Dimension.SP, 9.toFloat())
-        profile_rank_no2.text_count.setTextSize(Dimension.SP, 9.toFloat())
-
-        profile_rank_no3.text_rank.text = "현재  3위"
-        profile_rank_no3.text_rank.setTextSize(Dimension.SP, 8.toFloat())
-        profile_rank_no3.text_name.setTextSize(Dimension.SP, 8.toFloat())
-        profile_rank_no3.text_count.setTextSize(Dimension.SP, 8.toFloat())
-
-        profile_rank_no1.setOnClickListener {
-            callDonationStatusDialog(peopleTop3[0], 1)
-        }
-        profile_rank_no2.setOnClickListener {
-            callDonationStatusDialog(peopleTop3[1], 2)
-        }
-        profile_rank_no3.setOnClickListener {
-            callDonationStatusDialog(peopleTop3[2], 3)
-        }
-
-        //button_admin.visibility = View.GONE // 관리자모드
-        button_admin.setOnClickListener {
-            val dialog = AdminDialog(requireContext())
-            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-            dialog.setCanceledOnTouchOutside(false)
-            dialog.show()
-            dialog.button_ok.setOnClickListener { // OK
-                dialog.dismiss()
+                refreshPeople()
+                binding.swipeRefreshLayout.isRefreshing = false
             }
         }
     }
 
-    fun ShowTop3() {
+    private fun ShowTop3() {
         var imageID : Int = 0
         /*var imageID = context?.resources?.getIdentifier(peopleTop3[0].image, "drawable", context?.packageName)
         if (imageID != null) {
-            profile_rank_no1.img_profile.setImageResource(imageID)
+            binding.profileRankNo1.imgProfile.setImageResource(imageID)
         }
         imageID = context?.resources?.getIdentifier(peopleTop3[1].image, "drawable", context?.packageName)
         if (imageID != null) {
-            profile_rank_no2.img_profile.setImageResource(imageID)
+            binding.profileRankNo2.imgProfile.setImageResource(imageID)
         }
         imageID = context?.resources?.getIdentifier(peopleTop3[2].image, "drawable", context?.packageName)
         if (imageID != null) {
-            profile_rank_no3.img_profile.setImageResource(imageID)
+            binding.profileRankNo3.imgProfile.setImageResource(imageID)
         }*/
 
-        if (peopleTop3.size > 0 && profile_rank_no1 != null) {
-            profile_rank_no1.visibility = View.VISIBLE
+        if (peopleTop3.size > 0 && binding.profileRankNo1 != null) {
+            binding.profileRankNo1.root.visibility = View.VISIBLE
             imageID = context?.resources?.getIdentifier(peopleTop3[0].image, "drawable", context?.packageName)!!
-            //profile_rank_no1.img_profile.setImageResource(imageID)
-            Glide.with(profile_rank_no1.img_profile.context)
+            //binding.profileRankNo1.imgProfile.setImageResource(imageID)
+            Glide.with(binding.profileRankNo1.imgProfile.context)
                 .asBitmap()
                 .load(imageID) ///feed in path of the image
-                .fitCenter()
-                .into(profile_rank_no1.img_profile)
-            profile_rank_no1.text_name.text = peopleTop3[0].name
-            profile_rank_no1.text_count.text = "${decimalFormat.format(peopleTop3[0].count)}표"
+                .optionalFitCenter()
+                .into(binding.profileRankNo1.imgProfile)
+            binding.profileRankNo1.textName.text = peopleTop3[0].name
+            //binding.profileRankNo1.textCount.text = "${formatNumber(peopleTop3[0].count!!)}표"
+            binding.profileRankNo1.textCount.text = "${decimalFormat.format(peopleTop3[0].count!!)}"
 
             // 시즌 변경 작업
-            //profile_rank_no1.img_profile.visibility = View.GONE
-            //profile_rank_no1.text_name.visibility = View.GONE
-            //profile_rank_no1.text_count.visibility = View.GONE
+            //binding.profileRankNo1.imgProfile.visibility = View.GONE
+            //binding.profileRankNo1.textName.visibility = View.GONE
+            //binding.profileRankNo1.textCount.visibility = View.GONE
         }
-        if (peopleTop3.size > 1 && profile_rank_no2 != null) {
-            profile_rank_no2.visibility = View.VISIBLE
+        if (peopleTop3.size > 1 && binding.profileRankNo2 != null) {
+            binding.profileRankNo2.root.visibility = View.VISIBLE
             imageID = context?.resources?.getIdentifier(peopleTop3[1].image, "drawable", context?.packageName)!!
-            //profile_rank_no2.img_profile.setImageResource(imageID)
-            Glide.with(profile_rank_no2.img_profile.context)
+            //binding.profileRankNo2.imgProfile.setImageResource(imageID)
+            Glide.with(binding.profileRankNo2.imgProfile.context)
                 .asBitmap()
                 .load(imageID) ///feed in path of the image
-                .fitCenter()
-                .into(profile_rank_no2.img_profile)
-            profile_rank_no2.text_name.text = peopleTop3[1].name
-            profile_rank_no2.text_count.text = "${decimalFormat.format(peopleTop3[1].count)}표"
+                .optionalFitCenter()
+                .into(binding.profileRankNo2.imgProfile)
+            binding.profileRankNo2.textName.text = peopleTop3[1].name
+            //binding.profileRankNo2.textCount.text = "${formatNumber(peopleTop3[1].count!!)}표"
+            binding.profileRankNo2.textCount.text = "${decimalFormat.format(peopleTop3[1].count!!)}"
 
             // 시즌 변경 작업
-            //profile_rank_no2.img_profile.visibility = View.GONE
-            //profile_rank_no2.text_name.visibility = View.GONE
-            //profile_rank_no2.text_count.visibility = View.GONE
+            //binding.profileRankNo2.imgProfile.visibility = View.GONE
+            //binding.profileRankNo2.textName.visibility = View.GONE
+            //binding.profileRankNo2.textCount.visibility = View.GONE
         }
-        if (peopleTop3.size > 2 && profile_rank_no3 != null) {
-            profile_rank_no3.visibility = View.VISIBLE
+        if (peopleTop3.size > 2 && binding.profileRankNo3 != null) {
+            binding.profileRankNo3.root.visibility = View.VISIBLE
             imageID = context?.resources?.getIdentifier(peopleTop3[2].image, "drawable", context?.packageName)!!
-            //profile_rank_no3.img_profile.setImageResource(imageID)
-            Glide.with(profile_rank_no3.img_profile.context)
+            //binding.profileRankNo3.imgProfile.setImageResource(imageID)
+            Glide.with(binding.profileRankNo3.imgProfile.context)
                 .asBitmap()
                 .load(imageID) ///feed in path of the image
-                .fitCenter()
-                .into(profile_rank_no3.img_profile)
-            profile_rank_no3.text_name.text = peopleTop3[2].name
-            profile_rank_no3.text_count.text = "${decimalFormat.format(peopleTop3[2].count)}표"
+                .optionalFitCenter()
+                .into(binding.profileRankNo3.imgProfile)
+            binding.profileRankNo3.textName.text = peopleTop3[2].name
+            //binding.profileRankNo3.textCount.text = "${formatNumber(peopleTop3[2].count!!)}표"
+            binding.profileRankNo3.textCount.text = "${decimalFormat.format(peopleTop3[2].count!!)}"
 
             // 시즌 변경 작업
-            //profile_rank_no3.img_profile.visibility = View.GONE
-            //profile_rank_no3.text_name.visibility = View.GONE
-            //profile_rank_no3.text_count.visibility = View.GONE
+            //binding.profileRankNo3.imgProfile.visibility = View.GONE
+            //binding.profileRankNo3.textName.visibility = View.GONE
+            //binding.profileRankNo3.textCount.visibility = View.GONE
         }
-    }
-
-    fun loading() {
-        android.os.Handler().postDelayed({
-            if (loadingDialog == null) {
-                loadingDialog = LoadingDialog(requireContext())
-                loadingDialog?.requestWindowFeature(Window.FEATURE_NO_TITLE)
-                loadingDialog?.setCanceledOnTouchOutside(false)
-            }
-            loadingDialog?.show()
-        }, 0)
-    }
-
-    fun loadingEnd() {
-        android.os.Handler().postDelayed({
-            loadingDialog?.dismiss()
-        }, 400)
     }
 
     override fun onItemClick(item: RankDTO, position: Int) {
         callDonationStatusDialog(item, position.plus(4))
     }
 
-    fun callDonationStatusDialog(item: RankDTO, rank: Int) {
-        val dialog = DonationStatusDialog(requireContext(), item, rank)
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        dialog.setCanceledOnTouchOutside(false)
-        dialog.show()
-        dialog.button_ok.setOnClickListener { // OK
-            dialog.dismiss()
+    private fun callDonationStatusDialog(item: RankDTO, rank: Int) {
+        val userDTO = (activity as MainActivity?)?.getUser()!!
+        val seasonDTO = (activity as MainActivity?)?.getSeason()!!
+        firebaseViewModel.getVoteCount(userDTO.uid.toString(), seasonDTO.seasonNum!!, item.docname.toString()) { voteCount ->
+            val dialog = DonationStatusDialog(requireContext(), item, rank, voteCount)
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+            dialog.setCanceledOnTouchOutside(false)
+            dialog.show()
+            dialog.binding.buttonOk.setOnClickListener { // OK
+                dialog.dismiss()
+            }
         }
     }
-}
 
+    private fun formatNumber(value: Int): String {
+        return when {
+            value >= 1E3 -> "${decimalFormat.format((value.toFloat() / 1E3).toInt())}K"
+            else -> NumberFormat.getInstance().format(value)
+        }
+    }
+
+    // 날짜 변경 체크 타이머
+    private fun dateCheckTimer() {
+        timer(period = 1000)
+        {
+            val checkDate = SimpleDateFormat("yyyyMMdd").format(Date())
+            if (currentDate != checkDate) {
+                requireActivity().runOnUiThread {
+                    println("날짜가 변경되었습니다 $currentDate -> $checkDate")
+                    currentDate = checkDate
+
+                    checkDDay()
+                }
+            }
+        }
+    }
+
+    private fun checkDDay() {
+        val seasonDTO = (activity as MainActivity?)?.getSeason()!!
+        val dDay = seasonDTO.getDDay()
+        if (dDay <= 10) {
+            binding.textDDay.visibility = View.VISIBLE
+            binding.textDDay.text = if (dDay > 0) "D-$dDay" else "D-DAY"
+        } else {
+            binding.textDDay.visibility = View.GONE
+        }
+    }
+
+    companion object {
+        /**
+         * Use this factory method to create a new instance of
+         * this fragment using the provided parameters.
+         *
+         * @param param1 Parameter 1.
+         * @param param2 Parameter 2.
+         * @return A new instance of fragment FragmentPageRank.
+         */
+        // TODO: Rename and change types and number of parameters
+        @JvmStatic
+        fun newInstance(param1: String, param2: String) =
+            FragmentPageRank().apply {
+                arguments = Bundle().apply {
+                    putString(ARG_PARAM1, param1)
+                    putString(ARG_PARAM2, param2)
+                }
+            }
+    }
+}

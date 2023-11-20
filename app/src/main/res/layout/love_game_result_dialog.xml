@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="wrap_content"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:background="#3C4353"
+        android:layout_width="match_parent"
+        android:layout_height="300dp">
+
+        <RelativeLayout
+            android:id="@+id/layout_notice_title"
+            android:background="#1C1F2B"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/text_notice_title"
+                android:text="관리자 기능"
+                android:textColor="#ddffffff"
+                android:textStyle="bold"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="7dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </RelativeLayout>
+        <LinearLayout
+            android:id="@+id/layout_ticket_normal"
+            android:layout_below="@+id/layout_notice_title"
+            android:orientation="vertical"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_ticket_morning"
+                android:text="모닝 티켓 발송"
+                android:textColor="#ddffffff"
+                android:textSize="12sp"
+                android:background="@drawable/btn_round2"
+                android:layout_marginBottom="25dp"
+                android:layout_width="100dp"
+                android:layout_height="40dp"/>
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_ticket_afternoon"
+                android:text="정오 티켓 발송"
+                android:textColor="#ddffffff"
+                android:textSize="12sp"
+                android:background="@drawable/btn_round2"
+                android:layout_marginBottom="25dp"
+                android:layout_width="100dp"
+                android:layout_height="40dp"/>
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_ticket_evening"
+                android:text="저녁 티켓 발송"
+                android:textColor="#ddffffff"
+                android:textSize="12sp"
+                android:background="@drawable/btn_round2"
+                android:layout_marginBottom="25dp"
+                android:layout_width="100dp"
+                android:layout_height="40dp"/>
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_ticket_night"
+                android:text="깜짝 티켓 발송"
+                android:textColor="#ddffffff"
+                android:textSize="12sp"
+                android:background="@drawable/btn_round2"
+                android:layout_marginBottom="25dp"
+                android:layout_width="100dp"
+                android:layout_height="40dp"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/layout_ticket_hottime"
+            android:layout_toRightOf="@+id/layout_ticket_normal"
+            android:layout_below="@+id/layout_notice_title"
+            android:orientation="vertical"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_ticket_morning_hottime"
+                android:text="핫타임 모닝 티켓 발송"
+                android:textColor="#ddffffff"
+                android:textSize="12sp"
+                android:background="@drawable/btn_round3"
+                android:layout_marginBottom="25dp"
+                android:layout_width="130dp"
+                android:layout_height="40dp"/>
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_ticket_afternoon_hottime"
+                android:text="핫타임 정오 티켓 발송"
+                android:textColor="#ddffffff"
+                android:textSize="12sp"
+                android:background="@drawable/btn_round3"
+                android:layout_marginBottom="25dp"
+                android:layout_width="130dp"
+                android:layout_height="40dp"/>
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_ticket_evening_hottime"
+                android:text="핫타임 저녁 티켓 발송"
+                android:textColor="#ddffffff"
+                android:textSize="12sp"
+                android:background="@drawable/btn_round3"
+                android:layout_marginBottom="25dp"
+                android:layout_width="130dp"
+                android:layout_height="40dp"/>
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_ticket_night_hottime"
+                android:text="핫타임 깜짝 티켓 발송"
+                android:textColor="#ddffffff"
+                android:textSize="12sp"
+                android:background="@drawable/btn_round3"
+                android:layout_marginBottom="25dp"
+                android:layout_width="130dp"
+                android:layout_height="40dp"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/layout_ticket_weekend"
+            android:layout_toRightOf="@+id/layout_ticket_hottime"
+            android:layout_below="@+id/layout_notice_title"
+            android:orientation="vertical"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_ticket_afternoon_weekend"
+                android:text="주말 정오 티켓 발송"
+                android:textColor="#ddffffff"
+                android:textSize="12sp"
+                android:background="@drawable/btn_round"
+                android:layout_marginBottom="25dp"
+                android:layout_width="120dp"
+                android:layout_height="40dp"/>
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_hottime_start"
+                android:text="🔥핫타임🔥 시작"
+                android:textColor="#ddffffff"
+                android:textSize="12sp"
+                android:background="@drawable/btn_round3"
+                android:layout_marginBottom="25dp"
+                android:layout_width="120dp"
+                android:layout_height="40dp"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_hottime_stop"
+                android:text="🔥핫타임🔥 종료"
+                android:textColor="#ddffffff"
+                android:textSize="12sp"
+                android:background="@drawable/btn_round"
+                android:layout_marginBottom="25dp"
+                android:layout_width="120dp"
+                android:layout_height="40dp"/>
+        </LinearLayout>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:background="#5244CD"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_ok"
+            android:text="닫기"
+            android:textColor="#ddffffff"
+            android:background="@drawable/btn_round"
+            android:layout_marginTop="7dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"/>
+    </LinearLayout>
+
+
+</LinearLayout>

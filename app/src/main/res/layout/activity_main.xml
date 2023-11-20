@@ -1,64 +1,242 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout_main"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabs"
-        android:background="#A91BFB"
-        app:tabSelectedTextColor="#ffffff"
-        app:tabTextColor="#D1D1D1"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
-        app:tabMode="fixed"
+        android:layout_height="34dp"
+        android:background="@color/report_dialog"
         app:tabGravity="fill"
-        />
+        app:tabMode="fixed"
+        app:tabSelectedTextColor="@color/white"
+        app:tabTextAppearance="@style/tab_text"
+        app:tabTextColor="@color/report_text_categories"
+        app:tabInlineLabel="true"
+        app:tabIconTint="@color/tab_color_selector"
+        tools:ignore="SpeakableTextPresentCheck" />
 
-    <androidx.viewpager.widget.ViewPager
-        android:id="@+id/viewPager"
-        android:layout_below="@+id/tabs"
-        android:layout_above="@+id/layout_adview"
+    <RelativeLayout
+        android:id="@+id/layout_item"
+        android:background="#212B4A"
+        android:padding="3dp"
+        android:layout_below="@id/tabs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <RelativeLayout
+            android:id="@+id/layout_premium"
+            android:layout_toLeftOf="@id/layout_quest"
+            android:layout_centerVertical="true"
+            android:layout_width="30dp"
+            android:layout_height="26dp">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/img_premium_disable"
+                android:src="@drawable/premium_disable"
+                app:civ_circle_background_color="@color/text_sub"
+                app:civ_border_color="@color/text_sub"
+                app:civ_border_width="2dp"
+                android:layout_centerVertical="true"
+                android:layout_width="26dp"
+                android:layout_height="26dp"/>
+
+            <ImageView
+                android:id="@+id/img_premium_enable"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:layout_centerVertical="true"
+                android:src="@drawable/premium_enable" />
+
+            <ImageView
+                android:id="@+id/img_premium_new"
+                android:layout_width="30dp"
+                android:layout_height="26dp"
+                android:src="@drawable/new_item"
+                android:visibility="visible" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/layout_quest"
+            android:layout_toLeftOf="@id/layout_ticket"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="12dp"
+            android:layout_width="30dp"
+            android:layout_height="24dp">
+
+            <ImageView
+                android:id="@+id/img_quest"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_centerVertical="true"
+                android:src="@drawable/quests" />
+
+            <ImageView
+                android:id="@+id/img_quest_new"
+                android:layout_width="30dp"
+                android:layout_height="24dp"
+                android:src="@drawable/new_item"
+                android:visibility="visible" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_ticket"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@id/layout_gem"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:background="@drawable/btn_round6"
+            android:paddingLeft="5dp"
+            android:paddingTop="3dp"
+            android:paddingRight="5dp"
+            android:paddingBottom="3dp">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/ticket2" />
+
+            <TextView
+                android:id="@+id/text_ticket_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop="1dp"
+                android:layout_marginLeft="5dp"
+                android:fontFamily="@font/font_title"
+                android:text="0"
+                android:textColor="@color/white"
+                android:textSize="15dp" />
+
+            <TextView
+                android:id="@+id/text_ticket_timer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop="1dp"
+                android:layout_marginLeft="5dp"
+                android:fontFamily="@font/font_title"
+                android:text="(00:00)"
+                android:textColor="@color/display_board_6"
+                android:textSize="10dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_gem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="12dp"
+            android:layout_toLeftOf="@id/layout_mail"
+            android:background="@drawable/btn_round6"
+            android:paddingLeft="5dp"
+            android:paddingTop="3dp"
+            android:paddingRight="5dp"
+            android:paddingBottom="3dp">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/diamond" />
+
+            <TextView
+                android:id="@+id/text_gem_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop="1dp"
+                android:layout_marginLeft="5dp"
+                android:fontFamily="@font/font_title"
+                android:text="0"
+                android:textColor="@color/white"
+                android:textSize="15dp" />
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/layout_mail"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="15dp"
+            android:layout_centerVertical="true"
+            android:layout_width="30dp"
+            android:layout_height="24dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_centerVertical="true"
+                android:src="@drawable/mail" />
+
+            <ImageView
+                android:id="@+id/img_mail_new"
+                android:layout_width="30dp"
+                android:layout_height="24dp"
+                android:src="@drawable/new_item"
+                android:visibility="visible" />
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+    <include
+        android:id="@+id/display_board"
+        layout="@layout/item_display_board"
+        android:layout_below="@+id/layout_item"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
+        android:layout_below="@+id/display_board"
+        android:layout_above="@+id/layout_adview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         />
 
     <RelativeLayout
         android:id="@+id/layout_adview"
-        android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
-        android:layout_height="50dp">
-        <com.fsn.cauly.CaulyAdView
-            xmlns:app="http://schemas.android.com/apk/res/com.ados.mstrotrematch2"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true">
+
+        <com.fsn.cauly.CaulyAdView xmlns:app="http://schemas.android.com/apk/res/com.ados.mstrotrematch2"
             android:id="@+id/xmladview"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            app:appcode="avhXxFUQ"
-            app:effect="RightSlide"
-            app:dynamicReloadInterval="true"
-            app:reloadInterval="20"
-            app:bannerHeight="Fixed_50"
             android:visibility="gone"
-            />
-        <com.google.android.gms.ads.AdView
-            xmlns:ads="http://schemas.android.com/apk/res-auto"
+            app:appcode="avhXxFUQ"
+            app:bannerHeight="Fixed_50"
+            app:dynamicReloadInterval="true"
+            app:effect="RightSlide"
+            app:reloadInterval="20" />
+
+        <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
             android:id="@+id/adView_admob"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
             android:layout_alignParentBottom="true"
-            ads:adSize="BANNER"
+            android:layout_centerHorizontal="true"
             android:visibility="gone"
-            app:adUnitId="@string/admob_banner_ad_unit_id">
-        </com.google.android.gms.ads.AdView>
+            ads:adSize="BANNER"
+            app:adUnitId="@string/admob_banner_ad_unit_id"></com.google.android.gms.ads.AdView>
+
         <com.kakao.adfit.ads.ba.BannerAdView
             android:id="@+id/adView_kakao"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="gone"/>
+            android:visibility="gone" />
     </RelativeLayout>
+
 
 </RelativeLayout>

@@ -1,280 +1,234 @@
 package com.ados.mstrotrematch2
 
+import android.content.Intent
 import android.graphics.Paint
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.*
 import android.view.animation.AnimationUtils
 import android.widget.PopupMenu
 import android.widget.TextView
-import android.widget.Toast
-import androidx.annotation.Dimension
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
+import androidx.activity.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.ados.mstrotrematch2.databinding.ActivityHallOfFameBinding
 import com.ados.mstrotrematch2.dialog.DonationCertificateDialog
 import com.ados.mstrotrematch2.dialog.LoadingDialog
 import com.ados.mstrotrematch2.model.*
-import com.ados.mstrotrematch2.page.OnCheeringItemClickListener
-import com.ados.mstrotrematch2.page.OnRankItemClickListener
-import com.ados.mstrotrematch2.page.RecyclerViewAdapterCheering
-import com.ados.mstrotrematch2.page.RecyclerViewAdapterRank
+import com.ados.mstrotrematch2.adapter.OnCheeringItemClickListener
+import com.ados.mstrotrematch2.adapter.OnRankItemClickListener
+import com.ados.mstrotrematch2.adapter.RecyclerViewAdapterCheeringTotal
+import com.ados.mstrotrematch2.adapter.RecyclerViewAdapterRank
+import com.ados.mstrotrematch2.firebase.FirebaseViewModel
+import com.ados.mstrotrematch2.util.AdsBannerManager
 import com.bumptech.glide.Glide
-import com.fsn.cauly.*
-import com.google.android.gms.ads.*
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import kotlinx.android.synthetic.main.activity_hall_of_fame.*
-import kotlinx.android.synthetic.main.activity_hall_of_fame.adView_kakao
-import kotlinx.android.synthetic.main.activity_hall_of_fame.layout_adview
-import kotlinx.android.synthetic.main.activity_hall_of_fame.profile_rank_no1
-import kotlinx.android.synthetic.main.activity_hall_of_fame.profile_rank_no2
-import kotlinx.android.synthetic.main.activity_hall_of_fame.profile_rank_no3
-import kotlinx.android.synthetic.main.activity_hall_of_fame.recyclerview_rank
-import kotlinx.android.synthetic.main.donation_certificate_dialog.*
-import kotlinx.android.synthetic.main.profile_item.view.*
-import kotlinx.android.synthetic.main.profile_item.view.img_profile
-import kotlinx.android.synthetic.main.profile_item.view.text_count
-import kotlinx.android.synthetic.main.profile_item.view.text_name
 import java.text.DecimalFormat
-import java.text.SimpleDateFormat
+import java.text.NumberFormat
 import kotlin.collections.ArrayList
 import kotlin.concurrent.timer
 
 class HallOfFameActivity : AppCompatActivity(), OnRankItemClickListener, OnCheeringItemClickListener {
+    private lateinit var binding: ActivityHallOfFameBinding
+    enum class HallOfFameType {
+        MR_NEW, MR_OLD, MR2, FIRE
+    }
 
-    enum class DISPLAY_TYPE {
+    enum class DisplayType {
         VOTE, CHEERING, ONE_MILLION, TWO_MILLION, THREE_MILLION, FOUR_MILLION, FIVE_MILLION, SIX_MILLION, DONATION
     }
 
+    private val menuItemList = listOf(
+        R.id.Item1, R.id.Item2, R.id.Item3, R.id.Item4, R.id.Item5, R.id.Item6, R.id.Item7, R.id.Item8, R.id.Item9
+    )
+
+    private val firebaseViewModel : FirebaseViewModel by viewModels() // 뷰모델 연결
     var decimalFormat: DecimalFormat = DecimalFormat("###,###")
+    var hallOfFameType = HallOfFameType.MR_OLD
 
-    var adType: String? = null
-    lateinit var mAdView : AdView
-    lateinit var mInterstitialAd : InterstitialAd
-    lateinit var mAdViewCauly : CaulyAdView
-
-    var firestore : FirebaseFirestore? = null
     lateinit var recyclerView : RecyclerView
     var loadingDialog : LoadingDialog? = null
-    private var seasonDTO : SeasonDTO? = null
-    private var selectedSeason = "season_1"
-    private var isFinished = false
+    private var selectedSeasonNum = 1
+    private var selectedMenuId = 0
 
-    private var displayTypeIndex = 0
-    private val displayTypes : List<DISPLAY_TYPE> = listOf(DISPLAY_TYPE.VOTE, DISPLAY_TYPE.CHEERING, DISPLAY_TYPE.DONATION)
+    private var displayTypeIndex = 2
+    private val displayTypes : List<DisplayType> = listOf(DisplayType.VOTE, DisplayType.CHEERING, DisplayType.DONATION)
 
-    private var peopleTop3_Vote : ArrayList<RankDTO> = arrayListOf()
-    private var peopleOther_Vote : ArrayList<RankDTO> = arrayListOf()
-    private var peopleOther_Donation : ArrayList<RankDTO> = arrayListOf()
+    private var peopleTop3Vote : ArrayList<RankDTO> = arrayListOf()
+    private var peopleOtherVote : ArrayList<RankDTO> = arrayListOf()
+    private var peopleOtherDonation : ArrayList<RankDTO> = arrayListOf()
 
-    private var peopleTop3_Cheering : ArrayList<RankDTO> = arrayListOf()
-    private var peopleOther_Cheering : ArrayList<BoardDTO> = arrayListOf()
+    private var peopleTop3Cheering : ArrayList<RankDTO> = arrayListOf()
+    private var peopleOtherCheering : ArrayList<RankDTO> = arrayListOf()
 
-    /*private var peopleTop3_OneMillon : ArrayList<RankDTO> = arrayListOf()
-    private var peopleOther_OneMillon : ArrayList<RankDTO> = arrayListOf()
-
-    private var peopleTop3_TwoMillon : ArrayList<RankDTO> = arrayListOf()
-    private var peopleOther_TwoMillon : ArrayList<RankDTO> = arrayListOf()
-
-    private var peopleTop3_ThreeMillon : ArrayList<RankDTO> = arrayListOf()
-    private var peopleOther_ThreeMillon : ArrayList<RankDTO> = arrayListOf()
-
-    private var peopleTop3_FourMillon : ArrayList<RankDTO> = arrayListOf()
-    private var peopleOther_FourMillon : ArrayList<RankDTO> = arrayListOf()
-
-    private var peopleTop3_FiveMillon : ArrayList<RankDTO> = arrayListOf()
-    private var peopleOther_FiveMillon : ArrayList<RankDTO> = arrayListOf()
-
-    private var peopleTop3_SixMillon : ArrayList<RankDTO> = arrayListOf()
-    private var peopleOther_SixMillon : ArrayList<RankDTO> = arrayListOf()*/
-
+    lateinit var adPolicyDTO: AdPolicyDTO
+    lateinit var seasonDTO: SeasonDTO
+    private var adsBannerManager : AdsBannerManager? = null // AD
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_hall_of_fame)
+        binding = ActivityHallOfFameBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        recyclerView = recyclerview_rank
-        recyclerView.layoutManager = LinearLayoutManager(this)
+        adPolicyDTO = intent.getParcelableExtra("adPolicy")!!
+        seasonDTO = intent.getParcelableExtra("season")!!
+        //seasonDTO.seasonNum = 2 // @ 시즌 변경
 
-        firestore = FirebaseFirestore.getInstance()
-        firestore?.collection("preferences")?.document("season")?.addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
-            seasonDTO = documentSnapshot?.toObject(SeasonDTO::class.java)
+        hallOfFameType = intent.getSerializableExtra("hallOfFameType") as HallOfFameType
 
-            // 시즌 변경 작업
-            //seasonDTO?.seasonNum = 6
+        adsBannerManager = AdsBannerManager(this, lifecycle, adPolicyDTO, binding.adViewAdmob, binding.xmladview, binding.adViewKakao)
+        adsBannerManager?.callBanner {
 
-            selectedSeason = "season_${seasonDTO?.seasonNum!!.minus(1)}"
-
-            // 시즌2
-            if (seasonDTO?.seasonNum!! <= 2) {
-                text_other_season.visibility = View.GONE
-            }
-
-            loadData()
         }
 
-        // AD
-        mAdView = findViewById(R.id.adView_admob)
-        mAdViewCauly = findViewById(R.id.xmladview)
+        recyclerView = binding.recyclerviewRank
+        recyclerView.layoutManager = LinearLayoutManager(this)
 
-        InitAd()
+        when (hallOfFameType) {
+            HallOfFameType.MR_NEW -> {
+                selectedSeasonNum = seasonDTO.seasonNum?.minus(1)!!
+            }
+            HallOfFameType.MR_OLD -> {
+                selectedSeasonNum = 9
+            }
+            else -> {
+                binding.textOtherSeason.visibility = View.GONE
+            }
+        }
 
-        println("광고 송출")
-        //showAd()
-
-        //loadData()
+        observeVote()
+        observeCheering()
+        loadData()
 
         // Top 3 화면 설정
-        profile_rank_no1.visibility = View.GONE
-        profile_rank_no2.visibility = View.GONE
-        profile_rank_no3.visibility = View.GONE
+        binding.profileRankNo1.root.visibility = View.GONE
+        binding.profileRankNo2.root.visibility = View.GONE
+        binding.profileRankNo3.root.visibility = View.GONE
 
-        //profile_rank_no1.img_rank.setImageResource(R.drawable.crown_gold)
-        //profile_rank_no2.img_rank.setImageResource(R.drawable.crown_silver)
-        //profile_rank_no3.img_rank.setImageResource(R.drawable.crown_bronze)
-        Glide.with(profile_rank_no1.img_rank.context)
+        //binding.profileRankNo1.imgRank.setImageResource(R.drawable.crown_gold)
+        //binding.profileRankNo2.imgRank.setImageResource(R.drawable.crown_silver)
+        //binding.profileRankNo3.imgRank.setImageResource(R.drawable.crown_bronze)
+        Glide.with(binding.profileRankNo1.imgRank.context)
             .asBitmap()
             .load(R.drawable.crown_gold) ///feed in path of the image
-            .fitCenter()
-            .into(profile_rank_no1.img_rank)
-        Glide.with(profile_rank_no2.img_rank.context)
+            .optionalFitCenter()
+            .into(binding.profileRankNo1.imgRank)
+        Glide.with(binding.profileRankNo2.imgRank.context)
             .asBitmap()
             .load(R.drawable.crown_silver) ///feed in path of the image
-            .fitCenter()
-            .into(profile_rank_no2.img_rank)
-        Glide.with(profile_rank_no3.img_rank.context)
+            .optionalFitCenter()
+            .into(binding.profileRankNo2.imgRank)
+        Glide.with(binding.profileRankNo3.imgRank.context)
             .asBitmap()
             .load(R.drawable.crown_bronze) ///feed in path of the image
-            .fitCenter()
-            .into(profile_rank_no3.img_rank)
+            .optionalFitCenter()
+            .into(binding.profileRankNo3.imgRank)
 
-        Glide.with(img_left.context)
+        Glide.with(binding.imgTitle.context)
             .asBitmap()
-            .load(R.drawable.halloffame_title) ///feed in path of the image
-            .fitCenter()
-            .into(img_title)
-        Glide.with(img_left.context)
+            .load(R.drawable.hall_of_fame_title) ///feed in path of the image
+            .optionalFitCenter()
+            .into(binding.imgTitle)
+        Glide.with(binding.imgLeft.context)
             .asBitmap()
             .load(R.drawable.left_arrow) ///feed in path of the image
-            .fitCenter()
-            .into(img_left)
-        Glide.with(img_right.context)
+            .optionalFitCenter()
+            .into(binding.imgLeft)
+        Glide.with(binding.imgRight.context)
             .asBitmap()
             .load(R.drawable.right_arrow) ///feed in path of the image
-            .fitCenter()
-            .into(img_right)
+            .optionalFitCenter()
+            .into(binding.imgRight)
 
 
-        profile_rank_no1.text_rank.text = "최종  1위"
-        profile_rank_no1.text_rank.setTextSize(Dimension.SP, 10.toFloat())
-        profile_rank_no1.text_name.setTextSize(Dimension.SP, 10.toFloat())
-        profile_rank_no1.text_count.setTextSize(Dimension.SP, 10.toFloat())
+        binding.profileRankNo1.textRank.text = "최종  1위"
+        binding.profileRankNo1.textRank.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15.5f)
+        binding.profileRankNo1.textName.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 19.0f)
+        binding.profileRankNo1.textCount.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16.0f)
+        Glide.with(binding.profileRankNo1.imgLineTop.context)
+            .asBitmap()
+            .load(R.drawable.gold_line_top) ///feed in path of the image
+            .optionalFitCenter()
+            .into(binding.profileRankNo1.imgLineTop)
 
-        profile_rank_no2.text_rank.text = "최종  2위"
-        profile_rank_no2.text_rank.setTextSize(Dimension.SP, 9.toFloat())
-        profile_rank_no2.text_name.setTextSize(Dimension.SP, 9.toFloat())
-        profile_rank_no2.text_count.setTextSize(Dimension.SP, 9.toFloat())
+        binding.profileRankNo2.textRank.text = "최종  2위"
+        binding.profileRankNo2.textRank.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14.0f)
+        binding.profileRankNo2.textName.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 17.0f)
+        binding.profileRankNo2.textCount.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14.0f)
+        Glide.with(binding.profileRankNo2.imgLineTop.context)
+            .asBitmap()
+            .load(R.drawable.red_line_top) ///feed in path of the image
+            .optionalFitCenter()
+            .into(binding.profileRankNo2.imgLineTop)
 
-        profile_rank_no3.text_rank.text = "최종  3위"
-        profile_rank_no3.text_rank.setTextSize(Dimension.SP, 8.toFloat())
-        profile_rank_no3.text_name.setTextSize(Dimension.SP, 8.toFloat())
-        profile_rank_no3.text_count.setTextSize(Dimension.SP, 8.toFloat())
+        binding.profileRankNo3.textRank.text = "최종  3위"
+        binding.profileRankNo3.textRank.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13.0f)
+        binding.profileRankNo3.textName.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16.0f)
+        binding.profileRankNo3.textCount.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13.0f)
+        Glide.with(binding.profileRankNo3.imgLineTop.context)
+            .asBitmap()
+            .load(R.drawable.blue_line_top) ///feed in path of the image
+            .optionalFitCenter()
+            .into(binding.profileRankNo3.imgLineTop)
 
-        /*loading()
-        timer(period = 100)
-        {
-            if (peopleTop3_Vote.size > 0) {
-                cancel()
-                //display()
-                runOnUiThread {
-                    display()
-                    loadingEnd()
-                }
-            }
-        }*/
+        binding.buttonBack.setOnClickListener {
+            finish()
+        }
 
-
-        img_left.setOnClickListener {
+        binding.imgLeft.setOnClickListener {
             if (displayTypeIndex == 0)
                 displayTypeIndex = displayTypes.size - 1
             else
                 displayTypeIndex--
 
             var animation = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.horizon_left)
-            main_layout.startAnimation(animation)
+            binding.mainLayout.startAnimation(animation)
 
             display()
         }
 
-        img_right.setOnClickListener {
+        binding.imgRight.setOnClickListener {
             if (displayTypeIndex == (displayTypes.size - 1))
                 displayTypeIndex = 0
             else
                 displayTypeIndex++
 
             var animation = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.horizon_right)
-            main_layout.startAnimation(animation)
+            binding.mainLayout.startAnimation(animation)
 
             display()
         }
 
-        profile_rank_no1.setOnClickListener {
+        binding.profileRankNo1.root.setOnClickListener {
             when(displayTypes[displayTypeIndex]) {
-                DISPLAY_TYPE.DONATION -> {
-                    callDonationCertificateDialog(peopleTop3_Vote[0], 1)
+                DisplayType.DONATION, DisplayType.VOTE -> {
+                    callDonationCertificateDialog(peopleTop3Vote[0], 1)
                 }
             }
         }
-        profile_rank_no2.setOnClickListener {
+        binding.profileRankNo2.root.setOnClickListener {
             when(displayTypes[displayTypeIndex]) {
-                DISPLAY_TYPE.DONATION -> {
-                    callDonationCertificateDialog(peopleTop3_Vote[1], 2)
+                DisplayType.DONATION, DisplayType.VOTE -> {
+                    callDonationCertificateDialog(peopleTop3Vote[1], 2)
                 }
             }
         }
-        profile_rank_no3.setOnClickListener {
+        binding.profileRankNo3.root.setOnClickListener {
             when(displayTypes[displayTypeIndex]) {
-                DISPLAY_TYPE.DONATION -> {
-                    callDonationCertificateDialog(peopleTop3_Vote[2], 3)
+                DisplayType.DONATION, DisplayType.VOTE -> {
+                    callDonationCertificateDialog(peopleTop3Vote[2], 3)
                 }
             }
         }
 
-        text_other_season.paintFlags = text_other_season.paintFlags or Paint.UNDERLINE_TEXT_FLAG
-        text_other_season.setOnClickListener {
-            var pop = PopupMenu(this, text_other_season)
-            //menuInflater.inflate(R.menu.halloffame_menu, pop.menu)
-            pop.menu.add(Menu.NONE, R.id.Item1, Menu.NONE, "시즌1 명예의 전당")
-            pop.menu.add(Menu.NONE, R.id.Item2, Menu.NONE, "시즌2 명예의 전당")
-
-            if (seasonDTO != null) {
-                // 시즌4 부터 명예의 전당 3개 이상 추가됨
-                if (seasonDTO?.seasonNum!! >= 4) {
-                    pop.menu.add(Menu.NONE, R.id.Item3, Menu.NONE, "시즌3 명예의 전당")
-                }
-                if (seasonDTO?.seasonNum!! >= 5) {
-                    pop.menu.add(Menu.NONE, R.id.Item4, Menu.NONE, "시즌4 명예의 전당")
-                }
-                if (seasonDTO?.seasonNum!! >= 6) {
-                    pop.menu.add(Menu.NONE, R.id.Item5, Menu.NONE, "시즌5 명예의 전당")
-                }
-                if (seasonDTO?.seasonNum!! >= 7) {
-                    pop.menu.add(Menu.NONE, R.id.Item6, Menu.NONE, "시즌6 명예의 전당")
-                }
-                if (seasonDTO?.seasonNum!! >= 8) {
-                    pop.menu.add(Menu.NONE, R.id.Item7, Menu.NONE, "시즌7 명예의 전당")
-                }
-                if (seasonDTO?.seasonNum!! >= 9) {
-                    pop.menu.add(Menu.NONE, R.id.Item8, Menu.NONE, "시즌8 명예의 전당")
-                }
-                if (seasonDTO?.seasonNum!! >= 10) {
-                    pop.menu.add(Menu.NONE, R.id.Item9, Menu.NONE, "시즌9 명예의 전당")
-                }
+        binding.textOtherSeason.paintFlags = binding.textOtherSeason.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+        binding.textOtherSeason.setOnClickListener {
+            var pop = PopupMenu(this, binding.textOtherSeason)
+            for ((index, id) in menuItemList.withIndex()) {
+                pop.menu.add(Menu.NONE, id, Menu.NONE, "시즌${index+1} 명예의 전당")
             }
-
 
             // 1. 리스너로 처리
             var listener = PopupListener()
@@ -282,65 +236,20 @@ class HallOfFameActivity : AppCompatActivity(), OnRankItemClickListener, OnCheer
 
             // 2. 람다식으로 처리
             pop.setOnMenuItemClickListener { item ->
-                when (item.itemId) {
-                    R.id.Item1 -> {
-                        if (selectedSeason != "season_1") {
-                            selectedSeason = "season_1"
-                            showAd()
-                            loadData()
-                        }
+                if (selectedMenuId != item.itemId) {
+                    selectedMenuId = item.itemId
+                    when (item.itemId) {
+                        R.id.Item1 -> selectedSeasonNum = 1
+                        R.id.Item2 -> selectedSeasonNum = 2
+                        R.id.Item3 -> selectedSeasonNum = 3
+                        R.id.Item4 -> selectedSeasonNum = 4
+                        R.id.Item5 -> selectedSeasonNum = 5
+                        R.id.Item6 -> selectedSeasonNum = 6
+                        R.id.Item7 -> selectedSeasonNum = 7
+                        R.id.Item8 -> selectedSeasonNum = 8
+                        R.id.Item9 -> selectedSeasonNum = 9
                     }
-                    R.id.Item2 -> {
-                        if (selectedSeason != "season_2") {
-                            selectedSeason = "season_2"
-                            showAd()
-                            loadData()
-                        }
-                    }
-                    R.id.Item3 -> {
-                        if (selectedSeason != "season_3") {
-                            selectedSeason = "season_3"
-                            showAd()
-                            loadData()
-                        }
-                    }
-                    R.id.Item4 -> {
-                        if (selectedSeason != "season_4") {
-                            selectedSeason = "season_4"
-                            loadData()
-                        }
-                    }
-                    R.id.Item5 -> {
-                        if (selectedSeason != "season_5") {
-                            selectedSeason = "season_5"
-                            loadData()
-                        }
-                    }
-                    R.id.Item6 -> {
-                        if (selectedSeason != "season_6") {
-                            selectedSeason = "season_6"
-                            loadData()
-                        }
-                    }
-                    // 시즌 변경 작업
-                    /*R.id.Item7 -> {
-                        if (selectedSeason != "season_7") {
-                            selectedSeason = "season_7"
-                            loadData()
-                        }
-                    }
-                    R.id.Item8 -> {
-                        if (selectedSeason != "season_8") {
-                            selectedSeason = "season_8"
-                            loadData()
-                        }
-                    }
-                    R.id.Item9 -> {
-                        if (selectedSeason != "season_9") {
-                            selectedSeason = "season_9"
-                            loadData()
-                        }
-                    }*/
+                    loadData()
                 }
                 false
             }
@@ -349,22 +258,43 @@ class HallOfFameActivity : AppCompatActivity(), OnRankItemClickListener, OnCheer
 
 
         // 뉴스 기록
-        // 시즌 변경 작업
-        /*firestore?.collection("news")?.get()?.addOnSuccessListener { result ->
+        // 시즌 변경 작업 // 시즌교체 작업
+        //var firestore = FirebaseFirestore.getInstance()
+        // 투표 수 기록
+        /*firestore?.collection("people")?.get()?.addOnSuccessListener { result ->
             for (document in result) {
-                var person = document.toObject(NewsDTO::class.java)!!
-                firestore?.collection("season_result")?.document("season_5")?.collection("news")?.document()?.set(person)
+                var person = document.toObject(RankDTO::class.java)!!
+                firestore?.collection("season_result")?.document("season_9")?.collection("vote")?.document(person.docname!!)?.set(person)
+            }
+        }
+            ?.addOnFailureListener { exception ->
+
+            }
+
+        // 응원수 기록
+        firestore?.collection("people_cheering")?.get()?.addOnSuccessListener { result ->
+            for (document in result) {
+                var person = document.toObject(RankDTO::class.java)!!
+                firestore?.collection("season_result")?.document("season_9")?.collection("cheering")?.document(person.docname!!)?.set(person)
             }
         }
             ?.addOnFailureListener { exception ->
 
             }*/
+        /*firestore?.collection("news")?.get()?.addOnSuccessListener { result ->
+            for (document in result) {
+                var person = document.toObject(NewsDTO::class.java)!!
+                firestore?.collection("season_result")?.document("season_13")?.collection("news")?.document()?.set(person)
+            }
+        }
+            ?.addOnFailureListener { exception ->
 
+            }*/
         // 투표 수 기록
         /*firestore?.collection("people")?.get()?.addOnSuccessListener { result ->
             for (document in result) {
                 var person = document.toObject(RankDTO::class.java)!!
-                firestore?.collection("season_result")?.document("season_5")?.collection("vote")?.document(person.docname!!)?.set(person)
+                firestore?.collection("season_result")?.document("season_13")?.collection("vote")?.document(person.docname!!)?.set(person)
             }
         }
             ?.addOnFailureListener { exception ->
@@ -375,172 +305,121 @@ class HallOfFameActivity : AppCompatActivity(), OnRankItemClickListener, OnCheer
         /*firestore?.collection("people_cheering")?.get()?.addOnSuccessListener { result ->
             for (document in result) {
                 var person = document.toObject(RankDTO::class.java)!!
-                firestore?.collection("season_result")?.document("season_5")?.collection("cheering")?.document(person.docname!!)?.set(person)
+                firestore?.collection("season_result")?.document("season_13")?.collection("cheering")?.document(person.docname!!)?.set(person)
             }
         }
             ?.addOnFailureListener { exception ->
 
             }*/
 
-        // 100만 이상 기록
-        /*firestore?.collection("people")?.whereGreaterThan("count", 1000000)?.get()?.addOnSuccessListener { result ->
+        /*firestore?.collection("season_result")?.document("season_5")?.collection("vote")?.document("no00033")?.collection("donationNews")?.orderBy("order", Query.Direction.ASCENDING)?.get()?.addOnSuccessListener { result ->
+            for (document in result) {
+                var news = document.toObject(DonationNewsDTO::class.java)!!
+
+                firestore?.collection("season_result")?.document("season_6")?.collection("vote")?.document("no00033")?.collection("donationNews")?.document()?.set(news) // 이찬원
+            }
+
+        }*/
+
+       /*firestore?.collection("season_result")?.document("season_12")?.collection("vote")?.document("no00035")?.collection("donationNews")?.orderBy("order", Query.Direction.ASCENDING)?.get()?.addOnSuccessListener { result ->
+            for (document in result) {
+                var news = document.toObject(DonationNewsDTO::class.java)!!
+
+                //firestore?.collection("season_result")?.document(selectedSeason)?.collection("vote")?.document("no00035")?.collection("donationNews")?.document()?.set(news) // 임영웅
+                firestore?.collection("season_result")?.document(selectedSeason)?.collection("vote")?.document("no00033")?.collection("donationNews")?.document()?.set(news) // 이찬원
+                firestore?.collection("season_result")?.document(selectedSeason)?.collection("vote")?.document("no00026")?.collection("donationNews")?.document()?.set(news) // 영탁
+                firestore?.collection("season_result")?.document(selectedSeason)?.collection("vote")?.document("no00037")?.collection("donationNews")?.document()?.set(news) // 정동원
+                firestore?.collection("season_result")?.document(selectedSeason)?.collection("vote")?.document("no00036")?.collection("donationNews")?.document()?.set(news) // 장민호
+                firestore?.collection("season_result")?.document(selectedSeason)?.collection("vote")?.document("no00012")?.collection("donationNews")?.document()?.set(news) // 김희재
+                firestore?.collection("season_result")?.document(selectedSeason)?.collection("vote")?.document("no00023")?.collection("donationNews")?.document()?.set(news) // 안성훈
+                firestore?.collection("season_result")?.document(selectedSeason)?.collection("vote")?.document("no00021")?.collection("donationNews")?.document()?.set(news) // 신성
+                //firestore?.collection("season_result")?.document(selectedSeason)?.collection("vote")?.document("no00009")?.collection("donationNews")?.document()?.set(news) // 김중연
+            }
+
+        }*/
+
+        // 전체 순위 조회 (그알세)
+        /*var index = 1
+        firestore?.collection("season_result")?.document("season_12")?.collection("vote")?.orderBy("count", Query.Direction.DESCENDING)?.get()?.addOnSuccessListener { result ->
             for (document in result) {
                 var person = document.toObject(RankDTO::class.java)!!
-                firestore?.collection("season_result")?.document("season_4")?.collection("one_million")?.document(person.docname!!)?.set(person)
+                println ("${index++}. ${person.name} : ${decimalFormat.format(person.count)}표")
             }
         }
             ?.addOnFailureListener { exception ->
 
             }*/
 
-        /*firestore?.collection("season_result")?.document("season_2")?.collection("vote")?.document("no00013")?.collection("donationNews")?.orderBy("order", Query.Direction.ASCENDING)?.get()?.addOnSuccessListener { result ->
-            for (document in result) {
-                var news = document.toObject(DonationNewsDTO::class.java)!!
-
-                firestore?.collection("season_result")?.document("season_3")?.collection("vote")?.document("no00013")?.collection("donationNews")?.document()?.set(news) // 김다현
-            }
-
-        }*/
-
-        /*firestore?.collection("season_result")?.document("season_3")?.collection("vote")?.document("no00013")?.collection("donationNews")?.orderBy("order", Query.Direction.ASCENDING)?.get()?.addOnSuccessListener { result ->
-            for (document in result) {
-                var news = document.toObject(DonationNewsDTO::class.java)!!
-
-                firestore?.collection("season_result")?.document("season_3")?.collection("vote")?.document("no00081")?.collection("donationNews")?.document()?.set(news) // 임서원
-                firestore?.collection("season_result")?.document("season_3")?.collection("vote")?.document("no00087")?.collection("donationNews")?.document()?.set(news) // 전유진
-            }
-        }*/
-
-        /*firestore?.collection("season_result")?.document("season_4")?.collection("vote")?.document("no00013")?.collection("donationNews")?.orderBy("order", Query.Direction.ASCENDING)?.get()?.addOnSuccessListener { result ->
-            for (document in result) {
-                var news = document.toObject(DonationNewsDTO::class.java)!!
-
-                firestore?.collection("season_result")?.document(selectedSeason)?.collection("vote")?.document("no00019")?.collection("donationNews")?.document()?.set(news) // 김수빈
-                firestore?.collection("season_result")?.document(selectedSeason)?.collection("vote")?.document("no00037")?.collection("donationNews")?.document()?.set(news) // 명지
-                firestore?.collection("season_result")?.document(selectedSeason)?.collection("vote")?.document("no00087")?.collection("donationNews")?.document()?.set(news) // 전유진
-                firestore?.collection("season_result")?.document(selectedSeason)?.collection("vote")?.document("no00027")?.collection("donationNews")?.document()?.set(news) // 김태연
-            }
-        }*/
+        // 사진
+        //binding.imgLeft.visibility = View.GONE
+        //binding.imgRight.visibility = View.GONE
+        if (hallOfFameType == HallOfFameType.MR_NEW)
+            binding.textOtherSeason.visibility = View.GONE
     }
 
     inner class PopupListener : PopupMenu.OnMenuItemClickListener {
         override fun onMenuItemClick(p0: MenuItem?): Boolean {
             when (p0?.itemId) {
                 R.id.Item1 ->
-                    text_other_season.text = "menu1"
+                    binding.textOtherSeason.text = "menu1"
                 R.id.Item2 ->
-                    text_other_season.text = "menu1"
+                    binding.textOtherSeason.text = "menu1"
                 R.id.Item3 ->
-                    text_other_season.text = "menu1"
+                    binding.textOtherSeason.text = "menu1"
                 R.id.Item4 ->
-                    text_other_season.text = "menu1"
+                    binding.textOtherSeason.text = "menu1"
                 R.id.Item5 ->
-                    text_other_season.text = "menu1"
+                    binding.textOtherSeason.text = "menu1"
                 R.id.Item6 ->
-                    text_other_season.text = "menu1"
+                    binding.textOtherSeason.text = "menu1"
                 R.id.Item7 ->
-                    text_other_season.text = "menu1"
+                    binding.textOtherSeason.text = "menu1"
                 R.id.Item8 ->
-                    text_other_season.text = "menu1"
+                    binding.textOtherSeason.text = "menu1"
                 R.id.Item9 ->
-                    text_other_season.text = "menu1"
+                    binding.textOtherSeason.text = "menu1"
             }
             return false
         }
 
     }
 
-    override fun onBackPressed() {
-        isFinished = true
-        showAd()
-
-        //super.onBackPressed()
-    }
-
-    fun loadData() {
-        var rank_background_img = R.drawable.spotlight_s1_main
-        var season_logo_img = R.drawable.season1_logo
-        when (selectedSeason) {
-            "season_1" -> {
-                rank_background_img = R.drawable.spotlight_s1_main
-                season_logo_img = R.drawable.season1_logo
-            }
-            "season_2" -> {
-                rank_background_img = R.drawable.spotlight_s2_main
-                season_logo_img = R.drawable.season2_logo
-            }
-            "season_3" -> {
-                rank_background_img = R.drawable.spotlight_s3_main
-                season_logo_img = R.drawable.season3_logo
-            }
-            "season_4" -> {
-                rank_background_img = R.drawable.spotlight_s4_main
-                season_logo_img = R.drawable.season4_logo
-            }
-            "season_5" -> {
-                rank_background_img = R.drawable.spotlight_s5_main
-                season_logo_img = R.drawable.season5_logo
-            }
-            "season_6" -> {
-                rank_background_img = R.drawable.spotlight_s6_main
-                season_logo_img = R.drawable.season6_logo
-            }
-            // 시즌 변경 작업
-            /*"season_7" -> {
-                rank_background_img = R.drawable.spotlight_s7_main
-                season_logo_img = R.drawable.season7_logo
-            }
-            "season_8" -> {
-                rank_background_img = R.drawable.spotlight_s8_main
-                season_logo_img = R.drawable.season8_logo
-            }
-            "season_9" -> {
-                rank_background_img = R.drawable.spotlight_s9_main
-                season_logo_img = R.drawable.season9_logo
-            }*/
+    private fun loadData() {
+        var imgBackgroundName = if (hallOfFameType == HallOfFameType.MR_NEW) "spotlight_new_s${selectedSeasonNum}_main"
+        else "spotlight_s${selectedSeasonNum}_main"
+        var imageID = resources.getIdentifier(imgBackgroundName, "drawable", packageName)
+        if (imageID > 0) {
+            Glide.with(binding.imgRankBackground.context)
+                .asBitmap()
+                .load(imageID) ///feed in path of the image
+                .optionalFitCenter()
+                .into(binding.imgRankBackground)
         }
-        Glide.with(img_rank_background.context)
-            .asBitmap()
-            .load(rank_background_img) ///feed in path of the image
-            .fitCenter()
-            .into(img_rank_background)
-        Glide.with(img_season_logo.context)
-            .asBitmap()
-            .load(season_logo_img) ///feed in path of the image
-            .fitCenter()
-            .into(img_season_logo)
 
-        peopleTop3_Vote.clear()
-        peopleOther_Vote.clear()
-        peopleOther_Donation.clear()
-        peopleTop3_Cheering.clear()
-        peopleOther_Cheering.clear()
-        /*peopleTop3_OneMillon.clear()
-        peopleOther_OneMillon.clear()
-        peopleTop3_TwoMillon.clear()
-        peopleOther_TwoMillon.clear()
-        peopleTop3_ThreeMillon.clear()
-        peopleOther_ThreeMillon.clear()
-        peopleTop3_FourMillon.clear()
-        peopleOther_FourMillon.clear()
-        peopleTop3_FiveMillon.clear()
-        peopleOther_FiveMillon.clear()
-         peopleTop3_SixMillon.clear()
-         peopleOther_SixMillon.clear()*/
+        var imgSeasonLogoName = if (hallOfFameType == HallOfFameType.MR_NEW) "new_season${selectedSeasonNum}_logo"
+        else "season${selectedSeasonNum}_logo"
+        imageID = resources.getIdentifier(imgSeasonLogoName, "drawable", packageName)
+        if (imageID > 0) {
+            Glide.with(binding.imgSeasonLogo.context)
+                .asBitmap()
+                .load(imageID) ///feed in path of the image
+                .optionalFitCenter()
+                .into(binding.imgSeasonLogo)
+        }
+
+        peopleTop3Vote.clear()
+        peopleOtherVote.clear()
+        peopleOtherDonation.clear()
+        peopleTop3Cheering.clear()
+        peopleOtherCheering.clear()
 
         loadVote()
         loadCheering()
-        /*loadVoteOver("one_million", peopleTop3_OneMillon, peopleOther_OneMillon)
-        loadVoteOver("two_million", peopleTop3_TwoMillon, peopleOther_TwoMillon)
-        loadVoteOver("three_million", peopleTop3_ThreeMillon, peopleOther_ThreeMillon)
-        loadVoteOver("four_million", peopleTop3_FourMillon, peopleOther_FourMillon)
-        loadVoteOver("five_million", peopleTop3_FiveMillon, peopleOther_FiveMillon)
-        loadVoteOver("six_million", peopleTop3_SixMillon, peopleOther_SixMillon)*/
 
         loading()
         timer(period = 100)
         {
-            if (peopleTop3_Vote.size > 0) {
+            if (peopleTop3Vote.size > 0) {
                 cancel()
                 //display()
                 runOnUiThread {
@@ -551,310 +430,202 @@ class HallOfFameActivity : AppCompatActivity(), OnRankItemClickListener, OnCheer
         }
     }
 
-    // 투표 순위 조회
-    fun loadVote() {
-        var index : Int = 1
-        firestore?.collection("season_result")?.document(selectedSeason)?.collection("vote")?.orderBy("count", Query.Direction.DESCENDING)?.limit(10)?.get()?.addOnSuccessListener { result ->
-            index = 1
-            for (document in result) {
-                var person = document.toObject(RankDTO::class.java)!!
-                var person2 = document.toObject(RankDTO::class.java)!!
-                if (index < 4) { // Top 3 저장
-                    peopleTop3_Vote.add(person)
-                }
-                else { // 4위 부터 저장
-                    if (index <= 7) // Top 7 저장
-                        peopleOther_Vote.add(person)
-                    if (person2.count!! >= 1000000) {
-                        person2.subTitle = "${decimalFormat.format(person2.count?.div(1000000)?.times(10))}만원 기부"
-                        peopleOther_Donation.add(person2)
+    private fun getDocName() : String = when (hallOfFameType) {
+        HallOfFameType.MR_NEW -> "newSeason_${String.format("%04d",selectedSeasonNum)}"
+        HallOfFameType.MR_OLD -> "season_$selectedSeasonNum"
+        HallOfFameType.MR2 -> "season_${selectedSeasonNum}_mr2"
+        HallOfFameType.FIRE -> "season_${selectedSeasonNum}_fire"
+    }
+
+    private fun observeVote() {
+        firebaseViewModel.hallOfFameVote.observe(this) {
+            if (firebaseViewModel.hallOfFameVote.value != null) {
+                peopleTop3Vote = firebaseViewModel.hallOfFameVote.value!!
+                peopleOtherVote = firebaseViewModel.hallOfFameVote.value!!.clone() as ArrayList<RankDTO>
+                peopleOtherVote.subList(7, peopleOtherVote.size).clear()
+                peopleOtherVote.subList(0, 3).clear()
+
+                for (person in firebaseViewModel.hallOfFameVote.value!!) {
+                    if (person.count!! >= 1000000) {
+                        var addPerson = person.copy()
+                        addPerson.subTitle = "${decimalFormat.format(addPerson.count?.div(1000000)?.times(10))}만원 기부"
+                        peopleOtherDonation.add(addPerson)
                     }
                 }
-                index++
-            }
-        }
-            ?.addOnFailureListener { exception ->
+                peopleOtherDonation.subList(0, 3).clear()
 
             }
+        }
+    }
+
+    private fun observeCheering() {
+        firebaseViewModel.hallOfFameCheering.observe(this) {
+            if (firebaseViewModel.hallOfFameCheering.value != null) {
+                peopleTop3Cheering = firebaseViewModel.hallOfFameCheering.value!!
+                peopleOtherCheering = firebaseViewModel.hallOfFameCheering.value!!.clone() as ArrayList<RankDTO>
+                peopleOtherCheering.subList(7, peopleOtherCheering.size).clear()
+            }
+        }
+    }
+
+    // 투표 순위 조회
+    private fun loadVote() {
+        firebaseViewModel.getHallOfFameVote(getDocName())
     }
 
     // 투표 순위 조회
-    fun loadCheering() {
-        var index : Int = 1
-        firestore?.collection("season_result")?.document(selectedSeason)?.collection("cheering")?.orderBy("cheeringCountTotal", Query.Direction.DESCENDING)?.limit(7)?.get()?.addOnSuccessListener { result ->
-            index = 1
-            for (document in result) {
-                var person = document.toObject(RankDTO::class.java)!!
-                if (index < 4) { // Top 3 저장
-                    peopleTop3_Cheering.add(person)
-                }
-
-                var board = BoardDTO()
-                board.image = person.image
-                board.title = "${index}위 ${person.name}"
-                board.content = "합계 점수 : ${decimalFormat.format(person.cheeringCountTotal)}"
-                board.name = "응원글 : ${decimalFormat.format(person.cheeringCount)}"
-                board.likeCount = person.likeCount
-                board.dislikeCount = person.dislikeCount
-                peopleOther_Cheering.add(board)
-
-                index++
-            }
-        }
-            ?.addOnFailureListener { exception ->
-
-            }
+    private fun loadCheering() {
+        firebaseViewModel.getHallOfFameCheering(getDocName())
     }
 
-    // 백만표 이상 조회
-    fun loadVoteOver(collactionName : String, peopleTop3 : ArrayList<RankDTO>, peopleOther : ArrayList<RankDTO>) {
-        var index : Int = 1
-        println("백만 조회")
-        firestore?.collection("season_result")?.document(selectedSeason)?.collection(collactionName)?.orderBy("updateDate", Query.Direction.ASCENDING)?.get()?.addOnSuccessListener { result ->
-            peopleTop3.clear()
-            peopleOther.clear()
-
-            println("조회 성공")
-            index = 1
-            for (document in result) {
-                var person = document.toObject(RankDTO::class.java)!!
-
-                if (index < 4) { // Top 3 저장
-                    peopleTop3.add(person)
-                }
-                else { // 4위 부터 저장
-                    peopleOther.add(person)
-                }
-                index++
-            }
-        }
-            ?.addOnFailureListener { exception ->
-
-            }
-    }
-
-    fun ShowVoteTop3() {
+    private fun showVoteTop3() {
         var imageID : Int = 0
 
-        if (peopleTop3_Vote.size > 0 && profile_rank_no1 != null) {
-            profile_rank_no1.visibility = View.VISIBLE
-            imageID = resources?.getIdentifier(peopleTop3_Vote[0].image, "drawable", packageName)!!
-            //profile_rank_no1.img_profile.setImageResource(imageID)
-            Glide.with(profile_rank_no1.img_profile.context)
+        if (peopleTop3Vote.size > 0 && binding.profileRankNo1 != null) {
+            binding.profileRankNo1.root.visibility = View.VISIBLE
+            imageID = resources?.getIdentifier(peopleTop3Vote[0].image, "drawable", packageName)!!
+            //binding.profileRankNo1.imgProfile.setImageResource(imageID)
+            Glide.with(binding.profileRankNo1.imgProfile.context)
                 .asBitmap()
                 .load(imageID) ///feed in path of the image
-                .fitCenter()
-                .into(profile_rank_no1.img_profile)
-            profile_rank_no1.text_name.text = peopleTop3_Vote[0].name
-            profile_rank_no1.text_count.text = "${decimalFormat.format(peopleTop3_Vote[0].count)}표"
+                .optionalFitCenter()
+                .into(binding.profileRankNo1.imgProfile)
+            binding.profileRankNo1.textName.text = peopleTop3Vote[0].name
+            binding.profileRankNo1.textCount.text = "${decimalFormat.format(peopleTop3Vote[0].count!!)}"
         }
-        if (peopleTop3_Vote.size > 1 && profile_rank_no2 != null) {
-            profile_rank_no2.visibility = View.VISIBLE
-            imageID = resources?.getIdentifier(peopleTop3_Vote[1].image, "drawable", packageName)!!
-            //profile_rank_no2.img_profile.setImageResource(imageID)
-            Glide.with(profile_rank_no2.img_profile.context)
+        if (peopleTop3Vote.size > 1 && binding.profileRankNo2 != null) {
+            binding.profileRankNo2.root.visibility = View.VISIBLE
+            imageID = resources?.getIdentifier(peopleTop3Vote[1].image, "drawable", packageName)!!
+            //binding.profileRankNo2.imgProfile.setImageResource(imageID)
+            Glide.with(binding.profileRankNo2.imgProfile.context)
                 .asBitmap()
                 .load(imageID) ///feed in path of the image
-                .fitCenter()
-                .into(profile_rank_no2.img_profile)
-            profile_rank_no2.text_name.text = peopleTop3_Vote[1].name
-            profile_rank_no2.text_count.text = "${decimalFormat.format(peopleTop3_Vote[1].count)}표"
+                .optionalFitCenter()
+                .into(binding.profileRankNo2.imgProfile)
+            binding.profileRankNo2.textName.text = peopleTop3Vote[1].name
+            binding.profileRankNo2.textCount.text = "${decimalFormat.format(peopleTop3Vote[1].count!!)}"
         }
-        if (peopleTop3_Vote.size > 2 && profile_rank_no3 != null) {
-            profile_rank_no3.visibility = View.VISIBLE
-            imageID = resources?.getIdentifier(peopleTop3_Vote[2].image, "drawable", packageName)!!
-            //profile_rank_no3.img_profile.setImageResource(imageID)
-            Glide.with(profile_rank_no3.img_profile.context)
+        if (peopleTop3Vote.size > 2 && binding.profileRankNo3 != null) {
+            binding.profileRankNo3.root.visibility = View.VISIBLE
+            imageID = resources?.getIdentifier(peopleTop3Vote[2].image, "drawable", packageName)!!
+            //binding.profileRankNo3.imgProfile.setImageResource(imageID)
+            Glide.with(binding.profileRankNo3.imgProfile.context)
                 .asBitmap()
                 .load(imageID) ///feed in path of the image
-                .fitCenter()
-                .into(profile_rank_no3.img_profile)
-            profile_rank_no3.text_name.text = peopleTop3_Vote[2].name
-            profile_rank_no3.text_count.text = "${decimalFormat.format(peopleTop3_Vote[2].count)}표"
+                .optionalFitCenter()
+                .into(binding.profileRankNo3.imgProfile)
+            binding.profileRankNo3.textName.text = peopleTop3Vote[2].name
+            binding.profileRankNo3.textCount.text = "${decimalFormat.format(peopleTop3Vote[2].count!!)}"
         }
     }
 
-    fun ShowCheeringTop3() {
+    private fun ShowCheeringTop3() {
         var imageID : Int = 0
 
-        if (peopleTop3_Cheering.size > 0 && profile_rank_no1 != null) {
-            profile_rank_no1.visibility = View.VISIBLE
-            imageID = resources?.getIdentifier(peopleTop3_Cheering[0].image, "drawable", packageName)!!
-            //profile_rank_no1.img_profile.setImageResource(imageID)
-            Glide.with(profile_rank_no1.img_profile.context)
+        if (peopleTop3Cheering.size > 0 && binding.profileRankNo1 != null) {
+            binding.profileRankNo1.root.visibility = View.VISIBLE
+            imageID = resources?.getIdentifier(peopleTop3Cheering[0].image, "drawable", packageName)!!
+            //binding.profileRankNo1.imgProfile.setImageResource(imageID)
+            Glide.with(binding.profileRankNo1.imgProfile.context)
                 .asBitmap()
                 .load(imageID) ///feed in path of the image
-                .fitCenter()
-                .into(profile_rank_no1.img_profile)
-            profile_rank_no1.text_name.text = peopleTop3_Cheering[0].name
-            profile_rank_no1.text_count.text = "${decimalFormat.format(peopleTop3_Cheering[0].cheeringCountTotal)}점"
+                .optionalFitCenter()
+                .into(binding.profileRankNo1.imgProfile)
+            binding.profileRankNo1.textName.text = peopleTop3Cheering[0].name
+            binding.profileRankNo1.textCount.text = "${decimalFormat.format(peopleTop3Cheering[0].cheeringCountTotal)}점"
         }
-        if (peopleTop3_Cheering.size > 1 && profile_rank_no2 != null) {
-            profile_rank_no2.visibility = View.VISIBLE
-            imageID = resources?.getIdentifier(peopleTop3_Cheering[1].image, "drawable", packageName)!!
-            //profile_rank_no2.img_profile.setImageResource(imageID)
-            Glide.with(profile_rank_no2.img_profile.context)
+        if (peopleTop3Cheering.size > 1 && binding.profileRankNo2 != null) {
+            binding.profileRankNo2.root.visibility = View.VISIBLE
+            imageID = resources?.getIdentifier(peopleTop3Cheering[1].image, "drawable", packageName)!!
+            //binding.profileRankNo2.imgProfile.setImageResource(imageID)
+            Glide.with(binding.profileRankNo2.imgProfile.context)
                 .asBitmap()
                 .load(imageID) ///feed in path of the image
-                .fitCenter()
-                .into(profile_rank_no2.img_profile)
-            profile_rank_no2.text_name.text = peopleTop3_Cheering[1].name
-            profile_rank_no2.text_count.text = "${decimalFormat.format(peopleTop3_Cheering[1].cheeringCountTotal)}점"
+                .optionalFitCenter()
+                .into(binding.profileRankNo2.imgProfile)
+            binding.profileRankNo2.textName.text = peopleTop3Cheering[1].name
+            binding.profileRankNo2.textCount.text = "${decimalFormat.format(peopleTop3Cheering[1].cheeringCountTotal)}점"
         }
-        if (peopleTop3_Cheering.size > 2 && profile_rank_no3 != null) {
-            profile_rank_no3.visibility = View.VISIBLE
-            imageID = resources?.getIdentifier(peopleTop3_Cheering[2].image, "drawable", packageName)!!
-            //profile_rank_no3.img_profile.setImageResource(imageID)
-            Glide.with(profile_rank_no3.img_profile.context)
+        if (peopleTop3Cheering.size > 2 && binding.profileRankNo3 != null) {
+            binding.profileRankNo3.root.visibility = View.VISIBLE
+            imageID = resources?.getIdentifier(peopleTop3Cheering[2].image, "drawable", packageName)!!
+            //binding.profileRankNo3.imgProfile.setImageResource(imageID)
+            Glide.with(binding.profileRankNo3.imgProfile.context)
                 .asBitmap()
                 .load(imageID) ///feed in path of the image
-                .fitCenter()
-                .into(profile_rank_no3.img_profile)
-            profile_rank_no3.text_name.text = peopleTop3_Cheering[2].name
-            profile_rank_no3.text_count.text = "${decimalFormat.format(peopleTop3_Cheering[2].cheeringCountTotal)}점"
+                .optionalFitCenter()
+                .into(binding.profileRankNo3.imgProfile)
+            binding.profileRankNo3.textName.text = peopleTop3Cheering[2].name
+            binding.profileRankNo3.textCount.text = "${decimalFormat.format(peopleTop3Cheering[2].cheeringCountTotal)}점"
         }
     }
 
-    fun ShowMillionTop3(peopleTop3 : ArrayList<RankDTO>) {
+    private fun ShowDonation() {
         var imageID : Int = 0
 
-        if (peopleTop3.size > 0 && profile_rank_no1 != null) {
-            profile_rank_no1.visibility = View.VISIBLE
-            imageID = resources?.getIdentifier(peopleTop3[0].image, "drawable", packageName)!!
-            //profile_rank_no1.img_profile.setImageResource(imageID)
-            Glide.with(profile_rank_no1.img_profile.context)
+        if (peopleTop3Vote.size > 0 && binding.profileRankNo1 != null) {
+            binding.profileRankNo1.root.visibility = View.VISIBLE
+            imageID = resources?.getIdentifier(peopleTop3Vote[0].image, "drawable", packageName)!!
+            //binding.profileRankNo1.imgProfile.setImageResource(imageID)
+            Glide.with(binding.profileRankNo1.imgProfile.context)
                 .asBitmap()
                 .load(imageID) ///feed in path of the image
-                .fitCenter()
-                .into(profile_rank_no1.img_profile)
-            profile_rank_no1.text_name.text = peopleTop3[0].name
-            if (peopleTop3[0].updateDate != null)
-                profile_rank_no1.text_count.text = "${SimpleDateFormat("yyyy-MM-dd").format(peopleTop3[0].updateDate)} 달성"
+                .optionalFitCenter()
+                .into(binding.profileRankNo1.imgProfile)
+            binding.profileRankNo1.textName.text = peopleTop3Vote[0].name
+            binding.profileRankNo1.textCount.text = "${decimalFormat.format(peopleTop3Vote[0].count?.div(1000000)?.times(10)?.plus(30))}만원 기부"
         }
-        if (peopleTop3.size > 1 && profile_rank_no2 != null) {
-            profile_rank_no2.visibility = View.VISIBLE
-            imageID = resources?.getIdentifier(peopleTop3[1].image, "drawable", packageName)!!
-            //profile_rank_no2.img_profile.setImageResource(imageID)
-            Glide.with(profile_rank_no2.img_profile.context)
+        if (peopleTop3Vote.size > 1 && binding.profileRankNo2 != null) {
+            binding.profileRankNo2.root.visibility = View.VISIBLE
+            imageID = resources?.getIdentifier(peopleTop3Vote[1].image, "drawable", packageName)!!
+            //binding.profileRankNo2.imgProfile.setImageResource(imageID)
+            Glide.with(binding.profileRankNo2.imgProfile.context)
                 .asBitmap()
                 .load(imageID) ///feed in path of the image
-                .fitCenter()
-                .into(profile_rank_no2.img_profile)
-            profile_rank_no2.text_name.text = peopleTop3[1].name
-            if (peopleTop3[1].updateDate != null)
-                profile_rank_no2.text_count.text = "${SimpleDateFormat("yyyy-MM-dd").format(peopleTop3[1].updateDate)} 달성"
+                .optionalFitCenter()
+                .into(binding.profileRankNo2.imgProfile)
+            binding.profileRankNo2.textName.text = peopleTop3Vote[1].name
+            binding.profileRankNo2.textCount.text = "${decimalFormat.format(peopleTop3Vote[1].count?.div(1000000)?.times(10)?.plus(20))}만원 기부"
         }
-        if (peopleTop3.size > 2 && profile_rank_no3 != null) {
-            profile_rank_no3.visibility = View.VISIBLE
-            imageID = resources?.getIdentifier(peopleTop3[2].image, "drawable", packageName)!!
-            //profile_rank_no3.img_profile.setImageResource(imageID)
-            Glide.with(profile_rank_no3.img_profile.context)
+        if (peopleTop3Vote.size > 2 && binding.profileRankNo3 != null) {
+            binding.profileRankNo3.root.visibility = View.VISIBLE
+            imageID = resources?.getIdentifier(peopleTop3Vote[2].image, "drawable", packageName)!!
+            //binding.profileRankNo3.imgProfile.setImageResource(imageID)
+            Glide.with(binding.profileRankNo3.imgProfile.context)
                 .asBitmap()
                 .load(imageID) ///feed in path of the image
-                .fitCenter()
-                .into(profile_rank_no3.img_profile)
-            profile_rank_no3.text_name.text = peopleTop3[2].name
-            if (peopleTop3[2].updateDate != null)
-                profile_rank_no3.text_count.text = "${SimpleDateFormat("yyyy-MM-dd").format(peopleTop3[2].updateDate)} 달성"
+                .optionalFitCenter()
+                .into(binding.profileRankNo3.imgProfile)
+            binding.profileRankNo3.textName.text = peopleTop3Vote[2].name
+            binding.profileRankNo3.textCount.text = "${decimalFormat.format(peopleTop3Vote[2].count?.div(1000000)?.times(10)?.plus(10))}만원 기부"
         }
     }
 
-    fun ShowDonation() {
-        var imageID : Int = 0
-
-        if (peopleTop3_Vote.size > 0 && profile_rank_no1 != null) {
-            profile_rank_no1.visibility = View.VISIBLE
-            imageID = resources?.getIdentifier(peopleTop3_Vote[0].image, "drawable", packageName)!!
-            //profile_rank_no1.img_profile.setImageResource(imageID)
-            Glide.with(profile_rank_no1.img_profile.context)
-                .asBitmap()
-                .load(imageID) ///feed in path of the image
-                .fitCenter()
-                .into(profile_rank_no1.img_profile)
-            profile_rank_no1.text_name.text = peopleTop3_Vote[0].name
-            profile_rank_no1.text_count.text = "${decimalFormat.format(peopleTop3_Vote[0].count?.div(1000000)?.times(10)?.plus(30))}만원 기부"
-        }
-        if (peopleTop3_Vote.size > 1 && profile_rank_no2 != null) {
-            profile_rank_no2.visibility = View.VISIBLE
-            imageID = resources?.getIdentifier(peopleTop3_Vote[1].image, "drawable", packageName)!!
-            //profile_rank_no2.img_profile.setImageResource(imageID)
-            Glide.with(profile_rank_no2.img_profile.context)
-                .asBitmap()
-                .load(imageID) ///feed in path of the image
-                .fitCenter()
-                .into(profile_rank_no2.img_profile)
-            profile_rank_no2.text_name.text = peopleTop3_Vote[1].name
-            profile_rank_no2.text_count.text = "${decimalFormat.format(peopleTop3_Vote[1].count?.div(1000000)?.times(10)?.plus(20))}만원 기부"
-        }
-        if (peopleTop3_Vote.size > 2 && profile_rank_no3 != null) {
-            profile_rank_no3.visibility = View.VISIBLE
-            imageID = resources?.getIdentifier(peopleTop3_Vote[2].image, "drawable", packageName)!!
-            //profile_rank_no3.img_profile.setImageResource(imageID)
-            Glide.with(profile_rank_no3.img_profile.context)
-                .asBitmap()
-                .load(imageID) ///feed in path of the image
-                .fitCenter()
-                .into(profile_rank_no3.img_profile)
-            profile_rank_no3.text_name.text = peopleTop3_Vote[2].name
-            profile_rank_no3.text_count.text = "${decimalFormat.format(peopleTop3_Vote[2].count?.div(1000000)?.times(10)?.plus(10))}만원 기부"
-        }
-    }
-
-    fun display() {
-        profile_rank_no1.visibility = View.GONE
-        profile_rank_no2.visibility = View.GONE
-        profile_rank_no3.visibility = View.GONE
+    private fun display() {
+        binding.profileRankNo1.root.visibility = View.GONE
+        binding.profileRankNo2.root.visibility = View.GONE
+        binding.profileRankNo3.root.visibility = View.GONE
 
         when(displayTypes[displayTypeIndex]) {
-            DISPLAY_TYPE.VOTE -> {
-                button_title.text = "- 투표 순위 Top 7 -"
-                ShowVoteTop3()
-                recyclerView.adapter = RecyclerViewAdapterRank(peopleOther_Vote, this)
+            DisplayType.VOTE -> {
+                binding.buttonTitle.text = "투표 순위 Top 7"
+                showVoteTop3()
+                recyclerView.adapter = RecyclerViewAdapterRank(peopleOtherVote, this)
             }
-            DISPLAY_TYPE.CHEERING -> {
-                button_title.text = "- 응원 순위 Top 7 -"
+            DisplayType.CHEERING -> {
+                binding.buttonTitle.text = "응원 순위 Top 7"
                 ShowCheeringTop3()
-                recyclerView.adapter = RecyclerViewAdapterCheering(peopleOther_Cheering, this)
+                recyclerView.adapter = RecyclerViewAdapterCheeringTotal(peopleOtherCheering)
             }
-            /*DISPLAY_TYPE.ONE_MILLION -> {
-                button_title.text = "- 100만표 달성 가수 -"
-                ShowMillionTop3(peopleTop3_OneMillon)
-                recyclerView.adapter = RecyclerViewAdapterRank(peopleOther_OneMillon, this)
-            }
-            DISPLAY_TYPE.TWO_MILLION -> {
-                button_title.text = "- 200만표 달성 가수 -"
-                ShowMillionTop3(peopleTop3_TwoMillon)
-                recyclerView.adapter = RecyclerViewAdapterRank(peopleOther_TwoMillon, this)
-            }
-            DISPLAY_TYPE.THREE_MILLION -> {
-                button_title.text = "- 300만표 달성 가수 -"
-                ShowMillionTop3(peopleTop3_ThreeMillon)
-                recyclerView.adapter = RecyclerViewAdapterRank(peopleOther_ThreeMillon, this)
-            }
-            DISPLAY_TYPE.FOUR_MILLION -> {
-                button_title.text = "- 400만표 달성 가수 -"
-                ShowMillionTop3(peopleTop3_FourMillon)
-                recyclerView.adapter = RecyclerViewAdapterRank(peopleOther_FourMillon, this)
-            }
-            DISPLAY_TYPE.FIVE_MILLION -> {
-                button_title.text = "- 500만표 달성 가수 -"
-                ShowMillionTop3(peopleTop3_FiveMillon)
-                recyclerView.adapter = RecyclerViewAdapterRank(peopleOther_FiveMillon, this)
-            }
-            DISPLAY_TYPE.SIX_MILLION -> {
-                button_title.text = "- 600만표 달성 가수 -"
-                ShowMillionTop3(peopleTop3_SixMillon)
-                recyclerView.adapter = RecyclerViewAdapterRank(peopleOther_SixMillon, this)
-            }*/
-            DISPLAY_TYPE.DONATION -> {
-                button_title.text = "- ♡ 기부 내역 ♡ -"
+            DisplayType.DONATION -> {
+                binding. buttonTitle.text = "♡ 기부 내역 ♡"
                 ShowDonation()
-                recyclerView.adapter = RecyclerViewAdapterRank(peopleOther_Donation, this)
+                recyclerView.adapter = RecyclerViewAdapterRank(peopleOtherDonation, this)
             }
         }
     }
 
-    fun loading() {
+    private fun loading() {
         android.os.Handler().postDelayed({
             if (loadingDialog == null) {
                 loadingDialog = LoadingDialog(this)
@@ -865,263 +636,44 @@ class HallOfFameActivity : AppCompatActivity(), OnRankItemClickListener, OnCheer
         }, 0)
     }
 
-    fun loadingEnd() {
+    private fun loadingEnd() {
         android.os.Handler().postDelayed({
             loadingDialog?.dismiss()
         }, 400)
-    }
-
-    fun showAd() {
-        // 광고 종류 획득
-        var firestore = FirebaseFirestore.getInstance()
-        firestore?.collection("preferences")?.document("ad_policy")?.get()?.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                var ad_interstitial = task.result!!["ad_interstitial"]
-                callInterstitial(ad_interstitial as String)
-            }
-        }
-    }
-
-    fun callInterstitial(interstitial : String) {
-        when (interstitial) {
-            getString(R.string.adtype_admob) -> {
-                interstitialAdmob(true)
-            }
-            getString(R.string.adtype_cauly) -> {
-                interstitialCauly(true)
-            }
-            else -> {
-
-            }
-        }
-    }
-
-    fun interstitialAdmob(isFirst : Boolean) {
-        // 애드몹 - 전면
-        var InterstitialAd = InterstitialAd(this)
-        InterstitialAd.adUnitId = getString(R.string.admob_Interstitial_ad_unit_id) // 관리자모드
-        InterstitialAd.loadAd(AdRequest.Builder().build())
-
-        InterstitialAd.adListener = object : AdListener() {
-            override fun onAdLoaded() {
-                if (InterstitialAd.isLoaded) {
-                    InterstitialAd.show()
-                } else {
-                    // 광고 호출 실패
-                    if (isFirst) {
-                        interstitialCauly(false)
-                    }
-                }
-            }
-
-            override fun onAdFailedToLoad(errorCode: Int) {
-                // Code to be executed when an ad request fails.
-                if (isFirst) {
-                    interstitialCauly(false)
-                } else {
-                    if (isFinished)
-                        finish()
-                }
-            }
-
-            override fun onAdOpened() {
-                // Code to be executed when the ad is displayed.
-            }
-
-            override fun onAdClicked() {
-                // Code to be executed when the user clicks on an ad.
-            }
-
-            override fun onAdLeftApplication() {
-                // Code to be executed when the user has left the app.
-            }
-
-            override fun onAdClosed() {
-                if (isFinished)
-                    finish()
-            }
-        }
-    }
-
-    fun interstitialCauly(isFirst : Boolean) {
-        var adInfo: CaulyAdInfo
-        adInfo = CaulyAdInfoBuilder("avhXxFUQ").build()
-        var interstial = CaulyInterstitialAd()
-        interstial.setAdInfo(adInfo)
-
-        val adCallback = object : CaulyInterstitialAdListener {
-            override fun onReceiveInterstitialAd(p0: CaulyInterstitialAd?, p1: Boolean) {
-                p0?.show()
-            }
-
-            override fun onFailedToReceiveInterstitialAd(p0: CaulyInterstitialAd?, p1: Int, p2: String?) {
-                if (isFirst) {
-                    interstitialAdmob(false)
-                } else {
-                    if (isFinished)
-                        finish()
-                }
-            }
-
-            override fun onClosedInterstitialAd(p0: CaulyInterstitialAd?) {
-                if (isFinished)
-                    finish()
-            }
-
-            override fun onLeaveInterstitialAd(p0: CaulyInterstitialAd?) {
-
-            }
-
-        }
-
-        interstial.setInterstialAdListener(adCallback)
-        interstial.requestInterstitialAd(this)
     }
 
     override fun onItemClick(item: BoardDTO, position: Int) {
 
     }
 
-    override fun onItemClick_like(item: BoardDTO, like: TextView) {
+    override fun onItemClickLike(item: BoardDTO, like: TextView) {
 
-    }
-
-    override fun onItemClick_dislike(item: BoardDTO, dislike: TextView) {
-
-    }
-
-    fun InitAd() {
-
-        // 애드몹 - 배너
-        MobileAds.initialize(this, getString(R.string.admob_app_id))
-        var adRequest = AdRequest.Builder().build()
-        mAdView.loadAd(adRequest)
-
-        // 광고 종류 획득
-        firestore?.collection("preferences")?.document("ad_policy")?.get()?.addOnCompleteListener { task ->
-            if(task.isSuccessful){
-                adType = task.result!!["ad_banner2"].toString() // 관리자모드
-
-                adviewVisible()
-            }
-        }
-    }
-
-    fun adviewVisible() {
-        when(adType) {
-            getString(R.string.adtype_admob) -> {
-                // 애드몹 활성
-                mAdView.setVisible(true)
-
-                // 나머지 비활성
-                mAdViewCauly.setVisible(false)
-                adView_kakao.setVisible(false)
-            }
-            getString(R.string.adtype_cauly) -> {
-                // 카울리 활성
-                mAdViewCauly.setVisible(true)
-
-                // 나머지 비활성
-                mAdView.setVisible(false)
-                adView_kakao.setVisible(false)
-            }
-            getString(R.string.adtype_adfit) -> {
-                // 애드핏 활성
-                adView_kakao.setVisible(true)
-
-                val adView_kakao = adView_kakao!!  // 배너 광고 뷰
-                adView_kakao.setClientId("DAN-r8oaHTGIRZIZzKuH")  // 할당 받은 광고 단위(clientId) 설정
-                adView_kakao.setAdListener(object : com.kakao.adfit.ads.AdListener {  // 광고 수신 리스너 설정
-
-                    override fun onAdLoaded() {
-                        //toast("Banner is loaded")
-                    }
-
-                    override fun onAdFailed(errorCode: Int) {
-                        //toast("Failed to load banner :: errorCode = $errorCode")
-                    }
-
-                    override fun onAdClicked() {
-                        //toast("Banner is clicked")
-                    }
-
-                })
-
-                // lifecycle 사용 가능한 경우
-                // 참조 :: https://developer.android.com/topic/libraries/architecture/lifecycle
-                // 사용 불가능한 경우는 BannerJava320x50Activity 참조
-                lifecycle.addObserver(object : LifecycleObserver {
-
-                    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-                    fun onResume() {
-                        adView_kakao.resume()
-                    }
-
-                    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-                    fun onPause() {
-                        adView_kakao.pause()
-                    }
-
-                    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-                    fun onDestroy() {
-                        adView_kakao.destroy()
-                    }
-
-                })
-
-                adView_kakao.loadAd()  // 광고 요청
-
-                // 나머지 비활성
-                mAdView.setVisible(false)
-                mAdViewCauly.setVisible(false)
-            }
-            else -> {
-                // 모두 비활성
-                layout_adview.visibility  = View.GONE
-            }
-        }
-    }
-
-    fun View.setVisible(visible: Boolean) {
-        visibility = if (visible) {
-            View.VISIBLE
-        } else {
-            View.GONE
-        }
     }
 
     override fun onItemClick(item: RankDTO, position: Int) {
+        println("기부내역 클릭 ${displayTypes[displayTypeIndex]}, $displayTypeIndex")
         when(displayTypes[displayTypeIndex]) {
-            DISPLAY_TYPE.DONATION -> {
+            DisplayType.DONATION, DisplayType.VOTE -> {
                 callDonationCertificateDialog(item, position.plus(4))
             }
         }
     }
 
-    fun callDonationCertificateDialog(item: RankDTO, rank: Int) {
-        var donationNewsDTO : ArrayList<DonationNewsDTO> = arrayListOf()
-        firestore?.collection("season_result")?.document(selectedSeason)?.collection("vote")?.document(item.docname.toString())?.collection("donationNews")?.orderBy("order", Query.Direction.ASCENDING)?.get()?.addOnSuccessListener { result ->
-            for (document in result) {
-                var news = document.toObject(DonationNewsDTO::class.java)!!
-                donationNewsDTO.add(news)
-
-                println("기부내역 $news")
-            }
-
-            val dialog = DonationCertificateDialog(this, item, rank, donationNewsDTO)
-            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-            dialog.setCanceledOnTouchOutside(false)
-            dialog.show()
-            // Dialog 사이즈 조절 하기
-            var params = dialog.window?.attributes!!
-            params.width = WindowManager.LayoutParams.MATCH_PARENT
-            params.height = WindowManager.LayoutParams.MATCH_PARENT
-            dialog.window?.attributes = params
-            dialog.button_cancel.setOnClickListener { // No
-                dialog.dismiss()
-            }
+    private fun callDonationCertificateDialog(item: RankDTO, rank: Int) {
+        firebaseViewModel.getDonationNews(getDocName(), item.docname.toString()) { donationNews ->
+            var intent = Intent(this, DonationCertificateActivity::class.java)
+            intent.putParcelableArrayListExtra("donationNews", donationNews)
+            intent.putExtra("item", item)
+            intent.putExtra("rank", rank)
+            intent.putExtra("hallOfFameType", hallOfFameType)
+            startActivity(intent)
         }
+    }
 
-
+    private fun formatNumber(value: Int): String {
+        return when {
+            value >= 1E3 -> "${decimalFormat.format((value.toFloat() / 1E3).toInt())}K"
+            else -> NumberFormat.getInstance().format(value)
+        }
     }
 }

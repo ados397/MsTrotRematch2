@@ -1,248 +1,83 @@
 package com.ados.mstrotrematch2.dialog
 
 
-import android.app.Activity
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
-import com.ados.mstrotrematch2.DatabaseHelper
 import com.ados.mstrotrematch2.R
-import com.ados.mstrotrematch2.model.BoardDTO
-import com.fsn.cauly.CaulyAdInfo
-import com.fsn.cauly.CaulyAdInfoBuilder
-import com.fsn.cauly.CaulyInterstitialAd
-import com.fsn.cauly.CaulyInterstitialAdListener
-import com.google.android.gms.ads.AdListener
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.InterstitialAd
-import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.android.synthetic.main.report_dialog.*
+import com.ados.mstrotrematch2.databinding.ReportDialogBinding
+import com.ados.mstrotrematch2.model.ReportDTO
+import java.text.DecimalFormat
 import java.util.*
 
-class ReportDialog(context: Context, val item: BoardDTO, val parentActivity: Activity) : Dialog(context), View.OnClickListener {
+class ReportDialog(context: Context) : Dialog(context), View.OnClickListener {
 
-    //var firestore : FirebaseFirestore? = null
+    var decimalFormat: DecimalFormat = DecimalFormat("###,###")
+
+    lateinit var binding: ReportDialogBinding
+
     private val layout = R.layout.report_dialog
-    private var adminString = ""
-    var dbHandler : DatabaseHelper? = null
-    var isReport = false
+
+    var reportDTO: ReportDTO? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(layout)
+        binding = ReportDialogBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        //firestore = FirebaseFirestore.getInstance()
-        dbHandler = DatabaseHelper(context)
+        //window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
-        edit_etc.visibility = View.GONE
-        layout_admin.visibility = View.GONE
+        binding.buttonReportCancel.setOnClickListener {
+            dismiss()
+        }
 
-        button_report.setOnClickListener {
-            when (radio_group.checkedRadioButtonId){
-                R.id.radio_1 -> item.report = "욕설 및 불쾌한 내용"
-                R.id.radio_2 -> item.report = "다른 가수 비난"
-                R.id.radio_3 -> item.report = "음란하거나 선정적 내용"
-                R.id.radio_4 -> item.report = "관련 없는 광고성 내용"
-                R.id.radio_etc -> item.report = edit_etc.text.toString()
+        binding.buttonReportOk.setOnClickListener {
+            when (binding.radioGroup.checkedRadioButtonId){
+                R.id.radio_1 -> reportDTO?.reason = "스팸홍보/도배글입니다."
+                R.id.radio_2 -> reportDTO?.reason = "음란물입니다."
+                R.id.radio_3 -> reportDTO?.reason = "불법정보를 포함하고 있습니다."
+                R.id.radio_4 -> reportDTO?.reason = "청소년에게 유해한 내용입니다."
+                R.id.radio_5 -> reportDTO?.reason = "욕설/생명경시/혐오/차별적 표현입니다."
+                R.id.radio_6 -> reportDTO?.reason = "개인정보 노출 게시물입니다."
+                R.id.radio_7 -> reportDTO?.reason = "불쾌한 표현이 있습니다."
             }
 
-            if (item.report.isNullOrEmpty()) {
-                Toast.makeText(context,"신고 내용을 선택 해 주세요.", Toast.LENGTH_SHORT).show()
+            if (reportDTO?.reason.isNullOrEmpty()) {
+                Toast.makeText(context, "신고 사유를 선택하지 않았습니다.", Toast.LENGTH_SHORT).show()
             } else {
-                val alphabat = arrayOf("a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z")
-                val rand_word = alphabat.get(Random().nextInt(26))
-
-                var docname = "$rand_word${System.currentTimeMillis()}"
-                item.time = Date()
-                var firestore = FirebaseFirestore.getInstance()
-                var tsDoc = firestore.collection("cheeringboard_report")?.document(docname)
-                firestore?.runTransaction { transaction ->
-                    transaction.set(tsDoc, item)
-                }
-
-                Toast.makeText(context,"신고가 완료되었습니다.", Toast.LENGTH_SHORT).show()
-
-                isReport = true
-                if (radio_cheer.isChecked) { // 응원글 신고
-                    if (dbHandler?.getblock(item.docname.toString()) == false) {
-                        dbHandler?.updateBlock(item.docname.toString(), 1)
-                        //Toast.makeText(context,"응원글 차단", Toast.LENGTH_SHORT).show()
-                    } else {
-                        dbHandler?.updateBlock(item.docname.toString(), 0)
-                        //Toast.makeText(context,"응원글 차단 해제", Toast.LENGTH_SHORT).show()
-                    }
-                } else { // 사용자 신고
-                    if (dbHandler?.getblock(item.name.toString()) == false) {
-                        dbHandler?.updateBlock(item.name.toString(), 1)
-                        //Toast.makeText(context,"응원글 차단", Toast.LENGTH_SHORT).show()
-                    } else {
-                        dbHandler?.updateBlock(item.name.toString(), 0)
-                        //Toast.makeText(context,"응원글 차단 해제", Toast.LENGTH_SHORT).show()
-                    }
-                }
-
-
-                showAd()
-
+                reportDTO?.reportTime = Date()
                 dismiss()
             }
         }
-
-        radio_group.setOnCheckedChangeListener { group, checkedId ->
-            when(checkedId) {
-                R.id.radio_etc -> edit_etc.visibility = View.VISIBLE
-                else -> edit_etc.visibility = View.GONE
-            }
-        }
-
-        radio_1.setOnClickListener {
-            adminString = adminString + "1"
-            visibleAdminMode()
-        }
-        radio_2.setOnClickListener {
-            adminString = adminString + "2"
-            visibleAdminMode()
-        }
-        radio_3.setOnClickListener {
-            adminString = adminString + "3"
-            visibleAdminMode()
-        }
-        radio_4.setOnClickListener {
-            adminString = adminString + "4"
-            visibleAdminMode()
-        }
-        radio_etc.setOnClickListener {
-            adminString = adminString + "5"
-            visibleAdminMode()
-        }
-
-        button_block.setOnClickListener {
-            Toast.makeText(context,"사용자 차단", Toast.LENGTH_SHORT).show()
-            dismiss()
-        }
-        button_release.setOnClickListener {
-            Toast.makeText(context,"사용자 차단 해제", Toast.LENGTH_SHORT).show()
-            dismiss()
-        }
-
-        radio_cheer.setOnClickListener {
-            text_user.text = "해당 응원글을 신고 합니다."
-        }
-
-        radio_user.setOnClickListener {
-            text_user.text = "작성자 '${item.name}'(을)를 신고 합니다."
-        }
     }
 
-    private fun visibleAdminMode() {
-        if (adminString.equals("1115551111111")) {
-            layout_admin.visibility = View.VISIBLE
-            Toast.makeText(context,"관리자모드 실행", Toast.LENGTH_SHORT).show()
-        }
-    }
+    fun setInfo() {
+        if (reportDTO != null) {
+            binding.radioGroup.clearCheck()
+            binding.textNickname.text = reportDTO?.toUserNickname
+            binding.textContent.text = reportDTO?.content
 
-    override fun onClick(v: View?) {
-
-    }
-
-    fun showAd() {
-        // 광고 종류 획득
-        var firestore = FirebaseFirestore.getInstance()
-        firestore?.collection("preferences")?.document("ad_policy")?.get()?.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                var ad_interstitial = task.result!!["ad_interstitial"]
-                callInterstitial(ad_interstitial as String)
+            binding.textNicknameTitle.text = when (reportDTO?.type) {
+                ReportDTO.Type.FanClub -> "팬클럽 : "
+                ReportDTO.Type.Schedule -> "제목 : "
+                else -> "작성자 : "
             }
         }
     }
 
-    fun callInterstitial(interstitial : String) {
-        when (interstitial) {
-            parentActivity.getString(R.string.adtype_admob) -> {
-                interstitialAdmob(true)
-            }
-            parentActivity.getString(R.string.adtype_cauly) -> {
-                interstitialCauly(true)
-            }
-            else -> {
-
-            }
-        }
+    private fun init() {
+        //button_ok.setOnClickListener(this)
     }
 
-    fun interstitialAdmob(isFirst : Boolean) {
-        // 애드몹 - 전면
-        var InterstitialAd = InterstitialAd(parentActivity)
-        InterstitialAd.adUnitId = parentActivity.getString(R.string.admob_Interstitial_ad_unit_id) // 관리자모드
-        InterstitialAd.loadAd(AdRequest.Builder().build())
-
-        InterstitialAd.adListener = object : AdListener() {
-            override fun onAdLoaded() {
-                if (InterstitialAd.isLoaded) {
-                    InterstitialAd.show()
-                } else {
-                    // 광고 호출 실패
-                    if (isFirst) {
-                        interstitialCauly(false)
-                    }
-                }
+    override fun onClick(v: View) {
+        /*when (v.id) {
+            R.id.button_ok -> {
+                dismiss()
             }
-
-            override fun onAdFailedToLoad(errorCode: Int) {
-                // Code to be executed when an ad request fails.
-                if (isFirst) {
-                    interstitialCauly(false)
-                }
-            }
-
-            override fun onAdOpened() {
-                // Code to be executed when the ad is displayed.
-            }
-
-            override fun onAdClicked() {
-                // Code to be executed when the user clicks on an ad.
-            }
-
-            override fun onAdLeftApplication() {
-                // Code to be executed when the user has left the app.
-            }
-
-            override fun onAdClosed() {
-
-            }
-        }
-    }
-
-    fun interstitialCauly(isFirst : Boolean) {
-        var adInfo: CaulyAdInfo
-        adInfo = CaulyAdInfoBuilder("avhXxFUQ").build()
-        var interstial = CaulyInterstitialAd()
-        interstial.setAdInfo(adInfo)
-
-        val adCallback = object : CaulyInterstitialAdListener {
-            override fun onReceiveInterstitialAd(p0: CaulyInterstitialAd?, p1: Boolean) {
-                p0?.show()
-            }
-
-            override fun onFailedToReceiveInterstitialAd(p0: CaulyInterstitialAd?, p1: Int, p2: String?) {
-                if (isFirst) {
-                    interstitialAdmob(false)
-                }
-            }
-
-            override fun onClosedInterstitialAd(p0: CaulyInterstitialAd?) {
-
-            }
-
-            override fun onLeaveInterstitialAd(p0: CaulyInterstitialAd?) {
-
-            }
-
-        }
-
-        interstial.setInterstialAdListener(adCallback)
-        interstial.requestInterstitialAd(parentActivity)
+        }*/
     }
 }

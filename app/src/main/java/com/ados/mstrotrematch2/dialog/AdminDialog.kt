@@ -6,115 +6,127 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.ados.mstrotrematch2.R
+import com.ados.mstrotrematch2.databinding.AdminDialogBinding
 import com.ados.mstrotrematch2.model.EventDTO
-import com.ados.mstrotrematch2.model.NewsDTO
 import com.ados.mstrotrematch2.model.PreferencesDTO
 import com.google.firebase.firestore.FirebaseFirestore
-
-import com.google.firebase.firestore.Query
-import kotlinx.android.synthetic.main.admin_dialog.*
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 class AdminDialog(context: Context) : Dialog(context), View.OnClickListener {
 
+    lateinit var binding: AdminDialogBinding
+
     var firestore : FirebaseFirestore? = null
-    private val layout = R.layout.admin_dialog
     var preferencesDTO : PreferencesDTO? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(layout)
+        binding = AdminDialogBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         firestore = FirebaseFirestore.getInstance()
         firestore?.collection("preferences")?.document("preferences")?.addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
             preferencesDTO = documentSnapshot?.toObject(PreferencesDTO::class.java)
+
+            // 기본 설정 지정
+            var preferences = preferencesDTO?.copy(
+                rewardName = "광고 보고 다이아 1개 받으세요!",
+                rewardNamePremium = "광고 보고 다이아 2개 받으세요!",
+                writeCount = 10,
+                hotTimeTitle = "\uD83D\uDD25핫타임\uD83D\uDD25 이벤트",
+                priceDisplayBoard = 50, // 전광판 1회 표시 비용
+                priceGamble10 = 1, // 10 뽑기 1회 비용
+                priceGamble30 = 3, // 30 뽑기 1회 비용
+                priceGamble100 = 9, // 100 뽑기 1회 비용
+                displayBoardPeriod = 20, // 메인 전광판 표시 시간 (초)
+                displayBoardCount = 10, // 메인 전광판 표시할 항목 수
+                rewardUserCheckoutGem = 1, // 개인 출석체크 다이아 보상
+                rewardPremiumPackBuyGem = 200, // 프리미엄 패키지 구매 다이아 보상
+                rewardPremiumPackCheckoutGem = 20, // 프리미엄 패키지 매일 다이아 보상
+            )!!
+            firestore?.collection("preferences")?.document("preferences")?.set(preferences)
         }
 
         init()
 
         /*button_ticket_morning.setOnClickListener {
-            val uid = "s${SimpleDateFormat("yyMMdd0901").format(Date())}"
+            val uid = "t${SimpleDateFormat("yyMMdd0900").format(Date())}"
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
             val limit = SimpleDateFormat("yyyy-MM-dd 12:00").format(Date())
-            val eventDTO = EventDTO("\uD83C\uDF8A설연휴\uD83C\uDF8A 오전 티켓이 『7』장 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 7, dateFormat.parse(limit))
+            val eventDTO = EventDTO("\uD83C\uDF8A설연휴\uD83C\uDF8A 오전 티켓이『7』장 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 7, dateFormat.parse(limit))
 
             firestore?.collection("event")?.document(uid)?.set(eventDTO)
             Toast.makeText(context,"모닝 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
         }
         button_ticket_afternoon.setOnClickListener {
-            val uid = "s${SimpleDateFormat("yyMMdd1201").format(Date())}"
+            val uid = "t${SimpleDateFormat("yyMMdd1200").format(Date())}"
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
             val limit = SimpleDateFormat("yyyy-MM-dd 18:00").format(Date())
-            val eventDTO = EventDTO("\uD83C\uDF8A설연휴\uD83C\uDF8A 정오 티켓이 『7』장 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 7, dateFormat.parse(limit))
+            val eventDTO = EventDTO("\uD83C\uDF8A설연휴\uD83C\uDF8A 정오 티켓이『7』장 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 7, dateFormat.parse(limit))
 
             firestore?.collection("event")?.document(uid)?.set(eventDTO)
             Toast.makeText(context,"정오 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
         }
         button_ticket_evening.setOnClickListener {
-            val uid = "s${SimpleDateFormat("yyMMdd1801").format(Date())}"
+            val uid = "t${SimpleDateFormat("yyMMdd1800").format(Date())}"
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
             val limit = SimpleDateFormat("yyyy-MM-dd 23:59:59").format(Date())
-            val eventDTO = EventDTO("\uD83C\uDF8A설연휴\uD83C\uDF8A 저녁 티켓이 『7』장 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 7, dateFormat.parse(limit))
+            val eventDTO = EventDTO("\uD83C\uDF8A설연휴\uD83C\uDF8A 저녁 티켓이『7』장 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 7, dateFormat.parse(limit))
 
             firestore?.collection("event")?.document(uid)?.set(eventDTO)
             Toast.makeText(context,"저녁 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
         }
         button_ticket_night.setOnClickListener {
-            val uid = "s${SimpleDateFormat("yyMMdd2201").format(Date())}"
+            val uid = "t${SimpleDateFormat("yyMMdd2200").format(Date())}"
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
             val limit = SimpleDateFormat("yyyy-MM-dd 02:00").format(Date())
             val cal = Calendar.getInstance()
             cal.time = dateFormat.parse(limit)
             cal.add(Calendar.DATE, 1)
-            val eventDTO = EventDTO("\uD83C\uDF8A설연휴\uD83C\uDF8A 깜짝 티켓은 특별히 『9』장 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 9, cal.time)
+            val eventDTO = EventDTO("\uD83C\uDF8A설연휴\uD83C\uDF8A 깜짝 티켓은 특별히『9』장 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 9, cal.time)
 
             firestore?.collection("event")?.document(uid)?.set(eventDTO)
             Toast.makeText(context,"깜짝 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
         }*/
 
-
-
         // 노말 티켓 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        button_ticket_morning.setOnClickListener {
-            val uid = "s${SimpleDateFormat("yyMMdd0901").format(Date())}"
+        binding.buttonTicketMorning.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd0900").format(Date())}"
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
             val limit = SimpleDateFormat("yyyy-MM-dd 12:00").format(Date())
-            val eventDTO = EventDTO("오전 티켓이 2장 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 2, dateFormat.parse(limit))
+            val eventDTO = EventDTO("오전 티켓이 3장 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 3, dateFormat.parse(limit))
 
             firestore?.collection("event")?.document(uid)?.set(eventDTO)
             Toast.makeText(context,"모닝 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
         }
-        button_ticket_afternoon.setOnClickListener {
-            val uid = "s${SimpleDateFormat("yyMMdd1201").format(Date())}"
+        binding.buttonTicketAfternoon.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd1200").format(Date())}"
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
             val limit = SimpleDateFormat("yyyy-MM-dd 18:00").format(Date())
-            val eventDTO = EventDTO("정오 티켓이 2장 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 2, dateFormat.parse(limit))
+            val eventDTO = EventDTO("정오 티켓이 3장 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 3, dateFormat.parse(limit))
 
             firestore?.collection("event")?.document(uid)?.set(eventDTO)
             Toast.makeText(context,"정오 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
         }
-        button_ticket_evening.setOnClickListener {
-            val uid = "s${SimpleDateFormat("yyMMdd1801").format(Date())}"
+        binding.buttonTicketEvening.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd1800").format(Date())}"
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
             val limit = SimpleDateFormat("yyyy-MM-dd 23:59:59").format(Date())
-            val eventDTO = EventDTO("저녁 티켓이 2장 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 2, dateFormat.parse(limit))
+            val eventDTO = EventDTO("저녁 티켓이 3장 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 3, dateFormat.parse(limit))
 
             firestore?.collection("event")?.document(uid)?.set(eventDTO)
             Toast.makeText(context,"저녁 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
         }
-        button_ticket_night.setOnClickListener {
-            val uid = "s${SimpleDateFormat("yyMMdd2201").format(Date())}"
+        binding.buttonTicketNight.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd2200").format(Date())}"
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
             val limit = SimpleDateFormat("yyyy-MM-dd 02:00").format(Date())
             val cal = Calendar.getInstance()
             cal.time = dateFormat.parse(limit)
             cal.add(Calendar.DATE, 1)
-            val eventDTO = EventDTO("깜짝 티켓이 2장 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 2, cal.time)
+            val eventDTO = EventDTO("깜짝 티켓이 3장 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 3, cal.time)
 
             firestore?.collection("event")?.document(uid)?.set(eventDTO)
             Toast.makeText(context,"깜짝 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
@@ -123,202 +135,324 @@ class AdminDialog(context: Context) : Dialog(context), View.OnClickListener {
 
 
         // 핫타임 티켓 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        button_ticket_morning_hottime.setOnClickListener {
-            val uid = "s${SimpleDateFormat("yyMMdd0901").format(Date())}"
+        binding.buttonTicketMorningHottime.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd0900").format(Date())}"
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
             val limit = SimpleDateFormat("yyyy-MM-dd 12:00").format(Date())
-            val eventDTO = EventDTO("\uD83D\uDD25핫타임\uD83D\uDD25 오전 티켓이 '5'장 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 5, dateFormat.parse(limit))
+            val eventDTO = EventDTO("\uD83D\uDD25핫타임\uD83D\uDD25 오전 티켓이 '6'장 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 6, dateFormat.parse(limit))
 
             firestore?.collection("event")?.document(uid)?.set(eventDTO)
             Toast.makeText(context,"핫타임 모닝 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
         }
-        button_ticket_afternoon_hottime.setOnClickListener {
-            val uid = "s${SimpleDateFormat("yyMMdd1201").format(Date())}"
+        binding.buttonTicketAfternoonHottime.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd1200").format(Date())}"
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
             val limit = SimpleDateFormat("yyyy-MM-dd 18:00").format(Date())
-            val eventDTO = EventDTO("\uD83D\uDD25핫타임\uD83D\uDD25 정오 티켓이 '5'장 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 5, dateFormat.parse(limit))
+            val eventDTO = EventDTO("\uD83D\uDD25핫타임\uD83D\uDD25 정오 티켓이 '6'장 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 6, dateFormat.parse(limit))
 
             firestore?.collection("event")?.document(uid)?.set(eventDTO)
             Toast.makeText(context,"핫타임 정오 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
         }
-        button_ticket_evening_hottime.setOnClickListener {
-            val uid = "s${SimpleDateFormat("yyMMdd1801").format(Date())}"
+        binding.buttonTicketEveningHottime.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd1800").format(Date())}"
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
             val limit = SimpleDateFormat("yyyy-MM-dd 23:59:59").format(Date())
-            val eventDTO = EventDTO("\uD83D\uDD25핫타임\uD83D\uDD25 저녁 티켓이 '5'장 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 5, dateFormat.parse(limit))
+            val eventDTO = EventDTO("\uD83D\uDD25핫타임\uD83D\uDD25 저녁 티켓이 '6'장 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 6, dateFormat.parse(limit))
 
             firestore?.collection("event")?.document(uid)?.set(eventDTO)
             Toast.makeText(context,"핫타임 저녁 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
         }
-        button_ticket_night_hottime.setOnClickListener {
-            val uid = "s${SimpleDateFormat("yyMMdd2201").format(Date())}"
+        binding.buttonTicketNightHottime.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd2200").format(Date())}"
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
             val limit = SimpleDateFormat("yyyy-MM-dd 02:00").format(Date())
             val cal = Calendar.getInstance()
             cal.time = dateFormat.parse(limit)
             cal.add(Calendar.DATE, 1)
-            val eventDTO = EventDTO("\uD83C\uDFC6핫타임\uD83D\uDD25 깜짝 티켓이 '5'장 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 5, cal.time)
+            val eventDTO = EventDTO("\uD83D\uDD25핫타임\uD83D\uDD25 깜짝 티켓이 '6'장 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 6, cal.time)
 
             firestore?.collection("event")?.document(uid)?.set(eventDTO)
             Toast.makeText(context,"핫타임 깜짝 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
         }
-        /*button_ticket_morning_hottime.setOnClickListener {
-            val uid = "s${SimpleDateFormat("yyMMdd0901").format(Date())}"
+
+
+
+        // 이벤트 티켓 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        binding.buttonTicketMorningHottime2.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd0900").format(Date())}"
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
             val limit = SimpleDateFormat("yyyy-MM-dd 12:00").format(Date())
-            val eventDTO = EventDTO("\uD83C\uDFC6시즌6\uD83C\uDFC6 개막식 \uD83D\uDD25핫타임\uD83D\uDD25 오전 티켓이 \uD83C\uDF8110장\uD83C\uDF81 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 10, dateFormat.parse(limit))
+            val count = 10
+            val eventDTO = EventDTO("⭐특별⭐ 모닝 티켓이 ⭐${count}장⭐ 도착했습니다.\\n지금 수령 하시겠습니까?", uid, count, dateFormat.parse(limit))
 
             firestore?.collection("event")?.document(uid)?.set(eventDTO)
-            Toast.makeText(context,"핫타임 모닝 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context,"이벤트 모닝 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
         }
-        button_ticket_afternoon_hottime.setOnClickListener {
-            val uid = "s${SimpleDateFormat("yyMMdd1201").format(Date())}"
+        binding.buttonTicketAfternoonHottime2.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd1200").format(Date())}"
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
             val limit = SimpleDateFormat("yyyy-MM-dd 18:00").format(Date())
-            val eventDTO = EventDTO("\uD83C\uDFC6시즌6\uD83C\uDFC6 개막식 \uD83D\uDD25핫타임\uD83D\uDD25 정오 티켓이 \uD83C\uDF8110장\uD83C\uDF81 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 10, dateFormat.parse(limit))
+            val count = 11
+            val eventDTO = EventDTO("⭐특별⭐ 정오 티켓이 ⭐${count}장⭐ 도착했습니다.\\n지금 수령 하시겠습니까?", uid, count, dateFormat.parse(limit))
 
             firestore?.collection("event")?.document(uid)?.set(eventDTO)
-            Toast.makeText(context,"핫타임 정오 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context,"이벤트 정오 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
         }
-        button_ticket_evening_hottime.setOnClickListener {
-            val uid = "s${SimpleDateFormat("yyMMdd1801").format(Date())}"
+        binding.buttonTicketEveningHottime2.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd1800").format(Date())}"
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
             val limit = SimpleDateFormat("yyyy-MM-dd 23:59:59").format(Date())
-            val eventDTO = EventDTO("\uD83C\uDFC6시즌6\uD83C\uDFC6 개막식 \uD83D\uDD25핫타임\uD83D\uDD25 저녁 티켓이 \uD83C\uDF8110장\uD83C\uDF81 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 10, dateFormat.parse(limit))
+            val count = 12
+            val eventDTO = EventDTO("⭐특별⭐ 저녁 티켓이 ⭐${count}장⭐ 도착했습니다.\\n지금 수령 하시겠습니까?", uid, count, dateFormat.parse(limit))
 
             firestore?.collection("event")?.document(uid)?.set(eventDTO)
-            Toast.makeText(context,"핫타임 저녁 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context,"이벤트 저녁 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
         }
-        button_ticket_night_hottime.setOnClickListener {
-            val uid = "s${SimpleDateFormat("yyMMdd2201").format(Date())}"
+        binding.buttonTicketNightHottime2.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd2200").format(Date())}"
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
             val limit = SimpleDateFormat("yyyy-MM-dd 02:00").format(Date())
             val cal = Calendar.getInstance()
             cal.time = dateFormat.parse(limit)
             cal.add(Calendar.DATE, 1)
-            val eventDTO = EventDTO("\uD83C\uDFC6시즌6\uD83C\uDFC6 개막식 \uD83D\uDD25핫타임\uD83D\uDD25 깜짝 티켓이 \uD83C\uDF8110장\uD83C\uDF81 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 10, cal.time)
+            val count = 13
+            val eventDTO = EventDTO("⭐특별⭐ 깜짝 티켓이 ⭐${count}장⭐ 도착했습니다.\\n지금 수령 하시겠습니까?", uid, count, cal.time)
 
             firestore?.collection("event")?.document(uid)?.set(eventDTO)
-            Toast.makeText(context,"핫타임 깜짝 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context,"이벤트 깜짝 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
         }
-        button_hottime_special.setOnClickListener {
-            val uid = "s${SimpleDateFormat("yyMMdd0001").format(Date())}"
+        binding.buttonTicketSpecial2.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd0000").format(Date())}"
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
             val limit = SimpleDateFormat("yyyy-MM-dd 23:59:59").format(Date())
-            val eventDTO = EventDTO("\uD83C\uDFC6시즌6\uD83C\uDFC6 개막식 \uD83D\uDD25핫타임\uD83D\uDD25 스페셜 티켓이 \uD83D\uDC9B20장\uD83D\uDC9B 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 20, dateFormat.parse(limit))
+            val count = 14
+            val eventDTO = EventDTO("⭐특별⭐ 핫타임 스페셜 티켓이 ⭐${count}장⭐ 도착했습니다.\\n지금 수령 하시겠습니까?", uid, count, dateFormat.parse(limit))
+
+            firestore?.collection("event")?.document(uid)?.set(eventDTO)
+            Toast.makeText(context,"스페셜 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
+        }
+
+
+
+        // 이벤트 티켓 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        binding.buttonTicketMorningHottime3.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd0900").format(Date())}"
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
+            val limit = SimpleDateFormat("yyyy-MM-dd 12:00").format(Date())
+            val count = 13
+            val eventDTO = EventDTO("\uD83C\uDFC6시즌9\uD83C\uDFC6 마지막\uD83D\uDCA5 주말 \uD83D\uDD25핫타임\uD83D\uDD25 모닝 티켓이 \uD83D\uDCA5${count}장\uD83D\uDCA5 도착했습니다.\\n지금 수령 하시겠습니까?", uid, count, dateFormat.parse(limit))
+
+            firestore?.collection("event")?.document(uid)?.set(eventDTO)
+            Toast.makeText(context,"이벤트 모닝 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
+        }
+        binding.buttonTicketAfternoonHottime3.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd1200").format(Date())}"
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
+            val limit = SimpleDateFormat("yyyy-MM-dd 18:00").format(Date())
+            val count = 14
+            val eventDTO = EventDTO("\uD83C\uDFC6시즌9\uD83C\uDFC6 마지막\uD83D\uDCA5 주말 \uD83D\uDD25핫타임\uD83D\uDD25 정오 티켓이 \uD83D\uDCA5${count}장\uD83D\uDCA5 도착했습니다.\\n지금 수령 하시겠습니까?", uid, count, dateFormat.parse(limit))
+
+            firestore?.collection("event")?.document(uid)?.set(eventDTO)
+            Toast.makeText(context,"이벤트 정오 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
+        }
+        binding.buttonTicketEveningHottime3.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd1800").format(Date())}"
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
+            val limit = SimpleDateFormat("yyyy-MM-dd 23:59:59").format(Date())
+            val count = 17
+            val eventDTO = EventDTO("\uD83C\uDFC6시즌9\uD83C\uDFC6 마지막\uD83D\uDCA5 주말 \uD83D\uDD25핫타임\uD83D\uDD25 저녁 티켓이 \uD83D\uDCA5${count}장\uD83D\uDCA5 도착했습니다.\\n지금 수령 하시겠습니까?", uid, count, dateFormat.parse(limit))
+
+            firestore?.collection("event")?.document(uid)?.set(eventDTO)
+            Toast.makeText(context,"이벤트 저녁 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
+        }
+        binding.buttonTicketNightHottime3.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd2200").format(Date())}"
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
+            val limit = SimpleDateFormat("yyyy-MM-dd 02:00").format(Date())
+            val cal = Calendar.getInstance()
+            cal.time = dateFormat.parse(limit)
+            cal.add(Calendar.DATE, 1)
+            val count = 18
+            val eventDTO = EventDTO("\uD83C\uDFC6시즌9\uD83C\uDFC6 마지막\uD83D\uDCA5 주말 \uD83D\uDD25핫타임\uD83D\uDD25 깜짝 티켓이 \uD83D\uDCA5${count}장\uD83D\uDCA5 도착했습니다.\\n지금 수령 하시겠습니까?", uid, count, cal.time)
+
+            firestore?.collection("event")?.document(uid)?.set(eventDTO)
+            Toast.makeText(context,"이벤트 깜짝 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
+        }
+        binding.buttonTicketSpecial3.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd0000").format(Date())}"
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
+            val limit = SimpleDateFormat("yyyy-MM-dd 23:59:59").format(Date())
+            val count = 18
+            val eventDTO = EventDTO("\uD83C\uDFC6시즌9\uD83C\uDFC6 마지막\uD83D\uDCA5 주말 \uD83D\uDD25핫타임\uD83D\uDD25 스페셜\uD83C\uDF89 티켓이 \uD83D\uDCA5${count}장\uD83D\uDCA5 도착했습니다.\\n지금 수령 하시겠습니까?", uid, count, dateFormat.parse(limit))
+
+            firestore?.collection("event")?.document(uid)?.set(eventDTO)
+            Toast.makeText(context,"스페셜 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
+        }
+
+        /*binding.buttonTicketMorningHottime3.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd0900").format(Date())}"
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
+            val limit = SimpleDateFormat("yyyy-MM-dd 12:00").format(Date())
+            val count = 20
+            val eventDTO = EventDTO("\uD83C\uDFC6시즌12\uD83C\uDFC6 폐막식\uD83D\uDCA5 오전 티켓이 \uD83E\uDD0E${count}장\uD83E\uDD0E 도착했습니다.\\n지금 수령 하시겠습니까?", uid, count, dateFormat.parse(limit))
+
+            firestore?.collection("event")?.document(uid)?.set(eventDTO)
+            Toast.makeText(context,"이벤트 모닝 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
+        }
+        binding.buttonTicketAfternoonHottime3.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd1200").format(Date())}"
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
+            val limit = SimpleDateFormat("yyyy-MM-dd 18:00").format(Date())
+            val count = 15
+            val eventDTO = EventDTO("\uD83C\uDFC6시즌12\uD83C\uDFC6 폐막식\uD83D\uDCA5 정오 티켓이 \uD83E\uDD0E${count}장\uD83E\uDD0E 도착했습니다.\\n지금 수령 하시겠습니까?", uid, count, dateFormat.parse(limit))
+
+            firestore?.collection("event")?.document(uid)?.set(eventDTO)
+            Toast.makeText(context,"이벤트 정오 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
+        }
+        binding.buttonTicketEveningHottime3.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd1800").format(Date())}"
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
+            val limit = SimpleDateFormat("yyyy-MM-dd 23:59:59").format(Date())
+            val count = 17
+            val eventDTO = EventDTO("\uD83C\uDFC6시즌12\uD83C\uDFC6 폐막식\uD83D\uDCA5 저녁 티켓이 \uD83E\uDD0E${count}장\uD83E\uDD0E 도착했습니다.\\n지금 수령 하시겠습니까?", uid, count, dateFormat.parse(limit))
+
+            firestore?.collection("event")?.document(uid)?.set(eventDTO)
+            Toast.makeText(context,"이벤트 저녁 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
+        }
+        binding.buttonTicketNightHottime3.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd2200").format(Date())}"
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
+            val limit = SimpleDateFormat("yyyy-MM-dd 02:00").format(Date())
+            val cal = Calendar.getInstance()
+            cal.time = dateFormat.parse(limit)
+            cal.add(Calendar.DATE, 1)
+            val count = 20
+            val eventDTO = EventDTO("\uD83C\uDFC6시즌12\uD83C\uDFC6 폐막식\uD83D\uDCA5 깜짝 티켓이 \uD83E\uDD0E${count}장\uD83E\uDD0E 도착했습니다.\\n지금 수령 하시겠습니까?", uid, count, cal.time)
+
+            firestore?.collection("event")?.document(uid)?.set(eventDTO)
+            Toast.makeText(context,"이벤트 깜짝 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
+        }
+        binding.buttonTicketSpecial3.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd0000").format(Date())}"
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
+            val limit = SimpleDateFormat("yyyy-MM-dd 23:59:59").format(Date())
+            val count = 20
+            val eventDTO = EventDTO("\uD83C\uDFC6시즌12\uD83C\uDFC6 폐막식\uD83D\uDCA5 기념 \uD83C\uDF89스페셜\uD83C\uDF89 티켓이 \uD83D\uDC9B${count}장\uD83D\uDC9B 도착했습니다.\\n지금 수령 하시겠습니까?", uid, count, dateFormat.parse(limit))
+
+            firestore?.collection("event")?.document(uid)?.set(eventDTO)
+            Toast.makeText(context,"스페셜 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
+        }*/
+        /*binding.buttonTicketMorningHottime3.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd0900").format(Date())}"
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
+            val limit = SimpleDateFormat("yyyy-MM-dd 12:00").format(Date())
+            val count = 17
+            val eventDTO = EventDTO("\uD83C\uDFC6시즌13\uD83C\uDFC6 개막식\uD83D\uDCA5 오전 티켓이 \uD83D\uDCA5${count}장\uD83D\uDCA5 도착했습니다.\\n지금 수령 하시겠습니까?", uid, count, dateFormat.parse(limit))
+
+            firestore?.collection("event")?.document(uid)?.set(eventDTO)
+            Toast.makeText(context,"이벤트 모닝 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
+        }
+        binding.buttonTicketAfternoonHottime3.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd1200").format(Date())}"
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
+            val limit = SimpleDateFormat("yyyy-MM-dd 18:00").format(Date())
+            val count = 20
+            val eventDTO = EventDTO("\uD83C\uDFC6시즌13\uD83C\uDFC6 개막식\uD83D\uDCA5 정오 티켓이 \uD83D\uDCA5${count}장\uD83D\uDCA5 도착했습니다.\\n지금 수령 하시겠습니까?", uid, count, dateFormat.parse(limit))
+
+            firestore?.collection("event")?.document(uid)?.set(eventDTO)
+            Toast.makeText(context,"이벤트 정오 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
+        }
+        binding.buttonTicketEveningHottime3.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd1800").format(Date())}"
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
+            val limit = SimpleDateFormat("yyyy-MM-dd 23:59:59").format(Date())
+            val count = 19
+            val eventDTO = EventDTO("\uD83C\uDFC6시즌13\uD83C\uDFC6 개막식\uD83D\uDCA5 저녁 티켓이 \uD83D\uDCA5${count}장\uD83D\uDCA5 도착했습니다.\\n지금 수령 하시겠습니까?", uid, count, dateFormat.parse(limit))
+
+            firestore?.collection("event")?.document(uid)?.set(eventDTO)
+            Toast.makeText(context,"이벤트 저녁 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
+        }
+        binding.buttonTicketNightHottime3.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd2200").format(Date())}"
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
+            val limit = SimpleDateFormat("yyyy-MM-dd 02:00").format(Date())
+            val cal = Calendar.getInstance()
+            cal.time = dateFormat.parse(limit)
+            cal.add(Calendar.DATE, 1)
+            val count = 15
+            val eventDTO = EventDTO("\uD83C\uDFC6시즌13\uD83C\uDFC6 개막식\uD83D\uDCA5 깜짝 티켓이 \uD83D\uDCA5${count}장\uD83D\uDCA5 도착했습니다.\\n지금 수령 하시겠습니까?", uid, count, cal.time)
+
+            firestore?.collection("event")?.document(uid)?.set(eventDTO)
+            Toast.makeText(context,"이벤트 깜짝 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
+        }
+        binding.buttonTicketSpecial3.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd0000").format(Date())}"
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
+            val limit = SimpleDateFormat("yyyy-MM-dd 23:59:59").format(Date())
+            val count = 20
+            val eventDTO = EventDTO("\uD83C\uDFC6시즌13\uD83C\uDFC6 개막식\uD83D\uDCA5 기념 \uD83C\uDF89스페셜\uD83C\uDF89 티켓이 \uD83D\uDC9B${count}장\uD83D\uDC9B 도착했습니다.\\n지금 수령 하시겠습니까?", uid, count, dateFormat.parse(limit))
+
+            firestore?.collection("event")?.document(uid)?.set(eventDTO)
+            Toast.makeText(context,"스페셜 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
+        }*/
+
+        /*binding.buttonTicketMorningHottime3.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd0900").format(Date())}"
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
+            val limit = SimpleDateFormat("yyyy-MM-dd 12:00").format(Date())
+            val count = 15
+            val eventDTO = EventDTO("\uD83C\uDF91정월 대보름\uD83C\uDF15 모닝 티켓이 \uD83C\uDF87${count}장\uD83C\uDF87 도착했습니다.\\n지금 수령 하시겠습니까?", uid, count, dateFormat.parse(limit))
+
+            firestore?.collection("event")?.document(uid)?.set(eventDTO)
+            Toast.makeText(context,"이벤트 모닝 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
+        }
+        binding.buttonTicketAfternoonHottime3.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd1200").format(Date())}"
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
+            val limit = SimpleDateFormat("yyyy-MM-dd 18:00").format(Date())
+            val count = 12
+            val eventDTO = EventDTO("\uD83C\uDF91정월 대보름\uD83C\uDF15 정오 티켓이 \uD83C\uDF87${count}장\uD83C\uDF87 도착했습니다.\\n지금 수령 하시겠습니까?", uid, count, dateFormat.parse(limit))
+
+            firestore?.collection("event")?.document(uid)?.set(eventDTO)
+            Toast.makeText(context,"이벤트 정오 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
+        }
+        binding.buttonTicketEveningHottime3.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd1800").format(Date())}"
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
+            val limit = SimpleDateFormat("yyyy-MM-dd 23:59:59").format(Date())
+            val count = 15
+            val eventDTO = EventDTO("\uD83C\uDF91정월 대보름\uD83C\uDF15 저녁 티켓이 \uD83C\uDF87${count}장\uD83C\uDF87 도착했습니다.\\n지금 수령 하시겠습니까?", uid, count, dateFormat.parse(limit))
+
+            firestore?.collection("event")?.document(uid)?.set(eventDTO)
+            Toast.makeText(context,"이벤트 저녁 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
+        }
+        binding.buttonTicketNightHottime3.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd2200").format(Date())}"
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
+            val limit = SimpleDateFormat("yyyy-MM-dd 02:00").format(Date())
+            val cal = Calendar.getInstance()
+            cal.time = dateFormat.parse(limit)
+            cal.add(Calendar.DATE, 1)
+            val count = 18
+            val eventDTO = EventDTO("\uD83C\uDF91정월 대보름\uD83C\uDF15 깜짝 티켓이 \uD83C\uDF87${count}장\uD83C\uDF87 도착했습니다.\\n지금 수령 하시겠습니까?", uid, count, cal.time)
+
+            firestore?.collection("event")?.document(uid)?.set(eventDTO)
+            Toast.makeText(context,"이벤트 깜짝 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
+        }
+        binding.buttonTicketSpecial3.setOnClickListener {
+            val uid = "t${SimpleDateFormat("yyMMdd0000").format(Date())}"
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
+            val limit = SimpleDateFormat("yyyy-MM-dd 23:59:59").format(Date())
+            val count = 17
+            val eventDTO = EventDTO("\uD83C\uDF91정월 대보름\uD83C\uDF15 기념 \uD83C\uDF89스페셜\uD83C\uDF89 티켓이 \uD83C\uDF87${count}장\uD83C\uDF87 도착했습니다.\\n지금 수령 하시겠습니까?", uid, count, dateFormat.parse(limit))
 
             firestore?.collection("event")?.document(uid)?.set(eventDTO)
             Toast.makeText(context,"스페셜 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
         }*/
 
 
-
-        // 이벤트 티켓 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        button_ticket_morning_hottime2.setOnClickListener {
-            val uid = "s${SimpleDateFormat("yyMMdd0901").format(Date())}"
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
-            val limit = SimpleDateFormat("yyyy-MM-dd 12:00").format(Date())
-            val eventDTO = EventDTO("\uD83C\uDF33식목일\uD83C\uDF32 기념 모닝 티켓이 \uD83C\uDF3110장\uD83C\uDF40 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 10, dateFormat.parse(limit))
-
-            firestore?.collection("event")?.document(uid)?.set(eventDTO)
-            Toast.makeText(context,"이벤트 모닝 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
-        }
-        button_ticket_afternoon_hottime2.setOnClickListener {
-            val uid = "s${SimpleDateFormat("yyMMdd1201").format(Date())}"
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
-            val limit = SimpleDateFormat("yyyy-MM-dd 18:00").format(Date())
-            val eventDTO = EventDTO("\uD83C\uDF33식목일\uD83C\uDF32 기념 정오 티켓이 \uD83C\uDF3110장\uD83C\uDF40 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 10, dateFormat.parse(limit))
-
-            firestore?.collection("event")?.document(uid)?.set(eventDTO)
-            Toast.makeText(context,"이벤트 정오 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
-        }
-        button_ticket_evening_hottime2.setOnClickListener {
-            val uid = "s${SimpleDateFormat("yyMMdd1801").format(Date())}"
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
-            val limit = SimpleDateFormat("yyyy-MM-dd 23:59:59").format(Date())
-            val eventDTO = EventDTO("\uD83C\uDF33식목일\uD83C\uDF32 기념 저녁 티켓이 \uD83C\uDF3110장\uD83C\uDF40 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 10, dateFormat.parse(limit))
-
-            firestore?.collection("event")?.document(uid)?.set(eventDTO)
-            Toast.makeText(context,"이벤트 저녁 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
-        }
-        button_ticket_night_hottime2.setOnClickListener {
-            val uid = "s${SimpleDateFormat("yyMMdd2201").format(Date())}"
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
-            val limit = SimpleDateFormat("yyyy-MM-dd 02:00").format(Date())
-            val cal = Calendar.getInstance()
-            cal.time = dateFormat.parse(limit)
-            cal.add(Calendar.DATE, 1)
-            val eventDTO = EventDTO("\uD83C\uDF33식목일\uD83C\uDF32 기념 깜짝 티켓이 \uD83C\uDF3110장\uD83C\uDF40 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 10, cal.time)
-
-            firestore?.collection("event")?.document(uid)?.set(eventDTO)
-            Toast.makeText(context,"이벤트 깜짝 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
-        }
-        button_ticket_afternoon_weekend.setOnClickListener {
-            val uid = "s${SimpleDateFormat("yyMMdd0001").format(Date())}"
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
-            val limit = SimpleDateFormat("yyyy-MM-dd 23:59:59").format(Date())
-            val eventDTO = EventDTO("\uD83C\uDF33식목일\uD83C\uDF32 기념 스페셜 티켓이 \uD83C\uDF3114장\uD83C\uDF40 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 14, dateFormat.parse(limit))
-
-            firestore?.collection("event")?.document(uid)?.set(eventDTO)
-            Toast.makeText(context,"스페셜 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
-        }
-
-
-
-        // 이벤트 티켓 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        button_ticket_morning_hottime3.setOnClickListener {
-            val uid = "s${SimpleDateFormat("yyMMdd0901").format(Date())}"
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
-            val limit = SimpleDateFormat("yyyy-MM-dd 12:00").format(Date())
-            val eventDTO = EventDTO("\uD83C\uDFC6시즌5\uD83C\uDFC6 마지막 \uD83D\uDD25핫타임\uD83D\uDD25 오전 티켓이 \uD83D\uDCA510장\uD83D\uDCA5 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 10, dateFormat.parse(limit))
-
-            firestore?.collection("event")?.document(uid)?.set(eventDTO)
-            Toast.makeText(context,"이벤트 모닝 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
-        }
-        button_ticket_afternoon_hottime3.setOnClickListener {
-            val uid = "s${SimpleDateFormat("yyMMdd1201").format(Date())}"
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
-            val limit = SimpleDateFormat("yyyy-MM-dd 18:00").format(Date())
-            val eventDTO = EventDTO("\uD83C\uDFC6시즌5\uD83C\uDFC6 마지막 \uD83D\uDD25핫타임\uD83D\uDD25 정오 티켓이 \uD83D\uDCA510장\uD83D\uDCA5 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 10, dateFormat.parse(limit))
-
-            firestore?.collection("event")?.document(uid)?.set(eventDTO)
-            Toast.makeText(context,"이벤트 정오 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
-        }
-        button_ticket_evening_hottime3.setOnClickListener {
-            val uid = "s${SimpleDateFormat("yyMMdd1801").format(Date())}"
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
-            val limit = SimpleDateFormat("yyyy-MM-dd 23:59:59").format(Date())
-            val eventDTO = EventDTO("\uD83C\uDFC6시즌5\uD83C\uDFC6 마지막 \uD83D\uDD25핫타임\uD83D\uDD25 저녁 티켓이 \uD83D\uDCA510장\uD83D\uDCA5 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 10, dateFormat.parse(limit))
-
-            firestore?.collection("event")?.document(uid)?.set(eventDTO)
-            Toast.makeText(context,"이벤트 저녁 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
-        }
-        button_ticket_night_hottime3.setOnClickListener {
-            val uid = "s${SimpleDateFormat("yyMMdd2201").format(Date())}"
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
-            val limit = SimpleDateFormat("yyyy-MM-dd 02:00").format(Date())
-            val cal = Calendar.getInstance()
-            cal.time = dateFormat.parse(limit)
-            cal.add(Calendar.DATE, 1)
-            val eventDTO = EventDTO("\uD83C\uDFC6시즌5\uD83C\uDFC6 마지막 \uD83D\uDD25핫타임\uD83D\uDD25 깜짝 티켓이 \uD83D\uDCA510장\uD83D\uDCA5 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 10, cal.time)
-
-            firestore?.collection("event")?.document(uid)?.set(eventDTO)
-            Toast.makeText(context,"이벤트 깜짝 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
-        }
-        button_ticket_special3.setOnClickListener {
-            val uid = "s${SimpleDateFormat("yyMMdd0001").format(Date())}"
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
-            val limit = SimpleDateFormat("yyyy-MM-dd 23:59:59").format(Date())
-            val eventDTO = EventDTO("\uD83C\uDFC6시즌5\uD83C\uDFC6 마지막 \uD83D\uDD25핫타임\uD83D\uDD25 스페셜 티켓이 \uD83D\uDC9B15장\uD83D\uDC9B 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 15, dateFormat.parse(limit))
-
-            firestore?.collection("event")?.document(uid)?.set(eventDTO)
-            Toast.makeText(context,"스페셜 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
-        }
-
-
-
         /*button_ticket_afternoon_weekend.setOnClickListener {
-            val uid = "t${SimpleDateFormat("yyMMdd1201").format(Date())}"
+            val uid = "t${SimpleDateFormat("yyMMdd1200").format(Date())}"
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
             val limit = SimpleDateFormat("yyyy-MM-dd 18:00").format(Date())
             val eventDTO = EventDTO("\uD83C\uDF1F주말\uD83C\uDF1F 정오 티켓이 '5'장 도착했습니다.\\n지금 수령 하시겠습니까?", uid, 5, dateFormat.parse(limit))
@@ -328,28 +462,32 @@ class AdminDialog(context: Context) : Dialog(context), View.OnClickListener {
         }*/
 
 
-        button_ticket_random.setOnClickListener {
-            var ticketTime = number_picker_time.value * 5
 
-            val uid = "sr${SimpleDateFormat("yyMMddHHmm").format(Date())}"
+
+
+
+        binding.buttonTicketRandom.setOnClickListener {
+            var ticketTime = binding.numberPickerTime.value * 5
+
+            val uid = "tr${SimpleDateFormat("yyMMddHHmm").format(Date())}"
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
             val limit = SimpleDateFormat("yyyy-MM-dd HH:mm").format(Date())
             val cal = Calendar.getInstance()
             cal.time = dateFormat.parse(limit)
             cal.add(Calendar.MINUTE, ticketTime)
 
-            val eventDTO = EventDTO("\uD83C\uDF82축하드립니다! \uD83C\uDF40행운의\uD83C\uDF40 티켓을 발견했습니다\uD83C\uDF8A\\n금방 사라지니 빨리 수령하세요.\\n지금 수령 하시겠습니까?", uid, number_picker_ticket.value, cal.time)
+            val eventDTO = EventDTO("\uD83C\uDF82축하드립니다! \uD83C\uDF40행운의\uD83C\uDF40 티켓을 발견했습니다\uD83C\uDF8A\\n금방 사라지니 빨리 수령하세요.\\n지금 수령 하시겠습니까?", uid, binding.numberPickerTicket.value, cal.time)
             firestore?.collection("event")?.document(uid)?.set(eventDTO)
 
-            Toast.makeText(context,"${ticketTime}분, ${number_picker_ticket.value}장 행운의 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context,"${ticketTime}분, ${binding.numberPickerTicket.value}장 행운의 티켓 발송 완료.", Toast.LENGTH_SHORT).show()
         }
-        button_hottime_start.setOnClickListener {
+        binding.buttonHottimeStart.setOnClickListener {
             var preferencesDTOTemp = preferencesDTO?.copy(
                 IntervalTime = 5,
                 runHotTime = true,
                 rewardCount = 100,
                 rewardIntervalTime = 1,
-                rewardIntervalTimeSec = 60
+                rewardIntervalTimeSec = 45
             )
             if (preferencesDTOTemp != null) {
                 firestore?.collection("preferences")?.document("preferences")?.set(
@@ -358,8 +496,22 @@ class AdminDialog(context: Context) : Dialog(context), View.OnClickListener {
                 Toast.makeText(context,"핫타임 시작.", Toast.LENGTH_SHORT).show()
             }
         }
-
-        button_hottime_start2.setOnClickListener {
+        binding.buttonHottimeStart2.setOnClickListener {
+            var preferencesDTOTemp = preferencesDTO?.copy(
+                IntervalTime = 1,
+                runHotTime = true,
+                rewardCount = 200,
+                rewardIntervalTime = 1,
+                rewardIntervalTimeSec = 30
+            )
+            if (preferencesDTOTemp != null) {
+                firestore?.collection("preferences")?.document("preferences")?.set(
+                    preferencesDTOTemp
+                )
+                Toast.makeText(context,"이벤트1 시작.", Toast.LENGTH_SHORT).show()
+            }
+        }
+        binding.buttonHottimeStart3.setOnClickListener {
             var preferencesDTOTemp = preferencesDTO?.copy(
                 IntervalTime = 1,
                 runHotTime = true,
@@ -371,17 +523,16 @@ class AdminDialog(context: Context) : Dialog(context), View.OnClickListener {
                 firestore?.collection("preferences")?.document("preferences")?.set(
                     preferencesDTOTemp
                 )
-                Toast.makeText(context,"이벤트 시작.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context,"이벤트2 시작.", Toast.LENGTH_SHORT).show()
             }
         }
-
-        button_hottime_stop.setOnClickListener {
+        binding.buttonHottimeStop.setOnClickListener {
             var preferencesDTOTemp = preferencesDTO?.copy(
                 IntervalTime = 15,
                 runHotTime = false,
                 rewardCount = 50,
                 rewardIntervalTime = 2,
-                rewardIntervalTimeSec = 120
+                rewardIntervalTimeSec = 90
             )
             if (preferencesDTOTemp != null) {
                 firestore?.collection("preferences")?.document("preferences")?.set(
@@ -391,18 +542,18 @@ class AdminDialog(context: Context) : Dialog(context), View.OnClickListener {
             }
         }
 
-        number_picker_ticket.minValue = 1
-        number_picker_ticket.maxValue = 20
-        number_picker_ticket.value = 7
-        number_picker_ticket.wrapSelectorWheel = false
+        binding.numberPickerTicket.minValue = 1
+        binding.numberPickerTicket.maxValue = 20
+        binding.numberPickerTicket.value = 7
+        binding.numberPickerTicket.wrapSelectorWheel = false
 
         var yearList = (5..200 step 5).toList()
         var yearStrConvertList = yearList.map { it.toString() }
-        number_picker_time.minValue = 1
-        number_picker_time.maxValue = yearStrConvertList.size
-        number_picker_time.value = 12
-        number_picker_time.displayedValues = yearStrConvertList.toTypedArray()
-        number_picker_time.wrapSelectorWheel = false
+        binding.numberPickerTime.minValue = 1
+        binding.numberPickerTime.maxValue = yearStrConvertList.size
+        binding.numberPickerTime.value = 12
+        binding.numberPickerTime.displayedValues = yearStrConvertList.toTypedArray()
+        binding.numberPickerTime.wrapSelectorWheel = false
     }
 
     private fun init() {

@@ -5,6 +5,12 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="com.android.vending.BILLING" />
+    <uses-permission
+        android:name="android.permission.POST_NOTIFICATIONS"
+        android:minSdkVersion="33" />
 
     <application
         android:allowBackup="false"
@@ -12,11 +18,52 @@
         android:hardwareAccelerated="true"
         android:icon="@drawable/app_icon"
         android:label="@string/app_name"
+        android:largeHeap="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".HallOfFameActivity" />
+        <activity
+            android:name=".DonationCertificateActivity"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
+            android:name=".HallOfFameSelectActivity"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
+            android:name=".LoginEmailVerifyActivity"
+            android:exported="false" />
+        <activity
+            android:name=".HallOfFameActivity"
+            android:exported="true" />
+        <activity
+            android:name=".DisplayBoardActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustNothing" />
+        <activity
+            android:name=".FindPasswordActivity"
+            android:exported="true"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".PremiumPackageActivity"
+            android:exported="true"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".MailActivity"
+            android:exported="true"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".QuestActivity"
+            android:exported="true"
+            android:screenOrientation="portrait" />
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
@@ -27,7 +74,7 @@
         <!-- 로딩화면 추가 -->
         <activity
             android:name=".SplashActivity"
-            android:theme="@style/SplashTheme">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -35,8 +82,17 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".JoinActivity"
+            android:exported="true"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".LoginActivity"
+            android:exported="true"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".MainActivity"
-            android:configChanges="keyboard|orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"> <!-- 가로화면 시 전체화면 전환 해주는 코드 -->
+            android:configChanges="keyboard|orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"
+            android:exported="true"> <!-- 가로화면 시 전체화면 전환 해주는 코드 -->
         </activity> <!-- [START firebase_service] -->
         <service
             android:name=".MyFirebaseMessagingService"
@@ -47,10 +103,8 @@
         </service> <!-- [END firebase_service] -->
         <activity
             android:name="com.fsn.cauly.blackdragoncore.LandingActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"></activity>
-        <activity
-            android:name="com.facebook.ads.AudienceNetworkActivity"
-            android:hardwareAccelerated="true" />
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:exported="true" />
     </application>
 
 </manifest>

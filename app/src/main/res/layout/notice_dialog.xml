@@ -1,56 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="wrap_content"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
     android:layout_height="match_parent">
 
-    <RelativeLayout
-        android:background="#262A35"
+    <ImageView
+        android:id="@+id/img_top"
+        android:src="@drawable/purple_line_top"
+        android:layout_marginBottom="-0dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
         android:layout_width="match_parent"
-        android:layout_height="450dp">
+        android:layout_height="50dp"/>
 
-        <RelativeLayout
-            android:id="@+id/layout_notice_title"
-            android:background="#1C1F2B"
+    <LinearLayout
+        android:id="@+id/layout_title"
+        android:orientation="vertical"
+        android:background="@drawable/gradient_purple"
+        android:padding="10dp"
+        android:layout_below="@+id/img_top"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <TextView
-                android:id="@+id/text_notice_title"
-                android:text="공지사항"
-                android:textColor="#ddffffff"
-                android:textStyle="bold"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="7dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-        </RelativeLayout>
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:fontFamily="@font/font_title"
+            android:gravity="center"
+            android:text="공지사항"
+            android:textColor="@color/white"
+            android:textSize="24dp"
+            android:shadowColor="#B583E1"
+            android:shadowDx="0.0"
+            android:shadowDy="0.0"
+            android:shadowRadius="15.0" />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:background="@drawable/gradient_purple"
+        android:layout_below="@+id/layout_title"
+        android:layout_above="@+id/img_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerview_notice"
-            android:layout_below="@id/layout_notice_title"
+            android:background="@color/report_dialog_sub"
+            android:layout_above="@+id/layout_button"
+            android:layout_marginBottom="3dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
         </androidx.recyclerview.widget.RecyclerView>
+
+        <LinearLayout
+            android:id="@+id/layout_button"
+            android:orientation="horizontal"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_cancel"
+                android:layout_width="150dp"
+                android:layout_height="35dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="15dp"
+                android:background="@drawable/btn_round_white2"
+                android:fontFamily="@font/font_title"
+                android:textSize="18dp"
+                android:text="확인"
+                android:textColor="@color/report_dialog_sub" />
+
+        </LinearLayout>
+
     </RelativeLayout>
 
-    <LinearLayout
-        android:background="#5244CD"
+    <ImageView
+        android:id="@+id/img_bottom"
+        android:src="@drawable/purple_line_bottom"
+        android:layout_marginTop="-0dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <View
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-        <Button
-            android:id="@+id/button_cancel"
-            android:text="닫기"
-            android:textColor="#ddffffff"
-            android:background="@drawable/btn_round"
-            android:layout_marginTop="7dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginBottom="10dp"
-            android:layout_width="wrap_content"
-            android:layout_height="35dp"/>
-    </LinearLayout>
+        android:layout_height="50dp"/>
 
-
-</LinearLayout>
+</RelativeLayout>

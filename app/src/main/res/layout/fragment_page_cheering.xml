@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:background="#ffffff"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".page.FragmentPageCheering">
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:visibility="gone"
+        android:id="@+id/button_refresh"
+        android:text="새로고침"
+        android:textColor="#ddffffff"
+        android:textSize="16dp"
+        android:background="@drawable/btn_round2"
+        android:layout_below="@+id/layout_rank"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="-20dp"
+        android:layout_width="80dp"
+        android:layout_height="45dp"/>
+
+    <RelativeLayout
+        android:id="@+id/layout_menu"
+        android:background="@color/report_dialog"
+        android:orientation="horizontal"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/text_popular"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="8dp"
+            android:text="인기순"
+            android:textSize="20dp"
+            android:textStyle="bold"
+            android:textColor="@color/select_text" />
+        <TextView
+            android:id="@+id/text_new"
+            android:text="최신순"
+            android:textSize="20dp"
+            android:textColor="#dddddd"
+            android:layout_toRightOf="@+id/text_popular"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:id="@+id/text_statistics"
+            android:text="통계"
+            android:textSize="20dp"
+            android:textColor="#dddddd"
+            android:layout_toRightOf="@+id/text_new"
+            android:layout_centerVertical="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switch_favorite"
+            android:text="최애만"
+            android:textSize="20dp"
+            android:textColor="#dddddd"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/layout_rank"
+        android:layout_below="@+id/layout_menu"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="115dp">
+
+        <ImageView
+            android:id="@+id/img_rank_background"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitXY"
+            android:src="@drawable/spotlight_new_s1_cheering" />
+
+        <ImageView
+            android:id="@+id/img_question"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/question" />
+
+        <ImageView
+            android:id="@+id/img_season_logo"
+            android:layout_width="44.6dp"
+            android:layout_height="16.6dp"
+            android:layout_marginLeft="7dp"
+            android:layout_marginTop="7dp"
+            android:src="@drawable/new_season1_logo" />
+
+        <TextView
+            android:id="@+id/text_top3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="5dp"
+            android:paddingBottom="2dp"
+            android:shadowColor="#161865"
+            android:shadowDx="1.0"
+            android:shadowDy="1.0"
+            android:shadowRadius="1.0"
+            android:text="응원하기 12주차"
+            android:textSize="20dp"
+            android:textColor="#ffd93d"
+            android:textStyle="bold" />
+
+        <RelativeLayout
+            android:layout_below="@+id/text_top3"
+            android:layout_centerHorizontal="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <include layout="@layout/cheering_top_item"
+                android:id="@+id/layout_top2"
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="20dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <include layout="@layout/cheering_top_item"
+                android:id="@+id/layout_top1"
+                android:layout_toRightOf="@+id/layout_top2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="20dp" />
+            <include layout="@layout/cheering_top_item"
+                android:id="@+id/layout_top3"
+                android:layout_marginTop="10dp"
+                android:layout_toRightOf="@+id/layout_top1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </RelativeLayout>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_data"
+            android:layout_width="80dp"
+            android:layout_height="40dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="5dp"
+            android:background="@drawable/btn_round2"
+            android:text="데이터 취합"
+            android:textColor="#ddffffff"
+            android:textSize="16dp" />
+    </RelativeLayout>
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/layout_rank">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerview_cheering"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"></androidx.recyclerview.widget.RecyclerView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <RelativeLayout
+        android:id="@+id/layout_write"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/button_write"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="15dp"
+            android:backgroundTint="@color/yellow"
+            android:src="@drawable/add_pencil"
+            card_view:borderWidth="0dp" />
+
+        <ImageView
+            android:id="@+id/img_write_new"
+            android:layout_marginLeft="25dp"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:src="@drawable/new_item" />
+    </RelativeLayout>
+
+</RelativeLayout>

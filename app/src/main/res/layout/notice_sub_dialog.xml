@@ -59,10 +59,10 @@
 
             <TextView
                 android:id="@+id/text_content"
-                android:fontFamily="@font/font"
+                android:fontFamily="@font/font_sub_title"
                 android:text="공지 내용"
                 android:textColor="@color/report_text_content"
-                android:textSize="20dp"
+                android:textSize="17dp"
                 android:scrollbars="vertical"
                 android:autoLink="web"
                 android:linksClickable="true"
@@ -87,10 +87,10 @@
             app:rippleColor="#fff">
             <TextView
                 android:id="@+id/text_notice_link"
-                android:fontFamily="@font/font"
+                android:fontFamily="@font/font_sub_title"
                 android:text="지금 다운로드 ->"
                 android:textColor="#00FFEA"
-                android:textSize="22dp"
+                android:textSize="20dp"
                 android:layout_margin="3dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
@@ -103,16 +103,17 @@
             android:layout_height="wrap_content">
 
             <CheckBox
+                android:id="@+id/checkbox_stop_today"
                 android:layout_gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
             <TextView
                 android:layout_gravity="center"
-                android:fontFamily="@font/font"
+                android:fontFamily="@font/font_sub_title"
                 android:text="오늘 그만보기"
                 android:textColor="@color/white"
-                android:textSize="16dp"
+                android:textSize="14dp"
                 android:layout_margin="3dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".page.FragmentPageRank">
+
+    <RelativeLayout
+        android:id="@+id/img_layout"
+        android:layout_width="match_parent"
+        android:layout_height="280dp">
+
+        <ImageView
+            android:id="@+id/img_rank_background"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitXY"
+            android:src="@drawable/spotlight_new_s1_main" />
+
+        <ImageView
+            android:id="@+id/img_season_logo"
+            android:layout_width="55.75dp"
+            android:layout_height="20.75dp"
+            android:layout_above="@+id/text_season_end_date"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="4dp"
+            android:src="@drawable/new_season1_logo" />
+
+        <TextView
+            android:id="@+id/text_season_end_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="4dp"
+            android:text="2099-12-31 까지"
+            android:textColor="@color/colorWhite"
+            android:textSize="12dp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/img_hall_of_fame"
+            android:layout_width="130.2dp"
+            android:layout_height="36dp"
+            android:layout_alignParentRight="true"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
+            android:src="@drawable/hall_of_fame_button" />
+
+        <!--<ImageView
+            android:id="@+id/img_rank_no2"
+            android:src="@mipmap/ic_launcher_round"
+            android:layout_alignParentBottom="true"
+            android:layout_width="120dp"
+            android:layout_height="180dp"/>
+
+        <ImageView
+            android:id="@+id/img_rank_no1"
+            android:layout_toRightOf="@id/img_rank_no2"
+            android:layout_alignParentBottom="true"
+            android:src="@mipmap/ic_launcher_round"
+            android:layout_width="150dp"
+            android:layout_height="220dp"/>
+
+        <ImageView
+            android:id="@+id/img_rank_no3"
+            android:layout_toRightOf="@id/img_rank_no1"
+            android:layout_alignParentBottom="true"
+            android:src="@mipmap/ic_launcher_round"
+            android:layout_width="100dp"
+            android:layout_height="150dp"/>-->
+        <include
+            android:id="@+id/profile_rank_no2"
+            layout="@layout/profile_item"
+            android:layout_width="100dp"
+            android:layout_height="220dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginRight="5dp"
+            android:layout_marginBottom="15dp"
+            android:layout_toLeftOf="@+id/profile_rank_no1" />
+
+        <include
+            android:id="@+id/profile_rank_no1"
+            layout="@layout/profile_item"
+            android:layout_width="120dp"
+            android:layout_height="250dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="15dp" />
+
+        <include
+            android:id="@+id/profile_rank_no3"
+            layout="@layout/profile_item"
+            android:layout_width="90dp"
+            android:layout_height="210dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="5dp"
+            android:layout_marginBottom="15dp"
+            android:layout_toRightOf="@id/profile_rank_no1" />
+    </RelativeLayout>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_refresh"
+        android:text="새로고침"
+        android:textColor="#ddffffff"
+        android:textSize="16dp"
+        android:background="@drawable/btn_round2"
+        android:layout_below="@+id/img_layout"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="-20dp"
+        android:layout_width="80dp"
+        android:layout_height="45dp"/>
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_layout"
+        android:layout_below="@id/img_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerview_rank"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        </androidx.recyclerview.widget.RecyclerView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_admin"
+        android:layout_width="100dp"
+        android:layout_height="40dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/btn_round2"
+        android:text="관리자 기능"
+        android:textColor="#ddffffff"
+        android:textSize="14dp" />
+
+    <TextView
+        android:id="@+id/text_d_day"
+        android:text="D-DAY"
+        android:textColor="@color/white"
+        android:textSize="14dp"
+        android:textStyle="bold"
+        android:background="@drawable/btn_half_bottom_round"
+        android:paddingBottom="2dp"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
+        android:layout_marginRight="5dp"
+        android:layout_below="@+id/img_layout"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+</RelativeLayout>

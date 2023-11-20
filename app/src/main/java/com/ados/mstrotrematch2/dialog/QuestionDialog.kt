@@ -7,59 +7,87 @@ import android.os.Bundle
 import android.view.View
 import com.ados.mstrotrematch2.model.QuestionDTO
 import com.ados.mstrotrematch2.R
-import kotlinx.android.synthetic.main.question_dialog.*
+import com.ados.mstrotrematch2.databinding.QuestionDialogBinding
 
 class QuestionDialog(context: Context, var question: QuestionDTO) : Dialog(context), View.OnClickListener {
 
-
-
-    private val layout = R.layout.question_dialog
+    lateinit var binding: QuestionDialogBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(layout)
+        binding = QuestionDialogBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        text_title.text = question.title.toString().replace("\\n","\n")
-        text_content.text = question.content.toString().replace("\\n","\n")
+        setInfo()
+    }
+
+    fun setInfo() {
+        binding.imgQuestionOk.visibility = View.GONE
+        binding.imgQuestionCancel.visibility = View.GONE
+
+        binding.textTitle.text = question.title.toString().replace("\\n","\n")
+        binding.textContent.text = question.content.toString().replace("\\n","\n")
 
         when(question.stat) {
-            QuestionDTO.STAT.INFO -> img_stat.setImageResource(R.drawable.information)
-            QuestionDTO.STAT.WARNING -> img_stat.setImageResource(R.drawable.warning)
-            QuestionDTO.STAT.ERROR -> img_stat.setImageResource(R.drawable.error)
+            QuestionDTO.Stat.INFO -> binding.imgStat.setImageResource(R.drawable.information)
+            QuestionDTO.Stat.WARNING -> binding.imgStat.setImageResource(R.drawable.warning)
+            QuestionDTO.Stat.ERROR -> binding.imgStat.setImageResource(R.drawable.error)
+            else -> binding.imgStat.setImageResource(R.drawable.information)
+        }
+
+        if (!question.image.isNullOrEmpty()) {
+            var imageID = context.resources.getIdentifier(question.image, "drawable", context.packageName)
+            binding.imgStat.setImageResource(imageID)
         }
     }
 
     fun setButtonOk(name: String) {
-        button_question_ok.text = name
+        binding.textQuestionOk.text = name
     }
 
     fun setButtonCancel(name: String) {
-        button_question_cancel.text = name
+        binding.textQuestionCancel.text = name
     }
 
     fun showButtonOk(visible: Boolean) {
-        if (visible == true) {
-            button_question_ok.visibility = View.VISIBLE
+        if (visible) {
+            binding.buttonQuestionOk.visibility = View.VISIBLE
         } else {
-            button_question_ok.visibility = View.GONE
+            binding.buttonQuestionOk.visibility = View.GONE
         }
     }
 
     fun showButtonCancel(visible: Boolean) {
-        if (visible == true) {
-            button_question_cancel.visibility = View.VISIBLE
+        if (visible) {
+            binding.buttonQuestionCancel.visibility = View.VISIBLE
         } else {
-            button_question_cancel.visibility = View.GONE
+            binding.buttonQuestionCancel.visibility = View.GONE
+        }
+    }
+
+    fun showImgOk(visible: Boolean) {
+        if (visible) {
+            binding.imgQuestionOk.visibility = View.VISIBLE
+        } else {
+            binding.imgQuestionOk.visibility = View.GONE
+        }
+    }
+
+    fun showImgCancel(visible: Boolean) {
+        if (visible) {
+            binding.imgQuestionCancel.visibility = View.VISIBLE
+        } else {
+            binding.imgQuestionCancel.visibility = View.GONE
         }
     }
 
     private fun init() {
-        //button_question_ok.setOnClickListener(this)
+        //button_ok.setOnClickListener(this)
     }
 
     override fun onClick(v: View) {
         /*when (v.id) {
-            R.id.button_question_ok -> {
+            R.id.button_ok -> {
                 dismiss()
             }
         }*/

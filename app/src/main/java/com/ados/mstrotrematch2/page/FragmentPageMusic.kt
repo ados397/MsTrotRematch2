@@ -11,10 +11,15 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.NonNull
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ados.mstrotrematch2.MainActivity
 import com.ados.mstrotrematch2.R
+import com.ados.mstrotrematch2.adapter.OnMusicItemClickListener
+import com.ados.mstrotrematch2.adapter.RecyclerViewAdapterMusic
+import com.ados.mstrotrematch2.databinding.FragmentPageMusicBinding
+import com.ados.mstrotrematch2.firebase.FirebaseViewModel
 import com.ados.mstrotrematch2.model.ItemList
 import com.ados.mstrotrematch2.model.MovieDTO
 import com.ados.mstrotrematch2.model.RankDTO
@@ -25,86 +30,51 @@ import com.google.firebase.firestore.SetOptions
 import com.google.gson.GsonBuilder
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
-import kotlinx.android.synthetic.main.fragment_fragment_page_music.*
 import okhttp3.*
 import java.io.IOException
 
 
 class FragmentPageMusic : Fragment(), OnMusicItemClickListener {
+    private var _binding: FragmentPageMusicBinding? = null
+    private val binding get() = _binding!!
 
-    var firestore : FirebaseFirestore? = null
+    private val firebaseViewModel : FirebaseViewModel by viewModels()
     private var movieList : ArrayList<ItemList> = arrayListOf()
     lateinit var recyclerView : RecyclerView
     var mPlayer: YouTubePlayer? = null
     var curVideoId: String? = null
     var youtubeApi = YoutubeApi()
-    var jsonbody: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        //return inflater.inflate(R.layout.fragment_fragment_page_music, container, false)
+        _binding = FragmentPageMusicBinding.inflate(inflater, container, false)
+        var rootView = binding.root.rootView
 
-        var rootView = inflater.inflate(R.layout.fragment_fragment_page_music, container, false)
         recyclerView = rootView.findViewById(R.id.recyclerview_music!!)as RecyclerView
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        /*firestore = FirebaseFirestore.getInstance()
-        firestore?.collection("people")?.orderBy("count", Query.Direction.DESCENDING)?.addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-            people.clear()
-            if (querySnapshot == null) return@addSnapshotListener
-
-            // document 수만큼 획득
-            for (snapshot in querySnapshot) {
-                var person = snapshot.toObject(MovieDTO::class.java)!!
-                people.add(person)
-            }
-            recyclerView.adapter =
-                RecyclerViewAdapterMusic(people, this)
-        }*/
-
-        firestore = FirebaseFirestore.getInstance()
-        firestore?.collection("json")?.document("popular_list")?.get()?.addOnCompleteListener { task ->
-            if(task.isSuccessful){
-                jsonbody = task.result!!["body"].toString()
-                loadMovieList(youtubeApi)
-            }
+        firebaseViewModel.getMovieList()
+        firebaseViewModel.jsonMovie.observe(viewLifecycleOwner) {
+            loadMovieList(youtubeApi)
         }
-        /*firestore?.collection("preferences")?.document("youtubeapi")?.get()?.addOnCompleteListener { task ->
-            if(task.isSuccessful){
-
-
-                if (task.result!!["q"] != null) youtubeApi.q = task.result!!["q"].toString()
-                if (task.result!!["part"] != null) youtubeApi.part = task.result!!["part"].toString()
-                if (task.result!!["key"] != null) youtubeApi.key = task.result!!["key"].toString()
-                if (task.result!!["type"] != null) youtubeApi.type = task.result!!["type"].toString()
-                if (task.result!!["maxResults"] != null) youtubeApi.maxResults = task.result!!["maxResults"].toString()
-                if (task.result!!["videoDuration"] != null) youtubeApi.videoDuration = task.result!!["videoDuration"].toString()
-                if (task.result!!["keyword"] != null) youtubeApi.keyword = task.result!!["keyword"].toString()
-
-                val url = youtubeApi.getUrl()
-                println(url)
-
-                loadMovieList(youtubeApi)
-            }
-        }*/
 
         return rootView
     }
 
-    fun setAdapter() {
+    private fun setAdapter() {
         recyclerView.adapter = RecyclerViewAdapterMusic(movieList, this)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         //tv_fragment_name.text = "노래듣기"
 
-        getActivity()?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
-        player_view.getPlayerUiController().showFullscreenButton(true)
-        player_view.addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
+        binding.playerView.getPlayerUiController().showFullscreenButton(true)
+        binding.playerView.addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
             override fun onReady(@NonNull youTubePlayer: YouTubePlayer) {
                 mPlayer = youTubePlayer
                 val videoId = "uAHaUXV6_vE"
@@ -114,45 +84,45 @@ class FragmentPageMusic : Fragment(), OnMusicItemClickListener {
             }
         })
 
-        player_view.getPlayerUiController().setFullScreenButtonClickListener(View.OnClickListener {
-            if (player_view.isFullScreen()) {
-                player_view.exitFullScreen()
-                getActivity()?.window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+        binding.playerView.getPlayerUiController().setFullScreenButtonClickListener(View.OnClickListener {
+            if (binding.playerView.isFullScreen()) {
+                binding.playerView.exitFullScreen()
+                requireActivity().window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
                 // Show Tabs
                 (activity as MainActivity?)!!.showMainCtrl(true)
                 //searchCtrlShow(true)
 
                 //세로 화면으로 고정
-                getActivity()?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
             } else {
-                player_view.enterFullScreen()
-                getActivity()?.window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
+                binding.playerView.enterFullScreen()
+                requireActivity().window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
                 // Hide Tabs
                 (activity as MainActivity?)!!.showMainCtrl(false)
                 //searchCtrlShow(false)
 
                 // 고정 풀고 센서에 따라 화면 전환 모드
-                getActivity()?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
+                requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
             }
         })
 
-        button_search.setOnClickListener {
-            youtubeApi.q = edit_search_movie.text.toString()
+        binding.buttonSearch.setOnClickListener {
+            youtubeApi.q = binding.editSearchMovie.text.toString()
             loadMovieList(youtubeApi)
         }
 
-        edit_search_movie.setOnKeyListener { v, keyCode, event ->
+        binding.editSearchMovie.setOnKeyListener { v, keyCode, event ->
             if ((keyCode == KeyEvent.KEYCODE_ENTER) && (event.action == KeyEvent.ACTION_DOWN)) {
-                youtubeApi.q = edit_search_movie.text.toString()
+                youtubeApi.q = binding.editSearchMovie.text.toString()
                 loadMovieList(youtubeApi)
             }
             false
         }
 
-        //button_insertMove.visibility = View.GONE // 관리자모드
-        button_insertMove.setOnClickListener {
-            Toast.makeText(getActivity(),"업로드 시작", Toast.LENGTH_SHORT).show()
+        binding.buttonInsertMove.visibility = View.GONE // 관리자모드
+        binding.buttonInsertMove.setOnClickListener {
+            Toast.makeText(requireActivity(),"업로드 시작", Toast.LENGTH_SHORT).show()
             insertMovieList()
         }
     }
@@ -160,49 +130,66 @@ class FragmentPageMusic : Fragment(), OnMusicItemClickListener {
     override fun onItemClick(item: ItemList, position: Int) {
         if (curVideoId == item.id.videoId) { // 동일한 비디오 한 번 더 클릭하면 플레이어 닫기
             curVideoId = ""
-            player_view.visibility = View.GONE
+            binding.playerView.visibility = View.GONE
         } else {
             curVideoId = item.id.videoId
             mPlayer?.cueVideo(item.id.videoId.toString(), 0f)
-            player_view.visibility = View.VISIBLE
+            binding.playerView.visibility = View.VISIBLE
         }
     }
 
-    fun insertMovieList() {
+    private fun insertMovieList() {
         var api = YoutubeApi()
+        //api.order = "viewCount"
         var fullData : MovieDTO? = null
         var itemList : ArrayList<ItemList> = arrayListOf()
         var people : ArrayList<RankDTO> = arrayListOf()
-        firestore?.collection("people")?.orderBy("count", Query.Direction.DESCENDING)?.limit(10)?.get()?.addOnSuccessListener { result ->
+        var firestore = FirebaseFirestore.getInstance()
+        firestore.collection("people").orderBy("count", Query.Direction.DESCENDING).limit(10).get().addOnSuccessListener { result ->
             for (document in result) {
                 var person = document.toObject(RankDTO::class.java)!!
                 people.add(person)
             }
 
-            people.add(RankDTO("","미스트롯2",0,"",0,0,0,0,null))
+            people.add(RankDTO("","미스터트롯",0,"",0,0,0,0,null))
             var i = 10
             for (person in people) {
                 if (i == 0)
                     i = 30
 
                 api.q = person.name
+                api.channelId = null
                 //api.q += "노래"
                 /*if (person.name.equals("양지원"))
                     api.q += "tv"*/
                 when (person.name) {
-                    "김수빈" -> api.q += " 트로트"
-                    "김다현" -> api.q += " 트로트"
-                    "명지" -> api.q += " 트로트"
-                    //"이찬원" -> api.q += " 공식 채널"
-                    //"김희재" -> api.q += " HEEJAE"
-                    //"정동원" -> api.q += "tv"
-                    //"안성훈" -> api.q += "tv"
-                    //"장민호" -> api.q += " 공식 채널"
-                    //"영탁" -> api.q += "의 불쑥tv"
-                    //"신성" -> api.q += " 트로트 노래"
-                    //"최대성" -> api.q += " 트로트 노래"
-                    //"양지원" -> api.q += " tv"
-                    //"김중연" -> api.q += " tv"
+                    "임영웅" -> {
+                        //api.q += " 공식 채널"
+                        api.channelId = "UC3WZlO2Zl8NE1yIUgtwUtQw"
+                    }
+                    "이찬원" -> {
+                        //api.q += " 클린"
+                        api.channelId = "UC4UnP3v-iaFaLdtKwp84Pmw"
+                    }
+                    "김희재" -> api.q += " HEEJAE"
+                    "정동원" -> {
+                        api.q += "tv"
+                        api.channelId = "UCrLQ0ovys23H9xBV6U-Sd4A"
+                    }
+                    "안성훈" -> api.q += "tv"
+                    "장민호" -> api.q += " 고화질"
+                    "영탁" -> {
+                        //api.q += "의 불쑥tv"
+                        api.channelId = "UCH7JoVNZFpo1pOzZH-t5uew"
+                    }
+                    "신성" -> api.q += " 트로트 노래"
+                    "최대성" -> api.q += " 트로트 노래"
+                    "양지원" -> api.q += " tv"
+                    "김중연" -> api.q += " tv"
+                    "김수찬" -> {
+                        //api.q += " tv"
+                        api.channelId = "UCgLn4rH3Ey9OWSd88-HMUyQtoRegex"
+                    }
                     else -> " 노래"
                 }
 
@@ -238,9 +225,9 @@ class FragmentPageMusic : Fragment(), OnMusicItemClickListener {
                         println(body2)
 
                         val data = hashMapOf("body" to body2)
-                        firestore?.collection("json")?.document("popular_list")?.set(data, SetOptions.merge())
+                        firestore.collection("json")?.document("popular_list")?.set(data, SetOptions.merge())
 
-                        getActivity()?.runOnUiThread {
+                        requireActivity().runOnUiThread {
 
                         }
 
@@ -252,7 +239,7 @@ class FragmentPageMusic : Fragment(), OnMusicItemClickListener {
                 i--;
             }
 
-            Toast.makeText(getActivity(),"업로드 완료", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireActivity(),"업로드 완료", Toast.LENGTH_SHORT).show()
         }
             ?.addOnFailureListener { exception ->
 
@@ -303,7 +290,7 @@ class FragmentPageMusic : Fragment(), OnMusicItemClickListener {
                     val data = hashMapOf("body" to body2)
                     firestore?.collection("json")?.document("popular_list2")?.set(data, SetOptions.merge())
 
-                    getActivity()?.runOnUiThread {
+                    requireActivity().runOnUiThread {
 
                     }
 
@@ -319,12 +306,12 @@ class FragmentPageMusic : Fragment(), OnMusicItemClickListener {
 
     }
 
-    fun loadMovieList(youtubeApi: YoutubeApi) {
+    private fun loadMovieList(youtubeApi: YoutubeApi) {
         val gson = GsonBuilder().create()
-        val fullData = gson.fromJson(jsonbody, MovieDTO::class.java)
+        val fullData = gson.fromJson(firebaseViewModel.jsonMovie.value, MovieDTO::class.java)
         movieList = fullData.items as ArrayList<ItemList>
 
-        getActivity()?.runOnUiThread {
+        requireActivity().runOnUiThread {
             setAdapter()
         }
 
@@ -344,7 +331,7 @@ class FragmentPageMusic : Fragment(), OnMusicItemClickListener {
                 val fullData = gson.fromJson(jsonbody, MovieDTO::class.java)
                 movieList = fullData.items as ArrayList<ItemList>
 
-                getActivity()?.runOnUiThread {
+                requireActivity().runOnUiThread {
                     setAdapter()
                 }
 
@@ -354,9 +341,9 @@ class FragmentPageMusic : Fragment(), OnMusicItemClickListener {
 
     fun searchCtrlShow(show: Boolean) {
         if (show) {
-            layout_search_movie.visibility = View.VISIBLE
+            binding.layoutSearchMovie.visibility = View.VISIBLE
         } else {
-            layout_search_movie.visibility = View.GONE
+            binding.layoutSearchMovie.visibility = View.GONE
         }
     }
 

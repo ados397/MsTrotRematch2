@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/layout_main"
+    android:background="#F2D7FA"
+    tools:context=".page.FragmentPageVote">
+
+    <RelativeLayout
+        android:id="@+id/layout_fire_back"
+        android:layout_above="@+id/layout_reward"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ImageView
+            android:src="@drawable/fire_back_reverse"
+            android:scaleType="fitXY"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <ImageView
+            android:src="@drawable/fire_back"
+            android:scaleType="fitXY"
+            android:layout_alignParentBottom="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </RelativeLayout>
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_layout"
+        android:layout_above="@+id/layout_reward"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerview_vote"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        </androidx.recyclerview.widget.RecyclerView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <RelativeLayout
+        android:id="@+id/layout_reward"
+        android:background="@color/report_dialog_sub"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:id="@+id/layout_bottom_1"
+            android:orientation="horizontal"
+            android:weightSum="10"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <RelativeLayout
+                android:id="@+id/layout_gift"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <RelativeLayout
+                    android:id="@+id/layout_button_gift"
+                    android:background="@drawable/btn_circle2"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="45dp">
+                    <ImageView
+                        android:id="@+id/img_button_gift"
+                        android:src="@drawable/lottery"
+                        android:layout_marginLeft="12dp"
+                        android:layout_centerVertical="true"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"/>
+
+                    <TextView
+                        android:id="@+id/text_gift"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_toRightOf="@+id/img_button_gift"
+                        android:text="투표권 뽑기"
+                        android:textColor="@color/display_board_10"
+                        android:textSize="16dp"
+                        android:textStyle="bold" />
+                </RelativeLayout>
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/layout_hot_time"
+                android:layout_alignParentRight="true"
+                android:layout_marginTop="5dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <ImageView
+                    android:id="@+id/img_burning_time"
+                    android:src="@drawable/burning_time"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"/>
+                <ImageView
+                    android:id="@+id/img_burning_time_title"
+                    android:src="@drawable/burning_time_title"
+                    android:layout_toRightOf="@+id/img_burning_time"
+                    android:layout_centerVertical="true"
+                    android:layout_width="198.5dp"
+                    android:layout_height="34.3dp"/>
+            </RelativeLayout>
+
+        </LinearLayout>
+
+
+        <RelativeLayout
+            android:id="@+id/layout_button_reward"
+            android:layout_width="wrap_content"
+            android:layout_height="45dp"
+            android:layout_below="@+id/layout_bottom_1"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="3dp"
+            android:layout_marginBottom="5dp"
+            android:background="@drawable/btn_circle">
+
+            <ImageView
+                android:id="@+id/img_ticket"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="15dp"
+                android:src="@drawable/diamond" />
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_toRightOf="@+id/img_ticket"
+                android:layout_marginRight="25dp"
+                android:layout_centerVertical="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/text_reward_timer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:text="티켓 충전"
+                    android:textColor="@color/display_board_10"
+                    android:textSize="16dp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/text_reward_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:text="남은횟수 : 10"
+                    android:textColor="@color/purple_200"
+                    android:textSize="12dp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </RelativeLayout>
+
+        <ImageView
+            android:id="@+id/img_premium_double"
+            android:src="@drawable/premium_double"
+            android:layout_below="@+id/layout_bottom_1"
+            android:layout_toRightOf="@id/layout_button_reward"
+            android:layout_marginLeft="-22dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:visibility="gone"
+            android:id="@+id/button_refresh"
+            android:text="새로고침"
+            android:textColor="#ddffffff"
+            android:textSize="18dp"
+            android:background="@drawable/btn_round2"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="10dp"
+            android:layout_width="90dp"
+            android:layout_height="45dp"/>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_hot_time_info"
+        android:orientation="vertical"
+        android:background="@drawable/btn_round"
+        android:padding="15dp"
+        android:layout_alignParentRight="true"
+        android:layout_above="@id/layout_reward"
+        android:layout_marginRight="30dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/text_hot_time_title"
+            android:text="🔥 핫타임 혜택 🔥"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:textSize="14dp"
+            android:layout_gravity="center"
+            android:layout_marginBottom="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:id="@+id/text_hot_time_ticket"
+            android:text="🔥티켓 충전 시간 : 1분"
+            android:textColor="@color/white"
+            android:textSize="14dp"
+            android:layout_marginBottom="2dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:id="@+id/text_hot_time_reward_time"
+            android:text="🔥광고 충전 시간 : 30초"
+            android:textColor="@color/white"
+            android:textSize="14dp"
+            android:layout_marginBottom="2dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:id="@+id/text_hot_time_reward_count"
+            android:text="🔥광고 티켓 : 200개"
+            android:textColor="@color/white"
+            android:textSize="14dp"
+            android:layout_marginBottom="2dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+
+
+
+</RelativeLayout>

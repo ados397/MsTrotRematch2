@@ -6,27 +6,26 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import com.ados.mstrotrematch2.R
+import com.ados.mstrotrematch2.databinding.DeleteDialogBinding
 import com.ados.mstrotrematch2.model.BoardDTO
-import kotlinx.android.synthetic.main.delete_dialog.*
-import kotlinx.android.synthetic.main.event_dialog.button_ok
 
 class DeleteDialog(context: Context, var item : BoardDTO) : Dialog(context), View.OnClickListener {
 
-    private val layout = R.layout.delete_dialog
+    lateinit var binding: DeleteDialogBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(layout)
+        binding = DeleteDialogBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         init()
 
-        //button_admin_delete.visibility = View.GONE // 관리자모드
-        button_ok.setOnClickListener {
+        binding.buttonOk.setOnClickListener {
 
         }
     }
 
     private fun init() {
-        button_ok.setOnClickListener(this)
+        binding.buttonOk.setOnClickListener(this)
 
         //text_msg.text = event.title?.replace("\\n","\n")
     }

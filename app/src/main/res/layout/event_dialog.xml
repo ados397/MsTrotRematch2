@@ -3,8 +3,16 @@
     android:orientation="vertical" android:layout_width="wrap_content"
     android:layout_height="match_parent">
 
+    <ImageView
+        android:src="@drawable/gold_line_top"
+        android:layout_marginBottom="-5dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
     <RelativeLayout
-        android:background="#321E8F"
+        android:background="@drawable/gradient_purple"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <RelativeLayout
@@ -16,31 +24,34 @@
             android:paddingRight="20dp"
             android:layout_width="350dp"
             android:layout_height="130dp">
+
             <ImageView
                 android:id="@+id/img_ticket"
-                android:src="@drawable/ticekt"
-                android:scaleType="fitXY"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:scaleType="fitXY"
+                android:src="@drawable/ticekt" />
         </RelativeLayout>
+
         <TextView
             android:id="@+id/text_msg"
-            android:text="이벤트 티켓이 1장 도착했습니다."
-            android:textColor="#DDFFF319"
-            android:textStyle="bold"
-            android:layout_centerHorizontal="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/layout_ticket"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
-            android:layout_below="@id/layout_ticket"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:gravity="center"
+            android:text="이벤트 티켓이 1장 도착했습니다."
+            android:textColor="#DDFFF319"
+            android:textSize="18dp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/text_timer"
             android:text="(00:00:00 후 사라 집니다.)"
             android:textColor="#DDE176FA"
             android:textStyle="bold"
-            android:textSize="12sp"
+            android:textSize="16dp"
             android:layout_below="@+id/text_msg"
             android:layout_centerHorizontal="true"
             android:layout_width="wrap_content"
@@ -49,6 +60,7 @@
         <TextView
             android:id="@+id/text_count"
             android:text="아니오를 누르면 재접속 시 수령 가능합니다."
+            android:textSize="16dp"
             android:textColor="#ddA78FFF"
             android:textStyle="bold"
             android:layout_below="@+id/text_timer"
@@ -59,34 +71,48 @@
             android:layout_height="wrap_content"/>
     </RelativeLayout>
 
-    <LinearLayout
-        android:background="#CAB326"
+    <RelativeLayout
+        android:background="@color/dark_purple"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <View
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-        <Button
-            android:id="@+id/button_ok"
-            android:text="네"
-            android:textColor="#ddffffff"
-            android:background="@drawable/btn_round"
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_centerHorizontal="true"
             android:layout_marginTop="7dp"
-            android:layout_marginRight="7dp"
             android:layout_width="wrap_content"
-            android:layout_height="35dp"/>
-        <Button
-            android:id="@+id/button_cancel"
-            android:text="아니오"
-            android:textColor="#ddffffff"
-            android:background="@drawable/btn_round"
-            android:layout_marginTop="7dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginBottom="10dp"
-            android:layout_width="wrap_content"
-            android:layout_height="35dp"/>
-    </LinearLayout>
+            android:layout_height="wrap_content">
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_ok"
+                android:text="네"
+                android:textSize="18dp"
+                android:textStyle="bold"
+                android:textColor="@color/report_dialog_sub"
+                android:background="@drawable/btn_round_white2"
+                android:layout_marginRight="7dp"
+                android:layout_marginBottom="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="35dp"/>
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_cancel"
+                android:text="아니오"
+                android:textSize="18dp"
+                android:textStyle="bold"
+                android:textColor="@color/report_dialog_sub"
+                android:background="@drawable/btn_round_white2"
+                android:layout_marginBottom="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="35dp"/>
+        </LinearLayout>
+    </RelativeLayout>
 
+    <ImageView
+        android:id="@+id/img_bottom"
+        android:src="@drawable/gold_line_bottom"
+        android:layout_marginTop="-5dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_alignParentBottom="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 
 </LinearLayout>

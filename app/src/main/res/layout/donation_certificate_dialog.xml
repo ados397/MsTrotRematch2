@@ -5,6 +5,7 @@
 
     <ScrollView
         android:layout_above="@+id/layout_close"
+        android:background="@color/card_view_3"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <LinearLayout
@@ -14,14 +15,17 @@
             <TextView
                 android:id="@+id/text_title"
                 android:text="[ ㅇㅇㅇ 가수님 기부증서 ]"
-                android:textSize="16sp"
+                android:textSize="24dp"
                 android:textStyle="bold"
+                android:textColor="@color/text"
                 android:layout_margin="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
             <TextView
                 android:id="@+id/text_desc1"
                 android:text="설명 1"
+                android:textSize="20dp"
+                android:textColor="@color/text"
                 android:layout_marginLeft="15dp"
                 android:layout_marginRight="15dp"
                 android:layout_width="wrap_content"
@@ -29,6 +33,8 @@
             <TextView
                 android:id="@+id/text_desc2"
                 android:text="설명 2"
+                android:textSize="20dp"
+                android:textColor="@color/text"
                 android:layout_marginTop="5dp"
                 android:layout_marginLeft="15dp"
                 android:layout_marginRight="15dp"
@@ -37,6 +43,8 @@
             <TextView
                 android:id="@+id/text_desc3"
                 android:text="설명 3"
+                android:textSize="20dp"
+                android:textColor="@color/text"
                 android:layout_marginTop="5dp"
                 android:layout_marginLeft="15dp"
                 android:layout_marginRight="15dp"
@@ -45,6 +53,7 @@
             <ImageView
                 android:id="@+id/img_donation_certificate"
                 android:scaleType="fitStart"
+                android:layout_marginTop="5dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
         </LinearLayout>
@@ -52,25 +61,26 @@
 
     <LinearLayout
         android:id="@+id/layout_close"
-        android:background="#5244CD"
+        android:background="@color/dialog"
         android:layout_alignParentBottom="true"
-        android:layout_marginTop="5dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <View
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_weight="1" />
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/button_cancel"
-            android:text="닫기"
-            android:textColor="#ddffffff"
-            android:background="@drawable/btn_round"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_gravity="center"
             android:layout_marginTop="7dp"
             android:layout_marginRight="10dp"
-            android:layout_marginBottom="10dp"
-            android:layout_width="wrap_content"
-            android:layout_height="35dp"/>
+            android:layout_marginBottom="7dp"
+            android:background="@drawable/btn_round_white2"
+            android:text="닫기"
+            android:textColor="@color/text"
+            android:textSize="18dp" />
     </LinearLayout>
 
 </RelativeLayout>

@@ -3,31 +3,38 @@ package com.ados.mstrotrematch2.dialog
 
 import android.app.Dialog
 import android.content.Context
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.ados.mstrotrematch2.R
-import com.ados.mstrotrematch2.RecyclerViewAdapterNotice
+import com.ados.mstrotrematch2.adapter.RecyclerViewAdapterNotice
+import com.ados.mstrotrematch2.databinding.NoticeDialogBinding
 import com.ados.mstrotrematch2.model.NewsDTO
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-
 import com.google.firebase.firestore.Query
-import kotlinx.android.synthetic.main.notice_dialog.recyclerview_notice
 
 class NoticeDialog(context: Context) : Dialog(context), View.OnClickListener {
+    lateinit var binding: NoticeDialogBinding
 
     var firestore : FirebaseFirestore? = null
-    private val layout = R.layout.notice_dialog
-    //lateinit var recyclerView : RecyclerView
     var lastVisible : DocumentSnapshot? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(layout)
+        binding = NoticeDialogBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        recyclerview_notice.layoutManager = LinearLayoutManager(context)
+        setCancelable(true)
+
+        window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+
+
+        binding.recyclerviewNotice.layoutManager = LinearLayoutManager(context)
 
         var news : ArrayList<NewsDTO> = arrayListOf()
         firestore = FirebaseFirestore.getInstance()
@@ -46,14 +53,14 @@ class NoticeDialog(context: Context) : Dialog(context), View.OnClickListener {
             recyclerview_notice.adapter = RecyclerViewAdapterNotice(news)
         }*/
 
-        recyclerview_notice.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        binding.recyclerviewNotice.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
             }
             override fun onScrolled(recyclerView1: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView1, dx, dy)
 
-                if (!recyclerview_notice.canScrollVertically(1)) {
+                if (!binding.recyclerviewNotice.canScrollVertically(1)) {
                     if (news.size >= 10) {
 
                         refreshData(news)
@@ -74,10 +81,10 @@ class NoticeDialog(context: Context) : Dialog(context), View.OnClickListener {
                 for (document in result) {
                     var person = document.toObject(NewsDTO::class.java)!!
                     news.add(person)
-                    lastVisible = result.documents.get(result.size() - 1)
+                    lastVisible = result.documents[result.size() - 1]
                 }
                 if (result.size() > 0) {
-                    recyclerview_notice.adapter = RecyclerViewAdapterNotice(news)
+                    binding.recyclerviewNotice.adapter = RecyclerViewAdapterNotice(news)
                 }
             }?.addOnFailureListener { exception ->
 
@@ -89,11 +96,11 @@ class NoticeDialog(context: Context) : Dialog(context), View.OnClickListener {
                 for (document in result) {
                     var board = document.toObject(NewsDTO::class.java)!!
                     news.add(board)
-                    lastVisible = result.documents.get(result.size() - 1)
+                    lastVisible = result.documents[result.size() - 1]
                 }
                 //recyclerView.adapter = RecyclerViewAdapterCheering(posts, this)
                 if (result.size() > 0) {
-                    recyclerview_notice.adapter?.notifyItemInserted(news.size)
+                    binding.recyclerviewNotice.adapter?.notifyItemInserted(news.size)
                 }
             }?.addOnFailureListener { exception ->
 

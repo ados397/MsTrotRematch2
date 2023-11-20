@@ -4,7 +4,7 @@
     android:layout_height="match_parent">
 
     <RelativeLayout
-        android:background="#3C4353"
+        android:background="#A4B0CD"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -13,16 +13,18 @@
             android:background="#1C1F2B"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
+
             <TextView
                 android:id="@+id/text_notice_title"
-                android:text="관리자 기능"
-                android:textColor="#ddffffff"
-                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="7dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:text="관리자 기능"
+                android:textSize="18dp"
+                android:textColor="#ddffffff"
+                android:textStyle="bold" />
         </RelativeLayout>
         <LinearLayout
             android:id="@+id/layout_ticket_normal"
@@ -32,47 +34,47 @@
             android:layout_marginLeft="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_ticket_morning"
                 android:text="모닝 티켓"
                 android:textColor="#ddffffff"
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:background="@drawable/btn_round2"
                 android:layout_marginBottom="25dp"
                 android:layout_width="110dp"
                 android:layout_height="40dp"/>
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_ticket_afternoon"
                 android:text="정오 티켓"
                 android:textColor="#ddffffff"
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:background="@drawable/btn_round2"
                 android:layout_marginBottom="25dp"
                 android:layout_width="110dp"
                 android:layout_height="40dp"/>
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_ticket_evening"
                 android:text="저녁 티켓"
                 android:textColor="#ddffffff"
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:background="@drawable/btn_round2"
                 android:layout_marginBottom="25dp"
                 android:layout_width="110dp"
                 android:layout_height="40dp"/>
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_ticket_night"
                 android:text="깜짝 티켓"
                 android:textColor="#ddffffff"
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:background="@drawable/btn_round2"
                 android:layout_marginBottom="25dp"
                 android:layout_width="110dp"
                 android:layout_height="40dp"/>
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_hottime_stop"
                 android:text="🔥핫타임 종료"
                 android:textColor="#ddffffff"
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:background="@drawable/btn_round2"
                 android:layout_marginBottom="25dp"
                 android:layout_width="110dp"
@@ -87,56 +89,47 @@
             android:layout_marginLeft="15dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_ticket_morning_hottime"
                 android:text="핫타임 모닝"
                 android:textColor="#ddffffff"
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:background="@drawable/btn_round3"
                 android:layout_marginBottom="25dp"
                 android:layout_width="110dp"
                 android:layout_height="40dp"/>
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_ticket_afternoon_hottime"
                 android:text="핫타임 정오"
                 android:textColor="#ddffffff"
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:background="@drawable/btn_round3"
                 android:layout_marginBottom="25dp"
                 android:layout_width="110dp"
                 android:layout_height="40dp"/>
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_ticket_evening_hottime"
                 android:text="핫타임 저녁"
                 android:textColor="#ddffffff"
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:background="@drawable/btn_round3"
                 android:layout_marginBottom="25dp"
                 android:layout_width="110dp"
                 android:layout_height="40dp"/>
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_ticket_night_hottime"
                 android:text="핫타임 깜짝"
                 android:textColor="#ddffffff"
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:background="@drawable/btn_round3"
                 android:layout_marginBottom="25dp"
                 android:layout_width="110dp"
                 android:layout_height="40dp"/>
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_hottime_start"
                 android:text="🔥핫타임 시작"
                 android:textColor="#ddffffff"
-                android:textSize="12sp"
-                android:background="@drawable/btn_round3"
-                android:layout_marginBottom="25dp"
-                android:layout_width="110dp"
-                android:layout_height="40dp"/>
-            <Button
-                android:id="@+id/button_hottime_special"
-                android:text="🎉스페셜 티켓"
-                android:textColor="#ddffffff"
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:background="@drawable/btn_round3"
                 android:layout_marginBottom="25dp"
                 android:layout_width="110dp"
@@ -151,58 +144,58 @@
             android:layout_marginLeft="15dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_ticket_morning_hottime2"
                 android:text="🎉이벤트 모닝"
                 android:textColor="#ddffffff"
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:background="@drawable/btn_round5"
                 android:layout_marginBottom="25dp"
                 android:layout_width="110dp"
                 android:layout_height="40dp"/>
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_ticket_afternoon_hottime2"
                 android:text="🎉이벤트 정오"
                 android:textColor="#ddffffff"
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:background="@drawable/btn_round5"
                 android:layout_marginBottom="25dp"
                 android:layout_width="110dp"
                 android:layout_height="40dp"/>
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_ticket_evening_hottime2"
                 android:text="🎉이벤트 저녁"
                 android:textColor="#ddffffff"
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:background="@drawable/btn_round5"
                 android:layout_marginBottom="25dp"
                 android:layout_width="110dp"
                 android:layout_height="40dp"/>
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_ticket_night_hottime2"
                 android:text="🎉이벤트 깜짝"
                 android:textColor="#ddffffff"
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:background="@drawable/btn_round5"
                 android:layout_marginBottom="25dp"
                 android:layout_width="110dp"
                 android:layout_height="40dp"/>
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_hottime_start2"
                 android:text="🔥이벤트 시작"
                 android:textColor="#ddffffff"
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:background="@drawable/btn_round5"
                 android:layout_marginBottom="25dp"
                 android:layout_width="110dp"
                 android:layout_height="40dp"/>
 
-            <Button
-                android:id="@+id/button_ticket_afternoon_weekend"
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_ticket_special2"
                 android:text="🎉스페셜 티켓"
                 android:textColor="#ddffffff"
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:background="@drawable/btn_round5"
                 android:layout_marginBottom="25dp"
                 android:layout_width="110dp"
@@ -234,15 +227,31 @@
                 android:id="@+id/number_picker_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
-            <Button
-                android:id="@+id/button_ticket_random"
-                android:text="행운의 티켓 발송"
-                android:textColor="#ddffffff"
-                android:textSize="12sp"
-                android:background="@drawable/btn_round"
-                android:layout_marginBottom="25dp"
-                android:layout_width="120dp"
-                android:layout_height="40dp"/>
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/button_ticket_random"
+                    android:text="행운의 티켓 발송"
+                    android:textColor="#ddffffff"
+                    android:textSize="12dp"
+                    android:background="@drawable/btn_round"
+                    android:layout_marginBottom="25dp"
+                    android:layout_width="120dp"
+                    android:layout_height="40dp"/>
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/button_hottime_start3"
+                    android:text="🔥이벤트 시작"
+                    android:textColor="#ddffffff"
+                    android:textSize="12dp"
+                    android:background="@drawable/btn_round4"
+                    android:layout_marginLeft="120dp"
+                    android:layout_marginTop="70dp"
+                    android:layout_width="110dp"
+                    android:layout_height="40dp"/>
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
@@ -253,52 +262,52 @@
             android:layout_marginLeft="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_ticket_morning_hottime3"
                 android:text="모닝"
                 android:textColor="#ddffffff"
-                android:textSize="12sp"
-                android:background="@drawable/btn_round5"
+                android:textSize="12dp"
+                android:background="@drawable/btn_round4"
                 android:layout_marginBottom="25dp"
                 android:layout_width="65dp"
                 android:layout_height="40dp"/>
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_ticket_afternoon_hottime3"
                 android:text="정오"
                 android:textColor="#ddffffff"
-                android:textSize="12sp"
-                android:background="@drawable/btn_round5"
+                android:textSize="12dp"
+                android:background="@drawable/btn_round4"
                 android:layout_marginBottom="25dp"
                 android:layout_marginLeft="10dp"
                 android:layout_width="65dp"
                 android:layout_height="40dp"/>
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_ticket_evening_hottime3"
                 android:text="저녁"
                 android:textColor="#ddffffff"
-                android:textSize="12sp"
-                android:background="@drawable/btn_round5"
+                android:textSize="12dp"
+                android:background="@drawable/btn_round4"
                 android:layout_marginBottom="25dp"
                 android:layout_marginLeft="10dp"
                 android:layout_width="65dp"
                 android:layout_height="40dp"/>
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_ticket_night_hottime3"
                 android:text="깜짝"
                 android:textColor="#ddffffff"
-                android:textSize="12sp"
-                android:background="@drawable/btn_round5"
+                android:textSize="12dp"
+                android:background="@drawable/btn_round4"
                 android:layout_marginBottom="25dp"
                 android:layout_marginLeft="10dp"
                 android:layout_width="65dp"
                 android:layout_height="40dp"/>
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_ticket_special3"
                 android:text="스페셜"
                 android:textColor="#ddffffff"
-                android:textSize="12sp"
-                android:background="@drawable/btn_round5"
+                android:textSize="12dp"
+                android:background="@drawable/btn_round4"
                 android:layout_marginBottom="25dp"
                 android:layout_marginLeft="10dp"
                 android:layout_width="65dp"
@@ -314,9 +323,10 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_weight="1" />
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/button_ok"
             android:text="닫기"
+            android:textSize="18dp"
             android:textColor="#ddffffff"
             android:background="@drawable/btn_round"
             android:layout_marginTop="7dp"

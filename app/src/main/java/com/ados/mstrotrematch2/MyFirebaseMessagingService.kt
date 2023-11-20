@@ -28,7 +28,7 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
         //pendingIntent를 이용 알림을 클릭하면 열 앱의 액티비티를 설정해 준다.
         val intent = Intent(this, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT)
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
         val defaultSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         val notificationBuilder = NotificationCompat.Builder(this)
             .setSmallIcon(android.R.drawable.star_big_off)

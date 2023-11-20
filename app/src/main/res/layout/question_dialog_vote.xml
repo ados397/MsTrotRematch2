@@ -4,28 +4,43 @@
     android:layout_height="match_parent">
 
     <RelativeLayout
-        android:background="#262A35"
+        android:id="@+id/layout_background"
+        android:background="@color/report_dialog_sub"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:id="@+id/layout_top"
+            android:background="@drawable/gradient_purple"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"/>
+
         <ImageView
             android:id="@+id/img_profile"
-            android:src="@drawable/profile055"
-            android:layout_margin="10dp"
-            android:layout_width="100dp"
-            android:layout_height="135dp"/>
+            android:layout_width="130dp"
+            android:layout_height="170dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="6dp"
+            android:layout_below="@id/layout_top"
+            android:src="@mipmap/ic_launcher" />
 
         <TextView
             android:id="@+id/text_msg1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_toRightOf="@id/img_profile"
+            android:layout_below="@id/layout_top"
             android:text="ㅇㅇㅇ님에게"
             android:textColor="#ddffffff"
-            android:textStyle="bold"
-            android:layout_marginTop="20dp"
-            android:layout_toRightOf="@id/img_profile"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:textSize="22dp"
+            android:textStyle="bold" />
         <TextView
             android:id="@+id/text_msg2"
             android:text="투표 하시겠습니까?"
+            android:textSize="20dp"
             android:textColor="#ddffffff"
             android:textStyle="bold"
             android:layout_below="@+id/text_msg1"
@@ -42,63 +57,94 @@
             android:layout_marginTop="20dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>-->
-        <TextView
-            android:id="@+id/text_count"
-            android:text="현재 득표수 : 00"
-            android:textColor="#ddA78FFF"
-            android:textStyle="bold"
+
+        <LinearLayout
+            android:id="@+id/layout_favorite"
+            android:orientation="vertical"
+            android:gravity="center"
             android:layout_below="@+id/text_msg2"
             android:layout_toRightOf="@id/img_profile"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:id="@+id/img_favorite"
+                android:src="@drawable/hearts_fill"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="최애등록"
+                android:textSize="14dp"
+                android:textColor="@color/progress_background_0"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/text_count"
+            android:text="득표수 : 00"
+            android:textSize="20dp"
+            android:textColor="@color/display_board_6"
+            android:textStyle="bold"
+            android:layout_below="@+id/img_profile"
+            android:layout_centerHorizontal="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
         <LinearLayout
             android:id="@+id/layout_multi_count"
-            android:visibility="gone"
             android:layout_below="@+id/text_count"
-            android:layout_toRightOf="@id/img_profile"
+            android:layout_centerHorizontal="true"
             android:layout_marginTop="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_minus"
                 android:text="-"
+                android:textSize="28dp"
                 android:background="@drawable/btn_circle"
-                android:layout_width="30dp"
-                android:layout_height="30dp"/>
+                android:layout_gravity="center"
+                android:layout_width="40dp"
+                android:layout_height="40dp"/>
             <TextView
                 android:id="@+id/text_input_count"
                 android:text="1"
-                android:background="@drawable/btn_circle2"
-                android:textColor="@color/colorAccent"
+                android:textSize="18dp"
+                android:background="@drawable/btn_round9"
+                android:textColor="@color/white"
                 android:textStyle="bold"
                 android:gravity="center"
+                android:layout_gravity="center"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
-                android:layout_width="50dp"
-                android:layout_height="30dp"/>
-            <Button
+                android:layout_width="80dp"
+                android:layout_height="40dp"/>
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_plus"
                 android:text="+"
+                android:textSize="28dp"
                 android:background="@drawable/btn_circle"
-                android:layout_width="30dp"
-                android:layout_height="30dp"/>
-            <Button
+                android:layout_gravity="center"
+                android:layout_width="40dp"
+                android:layout_height="40dp"/>
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_max"
                 android:text="MAX"
+                android:textSize="18dp"
+                android:textStyle="bold"
                 android:background="@drawable/btn_circle"
                 android:layout_marginLeft="5dp"
-                android:layout_width="50dp"
-                android:layout_height="30dp"/>
+                android:layout_width="60dp"
+                android:layout_height="40dp"/>
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/layout_input_desc"
             android:layout_below="@+id/text_count"
-            android:layout_toRightOf="@id/img_profile"
-            android:layout_marginTop="10dp"
+            android:layout_centerHorizontal="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
             <ImageView
@@ -110,11 +156,37 @@
             <TextView
                 android:id="@+id/text_input_desc"
                 android:text="오늘 광고를 3 회 더 보면 다중 투표가 활성화 됩니다."
+                android:textSize="14dp"
                 android:textColor="#EEFFD600"
                 android:textStyle="bold"
-                android:layout_below="@+id/text_count"
-                android:layout_toRightOf="@id/img_profile"
-                android:layout_marginRight="10dp"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_premium"
+            android:orientation="horizontal"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/layout_multi_count"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/img_premium"
+                android:src="@drawable/premium_enable"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="다중투표 자동 활성화"
+                android:textSize="16dp"
+                android:textColor="@color/premium"
+                android:layout_gravity="center"
+                android:layout_marginLeft="7dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
         </LinearLayout>
@@ -122,33 +194,37 @@
     </RelativeLayout>
 
     <LinearLayout
-        android:background="#5244CD"
+        android:background="@color/dialog"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <View
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_weight="1" />
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/button_ok"
-            android:text="네"
-            android:textColor="#ddffffff"
-            android:background="@drawable/btn_round"
-            android:layout_marginTop="7dp"
-            android:layout_marginRight="7dp"
             android:layout_width="wrap_content"
-            android:layout_height="35dp"/>
-        <Button
-            android:id="@+id/button_cancel"
-            android:text="아니오"
-            android:textColor="#ddffffff"
-            android:background="@drawable/btn_round"
+            android:layout_height="34dp"
+            android:layout_gravity="center"
             android:layout_marginTop="7dp"
             android:layout_marginRight="10dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="7dp"
+            android:background="@drawable/btn_round_white2"
+            android:text="네"
+            android:textColor="@color/text"
+            android:textSize="18dp" />
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_cancel"
             android:layout_width="wrap_content"
-            android:layout_height="35dp"/>
+            android:layout_height="34dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="7dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="7dp"
+            android:background="@drawable/btn_round_white2"
+            android:text="아니오"
+            android:textColor="@color/text"
+            android:textSize="18dp" />
     </LinearLayout>
-
 
 </LinearLayout>

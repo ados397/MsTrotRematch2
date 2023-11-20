@@ -10,7 +10,7 @@ package com.ados.mstrotrematch2.model
 data class YoutubeApi (
     var q: String? = null,
     var part: String? = "snippet",
-    var key: String? = "AIzaSyBpnA7k1IhucLSjsNTvwP0PSLS7vk8fBvQ", // 관리자모드
+    var key: String? = "", // 관리자모드
     var type: String? = "video",
     var maxResults: String? = "50",
     var regionCode: String? = "KR",

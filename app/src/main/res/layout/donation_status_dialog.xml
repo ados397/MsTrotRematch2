@@ -3,151 +3,222 @@
     android:orientation="vertical" android:layout_width="wrap_content"
     android:layout_height="match_parent">
 
+    <ImageView
+        android:id="@+id/img_line_top"
+        android:src="@drawable/gold_line_top"
+        android:layout_marginBottom="-5dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
     <RelativeLayout
-        android:background="#262A35"
+        android:background="@color/report_dialog_sub"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
         <ImageView
             android:id="@+id/img_profile"
-            android:src="@drawable/profile055"
-            android:layout_margin="10dp"
-            android:layout_width="100dp"
-            android:layout_height="135dp"/>
+            android:layout_width="117.3dp"
+            android:layout_height="158.7dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
+            android:src="@drawable/profile001" />
 
-        <RelativeLayout
+        <LinearLayout
+            android:id="@+id/layout_info"
             android:layout_toRightOf="@id/img_profile"
+            android:orientation="vertical"
             android:layout_marginTop="10dp"
             android:layout_marginRight="10dp"
             android:layout_marginBottom="10dp"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content">
+
             <TextView
                 android:id="@+id/text_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="[ ㅇㅇㅇ ] 가수님"
                 android:textColor="#ddffffff"
-                android:textStyle="bold"
-                android:textSize="17sp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-            <TextView
-                android:id="@+id/text_rank"
-                android:text="현재순위 : "
-                android:textColor="#ddffffff"
-                android:textStyle="bold"
-                android:layout_below="@+id/text_name"
-                android:layout_marginTop="10dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-            <TextView
-                android:id="@+id/text_rank2"
-                android:text="1위"
-                android:textColor="#ffd93d"
-                android:textStyle="bold"
-                android:layout_below="@+id/text_name"
-                android:layout_toRightOf="@id/text_rank"
-                android:layout_marginTop="10dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-            <ImageView
-                android:id="@+id/img_crown"
-                android:src="@drawable/crown_gold"
-                android:layout_marginLeft="5dp"
-                android:layout_below="@+id/text_name"
-                android:layout_toRightOf="@id/text_rank2"
-                android:layout_marginTop="10dp"
-                android:layout_width="20dp"
-                android:layout_height="20dp"/>
-            <TextView
-                android:id="@+id/text_count1"
-                android:text="득표수 : "
-                android:textColor="#ddffffff"
-                android:textStyle="bold"
-                android:layout_below="@+id/text_rank"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-            <TextView
-                android:id="@+id/text_count2"
-                android:text="1,900,000"
-                android:textColor="#ddA78FFF"
-                android:textStyle="bold"
-                android:layout_below="@+id/text_rank"
-                android:layout_toRightOf="@id/text_count1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-            <TextView
-                android:id="@+id/text_donation1"
-                android:text="적립 기부금 : "
-                android:textColor="#ddffffff"
-                android:textStyle="bold"
-                android:layout_below="@+id/text_count1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-            <TextView
-                android:id="@+id/text_donation2"
-                android:text="10만원"
-                android:textColor="#ffd93d"
-                android:textStyle="bold"
-                android:layout_below="@+id/text_count1"
-                android:layout_toRightOf="@id/text_donation1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:textSize="24dp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/text_rank"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="현재순위 : "
+                    android:textColor="#ddffffff"
+                    android:textSize="20dp"
+                    android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/text_rank2"
+                    android:text="1위"
+                    android:textSize="23dp"
+                    android:textColor="#ffd93d"
+                    android:textStyle="bold"
+                    android:layout_gravity="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <ImageView
+                    android:id="@+id/img_crown"
+                    android:src="@drawable/crown_gold"
+                    android:layout_marginLeft="5dp"
+                    android:layout_gravity="center"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/text_count1"
+                    android:text="득표수 : "
+                    android:textSize="20dp"
+                    android:textColor="#ddffffff"
+                    android:textStyle="bold"
+                    android:layout_gravity="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:id="@+id/text_count2"
+                    android:text="1,900,000"
+                    android:textSize="20dp"
+                    android:textColor="@color/display_board_10"
+                    android:textStyle="bold"
+                    android:layout_gravity="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_my_vote"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/text_my_count1"
+                    android:text="👉 내 투표 수 : "
+                    android:textSize="16dp"
+                    android:textColor="@color/display_board_2"
+                    android:textStyle="bold"
+                    android:layout_gravity="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:id="@+id/text_my_count2"
+                    android:text="1,900,000"
+                    android:textSize="16dp"
+                    android:textColor="@color/progress_background_100"
+                    android:textStyle="bold"
+                    android:layout_gravity="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/text_donation1"
+                    android:text="적립 기부금 : "
+                    android:textSize="20dp"
+                    android:textColor="#ddffffff"
+                    android:textStyle="bold"
+                    android:layout_gravity="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:id="@+id/text_donation2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="10만원"
+                    android:textColor="#ffd93d"
+                    android:textSize="23dp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
             <TextView
                 android:id="@+id/text_donation_desc"
-                android:text="( 100만표 달성 )"
-                android:textColor="#90D863"
+                android:text="⭐100만표 달성⭐"
+                android:textColor="@color/display_board_8"
                 android:textStyle="bold"
-                android:textSize="12sp"
+                android:textSize="20dp"
                 android:layout_below="@+id/text_donation1"
-                android:layout_marginLeft="35dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
-        </RelativeLayout>
+        </LinearLayout>
 
-        <RelativeLayout
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_below="@id/img_profile"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_marginBottom="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
-            <TextView
-                android:id="@+id/text_next_count1"
-                android:text="20만원"
-                android:textColor="#ffd93d"
-                android:textStyle="bold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-            <TextView
-                android:id="@+id/text_next_count2"
-                android:text=" 적립까지 남은 표 : "
-                android:textColor="#ddffffff"
-                android:textStyle="bold"
-                android:layout_toRightOf="@id/text_next_count1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-            <TextView
-                android:id="@+id/text_next_count3"
-                android:text="100,000"
-                android:textColor="#ddA78FFF"
-                android:textStyle="bold"
-                android:layout_toRightOf="@id/text_next_count2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/text_next_count1"
+                    android:text="20만원"
+                    android:textSize="23dp"
+                    android:textColor="#ffd93d"
+                    android:textStyle="bold"
+                    android:layout_gravity="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:id="@+id/text_next_count2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text=" 적립까지 남은 표 : "
+                    android:textColor="#ddffffff"
+                    android:textSize="20dp"
+                    android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/text_next_count3"
+                    android:text="100,000"
+                    android:textSize="20dp"
+                    android:textColor="@color/display_board_10"
+                    android:textStyle="bold"
+                    android:layout_gravity="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
             <TextView
                 android:id="@+id/text_last_donation"
+                android:layout_gravity="center"
                 android:text="이대로 금 왕관 확정 시 30만원 추가 적립"
                 android:textColor="#E854C5"
                 android:textStyle="bold"
-                android:textSize="12sp"
+                android:textSize="18dp"
                 android:layout_below="@+id/text_next_count1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
             <TextView
                 android:id="@+id/text_desc1"
-                android:text="- 투표결과에 따라 시즌 종료 후 기부단체에 기부됩니다."
+                android:text="- 투표결과에 따라 시즌 종료 후 가수님의 이름으로 적립금을 기부합니다."
                 android:textColor="#ffd93d"
                 android:textStyle="bold"
-                android:textSize="12sp"
+                android:textSize="16dp"
                 android:layout_below="@+id/text_last_donation"
                 android:layout_marginTop="20dp"
                 android:layout_width="wrap_content"
@@ -157,7 +228,7 @@
                 android:text="- 100만 표마다 10만원씩 적립됩니다."
                 android:textColor="#BCBCBC"
                 android:textStyle="bold"
-                android:textSize="12sp"
+                android:textSize="16dp"
                 android:layout_below="@+id/text_desc1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
@@ -166,31 +237,33 @@
                 android:text="- 시즌 종료 결과 금/은/동 왕관은 각각 30/20/10만원 추가 적립 됩니다."
                 android:textColor="#BCBCBC"
                 android:textStyle="bold"
-                android:textSize="12sp"
+                android:textSize="16dp"
                 android:layout_below="@+id/text_desc2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
-        </RelativeLayout>
+        </LinearLayout>
     </RelativeLayout>
 
     <LinearLayout
-        android:background="#5244CD"
+        android:background="@color/dialog"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <View
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_weight="1" />
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/button_ok"
-            android:text="확인"
-            android:textColor="#ddffffff"
-            android:background="@drawable/btn_round"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_gravity="center"
             android:layout_marginTop="7dp"
             android:layout_marginRight="10dp"
-            android:layout_marginBottom="10dp"
-            android:layout_width="wrap_content"
-            android:layout_height="35dp"/>
+            android:layout_marginBottom="7dp"
+            android:background="@drawable/btn_round_white2"
+            android:text="확인"
+            android:textColor="@color/text"
+            android:textSize="18dp" />
     </LinearLayout>
 
 

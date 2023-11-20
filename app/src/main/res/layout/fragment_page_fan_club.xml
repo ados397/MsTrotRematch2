@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layout_main"
+    tools:context=".page.FragmentPageFanClub">
+
+    <LinearLayout
+        android:id="@+id/layout_tab"
+        android:orientation="horizontal"
+        android:layout_centerHorizontal="true"
+        android:padding="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/text_tab_info"
+            android:fontFamily="@font/font"
+            android:text="정보"
+            android:textColor="@color/white"
+            android:textSize="20dp"
+            android:background="@drawable/btn_round"
+            android:paddingLeft="20dp"
+            android:paddingTop="5dp"
+            android:paddingRight="20dp"
+            android:paddingBottom="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:id="@+id/text_tab_member"
+            android:fontFamily="@font/font"
+            android:text="멤버"
+            android:textColor="@color/black"
+            android:textSize="20dp"
+            android:paddingLeft="20dp"
+            android:paddingTop="5dp"
+            android:paddingRight="20dp"
+            android:paddingBottom="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:id="@+id/text_tab_rank"
+            android:fontFamily="@font/font"
+            android:text="순위"
+            android:textColor="@color/black"
+            android:textSize="20dp"
+            android:paddingLeft="20dp"
+            android:paddingTop="5dp"
+            android:paddingRight="20dp"
+            android:paddingBottom="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewpager"
+        android:layout_below="@+id/layout_tab"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <FrameLayout
+        android:id="@+id/layout_fragment_fan_club"
+        android:layout_below="@+id/layout_tab"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <RelativeLayout
+        android:id="@+id/layout_chat"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:id="@+id/layout_button_chat"
+            android:layout_alignParentRight="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/button_chat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="15dp"
+                android:backgroundTint="@color/yellow"
+                android:src="@drawable/chat"
+                card_view:borderWidth="0dp" />
+
+            <ImageView
+                android:id="@+id/img_chat_new"
+                android:layout_marginLeft="25dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/new_item" />
+
+        </RelativeLayout>
+
+
+        <TextView
+            android:id="@+id/text_chat"
+            android:text="관리자 : 여기가 채팅이 표시되는 영역 흘러가는 텍스트는 어떻게 될 것 인가"
+            android:textSize="18dp"
+            android:textColor="@color/text"
+            android:fontFamily="@font/font"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:background="@drawable/floating_chat_background"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:paddingLeft="15dp"
+            android:paddingRight="15dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="3dp"
+            android:layout_marginTop="10dp"
+            android:layout_toLeftOf="@+id/layout_button_chat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </RelativeLayout>
+
+</RelativeLayout>

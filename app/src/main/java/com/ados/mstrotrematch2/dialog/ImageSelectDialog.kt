@@ -5,65 +5,57 @@ import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.view.Window
 import android.widget.Toast
 import androidx.recyclerview.widget.GridLayoutManager
-import com.ados.mstrotrematch2.OnImageSelectItemClickListener
-import com.ados.mstrotrematch2.R
-import com.ados.mstrotrematch2.RecyclerViewAdapterImageSelect
+import com.ados.mstrotrematch2.adapter.OnImageSelectItemClickListener
+import com.ados.mstrotrematch2.adapter.RecyclerViewAdapterImageSelect
+import com.ados.mstrotrematch2.databinding.ImageSelectDialogBinding
 import com.ados.mstrotrematch2.model.RankDTO
+import com.ados.mstrotrematch2.model.RankExDTO
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import kotlinx.android.synthetic.main.image_select_dialog.*
-import kotlinx.android.synthetic.main.url_dialog.*
 
 
 class ImageSelectDialog(context: Context) : Dialog(context), View.OnClickListener,
     OnImageSelectItemClickListener {
 
-    private val layout = R.layout.image_select_dialog
-    var img_name = ""
-    var img_url = ""
+    lateinit var binding: ImageSelectDialogBinding
+    var imgName = ""
+    var imgUrl = ""
+    var peopleName = ""
+    var peopleDocName = ""
+    var peopleExDTOs : ArrayList<RankExDTO> = arrayListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(layout)
+        binding = ImageSelectDialogBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        recyclerview_img.layoutManager = GridLayoutManager(context, 3)
+        window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
-        var people : ArrayList<RankDTO> = arrayListOf()
-        var firestore = FirebaseFirestore.getInstance()
-        firestore?.collection("people")?.orderBy("name", Query.Direction.ASCENDING)?.get()?.addOnSuccessListener { result ->
-            for (document in result) {
-                var person = document.toObject(RankDTO::class.java)!!
-                people.add(person)
-            }
-            recyclerview_img.adapter = RecyclerViewAdapterImageSelect(people, this)
-        }
-            ?.addOnFailureListener { exception ->
+        binding.recyclerviewImg.layoutManager = GridLayoutManager(context, 3)
+        binding.recyclerviewImg.adapter = RecyclerViewAdapterImageSelect(peopleExDTOs, this)
 
-            }
-
-        //recyclerview_img.adapter = RecyclerViewAdapterImageSelect(this)
-
-        button_url.setOnClickListener {
+        binding.buttonUrl.setOnClickListener {
             val dialog = UrlDialog(context)
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
             dialog.setCanceledOnTouchOutside(false)
             dialog.show()
-            dialog.button_cancel_url.setOnClickListener { // No
+            dialog.binding.buttonCancelUrl.setOnClickListener { // No
                 dialog.dismiss()
             }
 
-            dialog.button_ok.setOnClickListener { // Yes
-                var url = dialog.edit_url.text.toString().replace(" ","")
-                if (url.length == 0) {
+            dialog.binding.buttonOk.setOnClickListener { // Yes
+                var url = dialog.binding.editUrl.text.toString().replace(" ","")
+                if (url.isNullOrEmpty()) {
                     Toast.makeText(context, "URL을 입력해주세요.", Toast.LENGTH_SHORT).show()
-                } else if (url.toUpperCase().contains("HTTP") == false) {
+                } else if (!url.toUpperCase().contains("HTTP")) {
                     Toast.makeText(context, "URL이 잘못 입력되었습니다.", Toast.LENGTH_SHORT).show()
                 } else {
-                    img_name = ""
-                    img_url = dialog.edit_url.text.toString()
+                    imgName = ""
+                    imgUrl = dialog.binding.editUrl.text.toString()
                     dialog.dismiss()
                     dismiss()
                 }
@@ -83,8 +75,10 @@ class ImageSelectDialog(context: Context) : Dialog(context), View.OnClickListene
         }*/
     }
 
-    override fun onItemClick(item: RankDTO) {
-        img_name = item.image.toString()
+    override fun onItemClick(item: RankExDTO) {
+        imgName = item.rankDTO?.image.toString()
+        peopleName = item.rankDTO?.name.toString()
+        peopleDocName = item.rankDTO?.docname.toString()
         dismiss()
     }
 

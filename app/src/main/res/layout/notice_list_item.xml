@@ -1,44 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/rank_item_layout"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="3dp">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout_main"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/text_title"
-        android:text="[공지] 공지사항 제목"
-        android:textStyle="bold"
-        android:textColor="#D55D7F"
-        android:layout_marginLeft="10dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-    <TextView
-        android:id="@+id/text_time"
-        android:text="(0000-00-00 00:00)"
-        android:textSize="10sp"
-        android:textColor="#E6DC87"
-        android:layout_below="@+id/text_title"
-        android:layout_marginLeft="10dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-    <TextView
-        android:id="@+id/text_content"
-        android:text="공지 내용"
-        android:textSize="12sp"
-        android:textColor="#FFFFFF"
-        android:linksClickable="true"
-        android:autoLink="web"
-        android:layout_below="@+id/text_time"
-        android:layout_marginLeft="10dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
-    <View
-        android:background="#787285"
-        android:layout_below="@+id/text_content"
-        android:layout_marginTop="5dp"
+    <RelativeLayout
+        android:id="@+id/layout_title"
+        android:background="@color/report_dialog"
+        android:paddingLeft="10dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
         android:layout_width="match_parent"
-        android:layout_height="1dp"/>
+        android:layout_height="wrap_content">
 
-</RelativeLayout>
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="45dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/text_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#D55D7F"
+                android:text="공지사항 제목"
+                android:textSize="16dp" />
+
+            <TextView
+                android:id="@+id/text_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_disable"
+                android:text="2022.03.08 13:31"
+                android:textSize="12dp" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/button_expand"
+            android:layout_width="70dp"
+            android:layout_height="30dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_baseline_keyboard_arrow_down_24" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_content"
+        android:orientation="vertical"
+        android:paddingLeft="20dp"
+        android:paddingRight="10dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:background="@color/report_dialog_sub"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/img_notice"
+            android:layout_width="match_parent"
+            android:layout_height="90dp"/>
+
+        <TextView
+            android:id="@+id/text_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="5dp"
+            android:autoLink="web"
+            android:linksClickable="true"
+            android:textColor="@color/report_text_content"
+            android:text="공지사항 내용"
+            android:textSize="14dp" />
+    </LinearLayout>
+
+</LinearLayout>

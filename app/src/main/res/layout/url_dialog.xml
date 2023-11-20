@@ -14,13 +14,14 @@
         <TextView
             android:id="@+id/text_url"
             android:text="URL"
+            android:textSize="18dp"
             android:layout_margin="7dp"
             android:layout_below="@+id/img_preview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <EditText
             android:id="@+id/edit_url"
-            android:textSize="12sp"
+            android:textSize="18dp"
             android:inputType="text"
             android:layout_below="@+id/img_preview"
             android:layout_toRightOf="@+id/text_url"
@@ -38,27 +39,30 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_weight="1" />
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/button_preview"
             android:text="미리보기"
+            android:textSize="18dp"
             android:textColor="#ddffffff"
             android:background="@drawable/btn_round"
             android:layout_marginTop="7dp"
             android:layout_marginRight="7dp"
             android:layout_width="wrap_content"
             android:layout_height="35dp"/>
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/button_ok"
             android:text="확인"
+            android:textSize="18dp"
             android:textColor="#ddffffff"
             android:background="@drawable/btn_round"
             android:layout_marginTop="7dp"
             android:layout_marginRight="7dp"
             android:layout_width="wrap_content"
             android:layout_height="35dp"/>
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/button_cancel_url"
             android:text="취소"
+            android:textSize="18dp"
             android:textColor="#ddffffff"
             android:background="@drawable/btn_round"
             android:layout_marginTop="7dp"

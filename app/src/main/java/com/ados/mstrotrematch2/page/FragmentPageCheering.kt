@@ -1,11 +1,8 @@
 package com.ados.mstrotrematch2.page
 
 
-import android.graphics.Color
 import android.graphics.Paint
 import android.os.Bundle
-import android.os.SystemClock
-import android.preference.PreferenceManager
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -14,75 +11,68 @@ import android.view.Window
 import android.widget.AbsListView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentTransaction
+import androidx.fragment.app.setFragmentResultListener
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ados.mstrotrematch2.*
-import com.ados.mstrotrematch2.dialog.BoardDialog
-import com.ados.mstrotrematch2.dialog.BoardWriteDialog
-import com.ados.mstrotrematch2.dialog.LoadingDialog
-import com.ados.mstrotrematch2.dialog.QuestionDialog
-import com.ados.mstrotrematch2.model.*
 import com.ados.mstrotrematch2.R
+import com.ados.mstrotrematch2.adapter.OnCheeringItemClickListener
+import com.ados.mstrotrematch2.adapter.RecyclerViewAdapterCheering
+import com.ados.mstrotrematch2.adapter.RecyclerViewAdapterCheeringTotal
+import com.ados.mstrotrematch2.database.DBHelperReport
+import com.ados.mstrotrematch2.database.DBHelperCheeringBoard
+import com.ados.mstrotrematch2.databinding.FragmentPageCheeringBinding
+import com.ados.mstrotrematch2.dialog.*
+import com.ados.mstrotrematch2.firebase.FirebaseRepository
+import com.ados.mstrotrematch2.firebase.FirebaseViewModel
+import com.ados.mstrotrematch2.model.*
+import com.ados.mstrotrematch2.util.MySharedPreferences
 import com.bumptech.glide.Glide
-import com.fsn.cauly.CaulyAdInfo
-import com.fsn.cauly.CaulyAdInfoBuilder
-import com.fsn.cauly.CaulyInterstitialAd
-import com.fsn.cauly.CaulyInterstitialAdListener
-import com.google.android.gms.ads.AdListener
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.InterstitialAd
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
-import kotlinx.android.synthetic.main.board_dialog.button_cancel
-import kotlinx.android.synthetic.main.cheering_top_item.view.*
-import kotlinx.android.synthetic.main.fragment_fragment_page_cheering.*
-import kotlinx.android.synthetic.main.fragment_fragment_page_cheering.button_refresh
-import kotlinx.android.synthetic.main.fragment_fragment_page_cheering.img_season_logo
-import kotlinx.android.synthetic.main.fragment_fragment_page_cheering.swipe_refresh_layout
-import kotlinx.android.synthetic.main.question_dialog.*
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.concurrent.timer
 
 class FragmentPageCheering : Fragment(), OnCheeringItemClickListener {
-    enum class ViewType {
-        POPULAR, NEW, STATISTICS
-    }
+    private var _binding: FragmentPageCheeringBinding? = null
+    private val binding get() = _binding!!
 
-    var decimalFormat: DecimalFormat = DecimalFormat("###,###")
-    var dbHandler : DatabaseHelper? = null
-    var firestore : FirebaseFirestore? = null
+    private val firebaseViewModel : FirebaseViewModel by viewModels()
+    private var toast : Toast? = null
+
+    private val decimalFormat: DecimalFormat = DecimalFormat("###,###")
+    private var dbHandler : DBHelperCheeringBoard? = null
+    private lateinit var dbHandlerReport : DBHelperReport
     lateinit var recyclerView : RecyclerView
-    private var posts_popular : ArrayList<BoardDTO> = arrayListOf()
-    private var posts_new : ArrayList<BoardDTO> = arrayListOf()
-    private var people : ArrayList<RankDTO> = arrayListOf()
-    private var statistics : ArrayList<BoardDTO> = arrayListOf()
-    var pageIndex : Int? = 0
-    var lastVisible : DocumentSnapshot? = null
-    var isScrolling = false
-    var isViewType = ViewType.POPULAR
-    private var isrefresh = true
-    var cheeringboardCollectionName = ""
-    var peopleCollectionName = ""
-    var preferencesDTO : PreferencesDTO? = null
+    private var isScrolling = false
+    private var isViewType = FirebaseRepository.CheeringBoardType.POPULAR
+    private var isRefresh = true
+    private var isInitPopularData = true // 해당 변수가 false 면 데이터 획득만 갱신 x
+    private var isInitNewData = false // 최초 실행 시에는 인기순 통계가 출력 되도록 함
+    private var isInitTotalData = false // 최초 실행 시에는 인기순 통계가 출력 되도록 함
+    private var insertRefresh = false
+    private var isSwitchButtonMsg = false
 
-    var loadingDialog : LoadingDialog? = null
+    private val sharedPreferences: MySharedPreferences by lazy {
+        MySharedPreferences(requireContext())
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        //return inflater.inflate(R.layout.fragment_fragment_page_cheering, container, false)
+        _binding = FragmentPageCheeringBinding.inflate(inflater, container, false)
+        var rootView = binding.root.rootView
 
-        var rootView = inflater.inflate(R.layout.fragment_fragment_page_cheering, container, false)
         recyclerView = rootView.findViewById(R.id.recyclerview_cheering!!)as RecyclerView
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        dbHandler = DatabaseHelper(getActivity()!!)
-        firestore = FirebaseFirestore.getInstance()
+        dbHandler = DBHelperCheeringBoard(requireContext())
+        dbHandlerReport = DBHelperReport(requireContext())
 
         return rootView
     }
@@ -90,115 +80,149 @@ class FragmentPageCheering : Fragment(), OnCheeringItemClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        firestore?.collection("preferences")?.document("season")?.addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
-            var seasonDTO = documentSnapshot?.toObject(SeasonDTO::class.java)
-            peopleCollectionName = "people_cheering"
+        val userDTO = (activity as MainActivity?)?.getUser()!!
 
-            // 시즌 변경 작업
-            //seasonDTO?.seasonNum = 6
-            var rank_background_img = R.drawable.spotlight_s6_cheering
-            var season_logo_img = R.drawable.season6_logo
-            if (seasonDTO?.seasonNum == 5) {
-                cheeringboardCollectionName = "cheeringboard_s5"
-                rank_background_img = R.drawable.spotlight_s5_cheering
-                season_logo_img = R.drawable.season5_logo
-            } else {
-                cheeringboardCollectionName = "cheeringboard_s6"
+        binding.switchFavorite.isChecked = sharedPreferences.getBoolean(MySharedPreferences.PREF_KEY_CHEERING_SHOW_FAVORITE, false)
+
+        val seasonDTO = (activity as MainActivity?)?.getSeason()!!
+        if (seasonDTO != null) {
+            //seasonDTO.seasonNum = 2 // @ 시즌 변경
+            var imgBackgroundName = "spotlight_new_s${seasonDTO.seasonNum}_cheering"
+            var imageID = resources.getIdentifier(imgBackgroundName, "drawable", requireContext().packageName)
+            if (imageID > 0) {
+                Glide.with(binding.imgRankBackground.context)
+                    .asBitmap()
+                    .load(imageID) ///feed in path of the image
+                    .optionalFitCenter()
+                    .into(binding.imgRankBackground)
             }
-            Glide.with(img_rank_background.context)
-                .asBitmap()
-                .load(rank_background_img) ///feed in path of the image
-                .fitCenter()
-                .into(img_rank_background)
-            Glide.with(img_season_logo.context)
-                .asBitmap()
-                .load(season_logo_img) ///feed in path of the image
-                .fitCenter()
-                .into(img_season_logo)
+
+            var imgSeasonLogoName = "new_season${seasonDTO.seasonNum}_logo"
+            imageID = resources.getIdentifier(imgSeasonLogoName, "drawable", requireContext().packageName)
+            if (imageID > 0) {
+                Glide.with(binding.imgSeasonLogo.context)
+                    .asBitmap()
+                    .load(imageID) ///feed in path of the image
+                    .optionalFitCenter()
+                    .into(binding.imgSeasonLogo)
+            }
+        }
+        binding.textTop3.text = "응원하기 ${seasonDTO.getWeek()}주차"
+
+        val preferencesDTO = (activity as MainActivity?)?.getPreferences()!!
+        val writeCount = sharedPreferences.getIntDate(MySharedPreferences.PREF_KEY_WRITE_CHEERING, 0)
+        var writeCountMax = if (userDTO.isPremium()) {
+            preferencesDTO.writeCount!!.times(2)
+        } else {
+            preferencesDTO.writeCount!!
         }
 
-        firestore?.collection("preferences")?.document("preferences")?.addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
-            preferencesDTO = documentSnapshot?.toObject(PreferencesDTO::class.java)
+        if (writeCount >= writeCountMax) { // 오늘 작성 가능한 글을 모두 다 작성했다면
+            binding.imgWriteNew.visibility = View.GONE
+        } else { // 아직 작성 횟수가 남았다면
+            binding.imgWriteNew.visibility = View.VISIBLE
         }
 
-        layout_top1.visibility = View.GONE
-        layout_top2.visibility = View.GONE
-        layout_top3.visibility = View.GONE
-        //layout_top1.img_crown.setImageResource(R.drawable.crown_gold)
-        //layout_top2.img_crown.setImageResource(R.drawable.crown_silver)
-        //layout_top3.img_crown.setImageResource(R.drawable.crown_bronze)
-        Glide.with(layout_top1.img_crown.context)
+        observeCheeringBoard()
+        isViewType = FirebaseRepository.CheeringBoardType.NEW
+        refreshData()
+
+        isViewType = FirebaseRepository.CheeringBoardType.POPULAR
+        refreshData()
+
+        refreshPeople()
+
+        binding.layoutTop1.root.visibility = View.GONE
+        binding.layoutTop2.root.visibility = View.GONE
+        binding.layoutTop3.root.visibility = View.GONE
+        //binding.layoutTop1.imgCrown.setImageResource(R.drawable.crown_gold)
+        //binding.layoutTop2.imgCrown.setImageResource(R.drawable.crown_silver)
+        //binding.layoutTop3.imgCrown.setImageResource(R.drawable.crown_bronze)
+        Glide.with(binding.layoutTop1.imgCrown.context)
             .asBitmap()
             .load(R.drawable.crown_gold) ///feed in path of the image
-            .fitCenter()
-            .into(layout_top1.img_crown)
-        Glide.with(layout_top2.img_crown.context)
+            .optionalFitCenter()
+            .into(binding.layoutTop1.imgCrown)
+        Glide.with(binding.layoutTop2.imgCrown.context)
             .asBitmap()
             .load(R.drawable.crown_silver) ///feed in path of the image
-            .fitCenter()
-            .into(layout_top2.img_crown)
-        Glide.with(layout_top3.img_crown.context)
+            .optionalFitCenter()
+            .into(binding.layoutTop2.imgCrown)
+        Glide.with(binding.layoutTop3.imgCrown.context)
             .asBitmap()
             .load(R.drawable.crown_bronze) ///feed in path of the image
-            .fitCenter()
-            .into(layout_top3.img_crown)
+            .optionalFitCenter()
+            .into(binding.layoutTop3.imgCrown)
 
-        Glide.with(img_question.context)
+        Glide.with(binding.imgQuestion.context)
             .asBitmap()
             .load(R.drawable.question) ///feed in path of the image
-            .fitCenter()
-            .into(img_question)
+            .optionalFitCenter()
+            .into(binding.imgQuestion)
 
-        Glide.with(layout_top3.img_crown.context)
+        Glide.with(binding.layoutTop3.imgCrown.context)
             .asBitmap()
             .load(R.drawable.crown_bronze) ///feed in path of the image
-            .fitCenter()
-            .into(layout_top3.img_crown)
+            .optionalFitCenter()
+            .into(binding.layoutTop3.imgCrown)
 
-        number_picker.minValue = 0
-        number_picker.maxValue = 47
-        number_picker.wrapSelectorWheel = false
-
-        loading()
-        timer(period = 100)
+        (activity as MainActivity?)?.loading()
+        /*timer(period = 100)
         {
-            if (cheeringboardCollectionName.isNotEmpty() && peopleCollectionName.isNotEmpty()) {
+            if (cheeringBoardCollectionName.isNotEmpty() && peopleCollectionName.isNotEmpty()) {
                 cancel()
-                getActivity()!!.runOnUiThread {
-                    isViewType = ViewType.NEW
-                    refreshData(posts_new)
+                requireActivity().runOnUiThread {
+                    var pref = PreferenceManager.getDefaultSharedPreferences(requireActivity())
+                    val keyString = "WriteCheering${SimpleDateFormat("yyyyMMdd").format(Date())}"
+                    val writeCount = pref.getInt(keyString, 0)
+                    binding.textCount.text = "남은횟수 : ${preferencesDTO?.writeCount!!.minus(writeCount)}"
 
-                    isViewType = ViewType.POPULAR
-                    refreshData(posts_popular)
+                    isViewType = FirebaseRepository.CheeringBoardType.NEW
+                    refreshData(postsNew)
+
+                    isViewType = FirebaseRepository.CheeringBoardType.POPULAR
+                    refreshData(postsPopular)
 
                     refreshPeople()
                 }
             }
-        }
-        timer(period = 100)
+        }*/
+        /*timer(period = 100)
         {
-            if (posts_popular.size > 0) {
+            if (postsPopular.size > 0) {
                 cancel()
-                getActivity()!!.runOnUiThread {
+                requireActivity().runOnUiThread {
                     showPopular()
-                    loadingEnd()
+                    (activity as MainActivity?)?.loadingEnd()
                 }
             }
-        }
+        }*/
         //refreshStatistics()
 
-        button_write.setOnClickListener {
-            //Toast.makeText(context,"불량 사용자로 차단되어 응원글 작성을 할 수 없습니다.", Toast.LENGTH_SHORT).show()
-            var nowDate = SimpleDateFormat("yyyy-MM-dd").format(Date())
-            var pref = PreferenceManager.getDefaultSharedPreferences(getActivity())
+        binding.buttonWrite.setOnClickListener {
+            //Toast.makeText(context,"불량 사용자로 차단되어 응원글 작성을 할 수 없습니다.")
+            /*var nowDate = SimpleDateFormat("yyyy-MM-dd").format(Date())
+            var pref = PreferenceManager.getDefaultSharedPreferences(requireActivity())
             var writeDate = pref.getString("WriteCheering", "")
 
             if (nowDate == writeDate) {
-                Toast.makeText(getActivity(),"글쓰기는 하루에 한번만 할 수 있습니다.", Toast.LENGTH_SHORT).show()
+                callToast("글쓰기는 하루에 한번만 할 수 있습니다.")
+            }*/
+            val userDTO = (activity as MainActivity?)?.getUser()!!
+            val preferencesDTO = (activity as MainActivity?)?.getPreferences()!!
+            val writeCount = sharedPreferences.getIntDate(MySharedPreferences.PREF_KEY_WRITE_CHEERING, 0)
+            val writeCountMax = if (userDTO.isPremium()) {
+                preferencesDTO.writeCount!!.times(2)
             } else {
-                var cheerBoard = pref.getString("CheerBoard", "")
+                preferencesDTO.writeCount!!
+            }
+
+            if (writeCount >= writeCountMax) {
+                callToast("오늘은 작성가능한 응원글을 모두 작성하였습니다. (${writeCountMax}회)")
+            } else {
+                val cheerBoard = sharedPreferences.getString(MySharedPreferences.PREF_KEY_CHEER_BOARD, "")
                 if (cheerBoard.isNullOrEmpty()) {
-                    var question = QuestionDTO(QuestionDTO.STAT.INFO, "응원글 이용약관", "")
+                    var question = QuestionDTO(QuestionDTO.Stat.INFO, "응원글 이용약관", "")
                     question.content = """
 응원글 중 아래에 해당되는 경우 고지없이 응원글이 삭제되거나 글쓰기에 제한을 받을 수 있습니다.
 
@@ -213,19 +237,19 @@ class FragmentPageCheering : Fragment(), OnCheeringItemClickListener {
                     questionDialog.setButtonOk("동의")
                     questionDialog.setButtonCancel("거절")
 
-                    questionDialog.button_question_cancel.setOnClickListener { // No
+                    questionDialog.binding.buttonQuestionCancel.setOnClickListener { // No
                         questionDialog.dismiss()
-                        Toast.makeText(getActivity(),"약관에 동의하여야 글쓰기가 가능합니다.", Toast.LENGTH_SHORT).show()
+                        callToast("약관에 동의하여야 글쓰기가 가능합니다.")
                     }
 
-                    questionDialog.button_question_ok.setOnClickListener { // Ok
+                    questionDialog.binding.buttonQuestionOk.setOnClickListener { // Ok
                         questionDialog.dismiss()
 
                         // 약관 동의 기록
-                        var editor = pref.edit()
-                        editor.putString("CheerBoard", nowDate).apply()
+                        var nowDate = SimpleDateFormat("yyyy-MM-dd").format(Date())
+                        sharedPreferences.putString(MySharedPreferences.PREF_KEY_CHEER_BOARD, nowDate)
 
-                        Toast.makeText(getActivity(),"$nowDate 동의 완료 되었습니다.", Toast.LENGTH_SHORT).show()
+                        callToast("$nowDate 동의 완료 되었습니다.")
 
                         showBoardWriteDialog()
                     }
@@ -235,84 +259,88 @@ class FragmentPageCheering : Fragment(), OnCheeringItemClickListener {
             }
         }
 
-        button_refresh.setOnClickListener {
-            if (isrefresh == false) {
-                Toast.makeText(getActivity(),"새로고침은 5초에 한 번 가능합니다.", Toast.LENGTH_SHORT).show()
+        binding.buttonRefresh.setOnClickListener {
+            if (!isRefresh) {
+                callToast("새로고침은 5초에 한 번 가능합니다.")
             } else {
-                isrefresh = false
+                isRefresh = false
 
                 var second = 1;
                 timer(period = 1000)
                 {
                     if (second > 5) {
                         cancel()
-                        isrefresh = true
+                        isRefresh = true
                     }
                     second++
                 }
 
-                lastVisible = null
-                if (isViewType == ViewType.STATISTICS) {
+                firebaseViewModel.lastVisibleRemove()
+                if (isViewType == FirebaseRepository.CheeringBoardType.STATISTICS) {
                     refreshPeople()
                 } else {
-                    if (isViewType == ViewType.POPULAR) {
-                        refreshData(posts_popular)
-                    } else if (isViewType == ViewType.NEW) {
-                        refreshData(posts_new)
-                    }
+                    refreshData()
                 }
             }
         }
 
-        swipe_refresh_layout.setOnRefreshListener {
-            if (isrefresh == false) {
-                Toast.makeText(getActivity(),"새로고침은 5초에 한 번 가능합니다.", Toast.LENGTH_SHORT).show()
-                swipe_refresh_layout.setRefreshing(false)
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            if (!isRefresh) {
+                callToast("새로고침은 5초에 한 번 가능합니다.")
+                binding.swipeRefreshLayout.isRefreshing = false
             } else {
-                isrefresh = false
+                isRefresh = false
 
                 var second = 1;
                 timer(period = 1000)
                 {
                     if (second > 5) {
                         cancel()
-                        isrefresh = true
+                        isRefresh = true
                     }
                     second++
                 }
 
-                if (isViewType != ViewType.STATISTICS) {
-                    lastVisible = null
-                    if (isViewType == ViewType.POPULAR) {
-                        refreshData(posts_popular)
-                    } else if (isViewType == ViewType.NEW) {
-                        refreshData(posts_new)
+                val seasonDTO = (activity as MainActivity?)?.getSeason()!!
+                binding.textTop3.text = "응원하기 ${seasonDTO.getWeek()}주차"
+
+                when (isViewType) {
+                    FirebaseRepository.CheeringBoardType.POPULAR -> {
+                        firebaseViewModel.lastVisiblePopularRemove()
+                        refreshData()
+                    }
+                    FirebaseRepository.CheeringBoardType.NEW -> {
+                        firebaseViewModel.lastVisibleNewRemove()
+                        refreshData()
+                    }
+                    FirebaseRepository.CheeringBoardType.STATISTICS -> {
+
                     }
                 }
-                swipe_refresh_layout.setRefreshing(false)
+                binding.swipeRefreshLayout.isRefreshing = false
             }
         }
 
-        text_popular.setOnClickListener {
-            if (isViewType != ViewType.POPULAR) {
+        binding.textPopular.setOnClickListener {
+            if (isViewType != FirebaseRepository.CheeringBoardType.POPULAR) {
                 showPopular()
             }
         }
 
-        text_new.setOnClickListener {
-            if (isViewType != ViewType.NEW) {
+        binding.textNew.setOnClickListener {
+            if (isViewType != FirebaseRepository.CheeringBoardType.NEW) {
                 showNew()
             }
         }
 
-        text_statistics.setOnClickListener {
-            if (isViewType != ViewType.STATISTICS) {
+        binding.textStatistics.setOnClickListener {
+            if (isViewType != FirebaseRepository.CheeringBoardType.STATISTICS) {
                 showStatistics()
             }
         }
 
-        img_question.setOnClickListener {
-            var question = QuestionDTO(QuestionDTO.STAT.INFO, "응원점수 집계 및 계산", "")
+        binding.imgQuestion.setOnClickListener {
+            var question = QuestionDTO(QuestionDTO.Stat.INFO, "응원점수 집계 및 계산", "")
             question.content = """
 ■ 응원점수 집계는 하루 한 번
     새벽 0시~2시 사이에 됩니다.
@@ -320,22 +348,101 @@ class FragmentPageCheering : Fragment(), OnCheeringItemClickListener {
     - 응원글 작성 : 50점, 좋아요 : 1점
     - 두 점수를 합한 점수가 합계 점수
                 """
-            val dialog = QuestionDialog(requireContext(), question)
+            val dialog = CheeringInfoDialog(requireContext(), question)
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
             dialog.setCanceledOnTouchOutside(false)
             dialog.show()
             dialog.setButtonCancel("닫기")
             dialog.showButtonOk(false)
 
-            dialog.button_question_cancel.setOnClickListener { // No
+            dialog.binding.buttonQuestionCancel.setOnClickListener { // No
                 dialog.dismiss()
             }
         }
 
-        rayout_number_picker.visibility = View.GONE
-        //button_data.visibility = View.GONE // 관리자모드
-        button_data.setOnClickListener {
+        binding.buttonData.visibility = View.GONE // 관리자모드
+        binding.buttonData.setOnClickListener {
             refreshStatistics()
+        }
+
+        binding.switchFavorite.setOnCheckedChangeListener { buttonView, isChecked ->
+            val userDTO = (activity as MainActivity?)?.getUser()!!
+            if (userDTO.favorites.size <= 0 && isChecked) {
+                sharedPreferences.putBoolean(MySharedPreferences.PREF_KEY_CHEERING_SHOW_FAVORITE, false)
+                callToast("지정한 최애가 없습니다. 최애는 투표하기에서 설정 가능합니다.")
+                binding.switchFavorite.isChecked = false
+            } else {
+                isSwitchButtonMsg = false
+
+                sharedPreferences.putBoolean(MySharedPreferences.PREF_KEY_CHEERING_SHOW_FAVORITE, isChecked)
+
+                firebaseViewModel.lastVisiblePopularRemove()
+                firebaseViewModel.lastVisibleNewRemove()
+
+                insertRefresh = false
+
+                when (isViewType) {
+                    FirebaseRepository.CheeringBoardType.POPULAR -> { // 인기순
+                        // 최신순 데이터는 획득만
+                        isInitNewData = false
+                        isViewType = FirebaseRepository.CheeringBoardType.NEW
+                        refreshData()
+
+                        isViewType = FirebaseRepository.CheeringBoardType.POPULAR
+                        refreshData()
+                    }
+                    FirebaseRepository.CheeringBoardType.NEW -> { // 최신순
+                        // 인기순 데이터는 획득만
+                        isInitPopularData = false
+                        isViewType = FirebaseRepository.CheeringBoardType.POPULAR
+                        refreshData()
+
+                        isViewType = FirebaseRepository.CheeringBoardType.NEW
+                        refreshData()
+                    }
+                    else -> { // 통계
+                        // 인기순, 최신순 데이터 획득만
+                        isInitNewData = false
+                        isViewType = FirebaseRepository.CheeringBoardType.NEW
+                        refreshData()
+
+                        isInitPopularData = false
+                        isViewType = FirebaseRepository.CheeringBoardType.POPULAR
+                        refreshData()
+                    }
+                }
+            }
+
+
+            //refreshData()
+
+            /*if (!isSwitchButtonMsg) { // 변수를 사용하지 않으면 취소를 눌렀을 때 무한 반복 됨
+                var question = if (isChecked) {
+                    QuestionDTO(QuestionDTO.Stat.INFO, "최애가수만 보기", "최애가수만 표시하시겠습니까?")
+                } else {
+                    QuestionDTO(QuestionDTO.Stat.INFO, "전체가수 보기", "전체가수 모두 표시하시겠습니까?")
+                }
+                val dialog = QuestionDialog(requireContext(), question)
+                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+                dialog.setCanceledOnTouchOutside(false)
+                dialog.show()
+                dialog.binding.buttonQuestionCancel.setOnClickListener { // No
+                    dialog.dismiss()
+                    binding.switchFavorite.isChecked = !binding.switchFavorite.isChecked
+                }
+                dialog.binding.buttonQuestionOk.setOnClickListener { // Ok
+                    dialog.dismiss()
+                    isSwitchButtonMsg = false
+
+                    sharedPreferences.putBoolean(MySharedPreferences.PREF_KEY_CHEERING_SHOW_FAVORITE, isChecked)
+
+                    firebaseViewModel.lastVisiblePopularRemove()
+                    firebaseViewModel.lastVisibleNewRemove()
+
+                    insertRefresh = false
+                    refreshData()
+                }
+            }*/
         }
 
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -349,238 +456,251 @@ class FragmentPageCheering : Fragment(), OnCheeringItemClickListener {
             override fun onScrolled(recyclerView1: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView1, dx, dy)
 
-                if (isViewType == ViewType.POPULAR) {
-                    if (!recyclerView.canScrollVertically(1)) {
-                        if (posts_popular.size >= 30) {
-                            isScrolling = false
-
-                            refreshData(posts_popular)
-                        }
-                    }
-                } else if (isViewType == ViewType.NEW) {
-                    if (!recyclerView.canScrollVertically(1)) {
-                        if (posts_new.size >= 30) {
-                            isScrolling = false
-
-                            refreshData(posts_new)
-                        }
+                // 마지막까지 스크롤 했으면 다음 데이터 조회
+                if (!recyclerView.canScrollVertically(1)) {
+                    isScrolling = false
+                    insertRefresh = true
+                    if ((isViewType == FirebaseRepository.CheeringBoardType.POPULAR && firebaseViewModel.boardDTOsPopular.value!!.size >= 30)
+                        || (isViewType == FirebaseRepository.CheeringBoardType.NEW && firebaseViewModel.boardDTOsNew.value!!.size >= 30)) {
+                        refreshData()
                     }
                 }
             }
         })
+
+        // 프래그먼트 간 통신
+        // 신고 처리한 항목을 갱신
+        setFragmentResultListener("notifyItemChanged") { requestKey, bundle ->
+            // We use a String here, but any type that can be put in a Bundle is supported
+            val position = bundle.getInt("position")
+            // Do something with the result
+            recyclerView.adapter?.notifyItemChanged(position)
+        }
+
+        setFragmentResultListener("notifyItemRemoved") { requestKey, bundle ->
+            // We use a String here, but any type that can be put in a Bundle is supported
+            val position = bundle.getInt("position")
+            // Do something with the result
+            firebaseViewModel.boardDTOsPopular.value!!.removeAt(position)
+            recyclerView.adapter?.notifyItemRemoved(position)
+        }
+
     }
 
-    fun showBoardWriteDialog() {
-        val dialog = BoardWriteDialog(requireContext())
+    private fun showBoardWriteDialog() {
+        val fragment = FragmentBoardWrite()
+        parentFragmentManager.beginTransaction().apply {
+            replace(R.id.layout_fragment, fragment)
+            setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+            addToBackStack(null)
+            commit()
+        }
+        return
+
+        /*val dialog = BoardWriteDialog(requireContext())
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setCanceledOnTouchOutside(false)
+        dialog.preferencesDTO = preferencesDTO
+        dialog.mainActivity = (activity as MainActivity?)
         dialog.show()
-        dialog.button_cancel.setOnClickListener { // No
+        dialog.binding.buttonCancel.setOnClickListener { // No
             dialog.dismiss()
         }
 
         dialog.setOnDismissListener {
-            if (dialog.isWrite == true) {
+            if (dialog.isWrite) {
                 // 투표권 1장 추가
-                var pref = PreferenceManager.getDefaultSharedPreferences(getActivity())
+                var pref = PreferenceManager.getDefaultSharedPreferences(requireActivity())
                 var ticketcount = pref.getInt("TicketCount", preferencesDTO?.ticketChargeCount!!)
 
                 var editor = pref.edit()
-                editor.putInt("TicketCount", ticketcount + 1).apply()
+                editor.putInt("TicketCount", ticketcount + preferencesDTO?.cheeringTicketCount!!).apply()
 
-                Toast.makeText(getActivity(),"응원하기로 티켓이 1장 추가되었습니다.", Toast.LENGTH_SHORT).show()
+                callToast("응원하기로 티켓이 ${preferencesDTO?.cheeringTicketCount}장 추가되었습니다.")
+
+                val keyString = "WriteCheering${SimpleDateFormat("yyyyMMdd").format(Date())}"
+                val writeCount = pref.getInt(keyString, 0)
+                binding.textCount.text = "남은횟수 : ${preferencesDTO?.writeCount!!.minus(writeCount)}"
 
                 showAd()
             }
-        }
-    }
-
-    fun refreshData(posts : ArrayList<BoardDTO>) {
-        loading()
-        var field = ""
-        if (isViewType == ViewType.POPULAR) {
-            field = "likeCount"
-        } else {
-            field = "time"
-        }
-
-        /* 최근 글만 가져오려고 했지만 복합 쿼리가 안먹힘
-        ?.whereGreaterThanOrEqualTo("time", cal.time)
-
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-        val limit = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date())
-        val cal = Calendar.getInstance()
-        cal.time = dateFormat.parse(limit)
-        cal.add (Calendar.DATE, -90)*/
-
-        if (lastVisible == null) {
-            firestore?.collection(cheeringboardCollectionName)?.orderBy(field, Query.Direction.DESCENDING)
-                ?.limit(30)?.get()?.addOnSuccessListener { result ->
-                posts.clear()
-                for (document in result) {
-                    var person = document.toObject(BoardDTO::class.java)!!
-                    if (dbHandler?.getblock(person.name.toString()) == true || dbHandler?.getblock(person.docname.toString()) == true) {
-                        person.isBlock = true
-                    }
-                    posts.add(person)
-                    lastVisible = result.documents.get(result.size() - 1)
-                }
-                if (result.size() > 0) {
-                    recyclerView.adapter = RecyclerViewAdapterCheering(posts, this)
-                }
-                loadingEnd()
-            }?.addOnFailureListener { exception ->
-
-            }
-        } else {
-            firestore?.collection(cheeringboardCollectionName)?.orderBy(field, Query.Direction.DESCENDING)?.startAfter(lastVisible!!)?.limit(30)?.get()?.addOnSuccessListener { result ->
-                //posts.clear()
-                for (document in result) {
-                    var board = document.toObject(BoardDTO::class.java)!!
-                    if (dbHandler?.getblock(board.name.toString()) == true || dbHandler?.getblock(board.docname.toString()) == true) {
-                        board.isBlock = true
-                    }
-                    posts.add(board)
-                    lastVisible = result.documents.get(result.size() - 1)
-                }
-                //recyclerView.adapter = RecyclerViewAdapterCheering(posts, this)
-                if (result.size() > 0) {
-                    recyclerView.adapter?.notifyItemInserted(posts.size)
-                }
-                loadingEnd()
-            }?.addOnFailureListener { exception ->
-
-            }
-        }
-    }
-
-    fun showPopular() {
-        isViewType = ViewType.POPULAR
-        lastVisible = null
-
-        text_popular.setTextColor(Color.parseColor("#DDFFF319"))
-        text_popular.paintFlags = text_popular.paintFlags or Paint.UNDERLINE_TEXT_FLAG or Paint.FAKE_BOLD_TEXT_FLAG
-        text_new.setTextColor(Color.parseColor("#CCCCCC"))
-        text_new.paintFlags = Paint.ANTI_ALIAS_FLAG
-        text_statistics.setTextColor(Color.parseColor("#CCCCCC"))
-        text_statistics.paintFlags = Paint.ANTI_ALIAS_FLAG
-
-        recyclerView.adapter = RecyclerViewAdapterCheering(posts_popular, this)
-        /*if (isViewType == ViewType.POPULAR) {
-            refreshData(posts_popular)
-        } else if (isViewType == ViewType.NEW) {
-            refreshData(posts_new)
         }*/
     }
 
-    fun showNew() {
-        isViewType = ViewType.NEW
-        lastVisible = null
+    private fun observeCheeringBoard() {
+        // 인기순 데이터
+        firebaseViewModel.boardDTOsPopular.observe(viewLifecycleOwner) {
+            if (firebaseViewModel.boardDTOsPopular.value != null) {
+                if (isInitPopularData) { // 해당 변수가 false 면 데이터 획득만 갱신 x
+                    setAdapter(firebaseViewModel.boardDTOsPopular.value!!, true)
+                } else {
+                    isInitPopularData = true
+                }
+            }
+            (activity as MainActivity?)?.loadingEnd()
+        }
 
-        text_popular.setTextColor(Color.parseColor("#CCCCCC"))
-        text_popular.paintFlags = Paint.ANTI_ALIAS_FLAG
-        text_new.setTextColor(Color.parseColor("#DDFFF319"))
-        text_new.paintFlags = text_popular.paintFlags or Paint.UNDERLINE_TEXT_FLAG or Paint.FAKE_BOLD_TEXT_FLAG
-        text_statistics.setTextColor(Color.parseColor("#CCCCCC"))
-        text_statistics.paintFlags = Paint.ANTI_ALIAS_FLAG
+        // 최신순 데이터
+        firebaseViewModel.boardDTOsNew.observe(viewLifecycleOwner) {
+            if (firebaseViewModel.boardDTOsNew.value != null) {
+                if (isInitNewData) { // 최초 실행 시에는 인기순 통계가 출력 되도록 함
+                    setAdapter(firebaseViewModel.boardDTOsNew.value!!, true)
+                } else {
+                    isInitNewData = true
+                }
+            }
+            (activity as MainActivity?)?.loadingEnd()
+        }
 
-        recyclerView.adapter = RecyclerViewAdapterCheering(posts_new, this)
-        /*if (isViewType == ViewType.POPULAR) {
-            refreshData(posts_popular)
-        } else if (isViewType == ViewType.NEW) {
-            refreshData(posts_new)
+        // 통계 데이터
+        firebaseViewModel.rankDTOsStatistics.observe(viewLifecycleOwner) {
+            if (firebaseViewModel.rankDTOsStatistics.value != null) {
+                for ((index, person) in firebaseViewModel.rankDTOsStatistics.value!!.withIndex()) {
+                    when (index) {
+                        0 -> {
+                            binding.layoutTop1.root.visibility = View.VISIBLE
+                            binding.layoutTop1.textName.text = person.name
+                            binding.layoutTop1.textCount.text = "총점:${decimalFormat.format(person.cheeringCountTotal)}"
+                        }
+                        1 -> {
+                            binding.layoutTop2.root.visibility = View.VISIBLE
+                            binding.layoutTop2.textName.text = person.name
+                            binding.layoutTop2.textCount.text = "총점:${decimalFormat.format(person.cheeringCountTotal)}"
+                        }
+                        2 -> {
+                            binding.layoutTop3.root.visibility = View.VISIBLE
+                            binding.layoutTop3.textName.text = person.name
+                            binding.layoutTop3.textCount.text = "총점:${decimalFormat.format(person.cheeringCountTotal)}"
+                        }
+                    }
+                }
+                if (isInitTotalData) { // 최초 실행 시에는 인기순 통계가 출력 되도록 함
+                    recyclerView.adapter = RecyclerViewAdapterCheeringTotal(firebaseViewModel.rankDTOsStatistics.value!!)
+                } else {
+                    isInitTotalData = true
+                }
+            }
+            (activity as MainActivity?)?.loadingEnd()
+        }
+    }
+
+    private fun setAdapter(boards: ArrayList<BoardDTO>, isInsert: Boolean) {
+        if (insertRefresh) {
+            recyclerView.adapter?.notifyItemInserted(boards.size)
+        } else {
+            recyclerView.adapter = RecyclerViewAdapterCheering(boards, this)
+        }
+        insertRefresh = false
+
+        /*if (boards.size > 30) {
+            recyclerView.adapter?.notifyItemInserted(boards.size)
+        } else {
+            recyclerView.adapter = RecyclerViewAdapterCheering(boards, this)
         }*/
     }
 
-    fun showStatistics() {
-        isViewType = ViewType.STATISTICS
-        lastVisible = null
+    private fun refreshData() {
+        (activity as MainActivity?)?.loading()
+        val seasonDTO = (activity as MainActivity?)?.getSeason()!!
 
-        text_popular.setTextColor(Color.parseColor("#CCCCCC"))
-        text_popular.paintFlags = Paint.ANTI_ALIAS_FLAG
-        text_new.setTextColor(Color.parseColor("#CCCCCC"))
-        text_new.paintFlags = Paint.ANTI_ALIAS_FLAG
-        text_statistics.setTextColor(Color.parseColor("#DDFFF319"))
-        text_statistics.paintFlags = text_popular.paintFlags or Paint.UNDERLINE_TEXT_FLAG or Paint.FAKE_BOLD_TEXT_FLAG
+        val list = if (binding.switchFavorite.isChecked) (activity as MainActivity?)?.getUser()!!.favorites
+        else null
 
-        recyclerView.adapter = RecyclerViewAdapterCheering(statistics, this)
+        when (isViewType) {
+            FirebaseRepository.CheeringBoardType.POPULAR -> {
+                firebaseViewModel.getCheeringBoardPopular(dbHandlerReport, seasonDTO.seasonNum!!, seasonDTO.getWeek(), list)
+            }
+            FirebaseRepository.CheeringBoardType.NEW -> {
+                firebaseViewModel.getCheeringBoardNew(dbHandlerReport, seasonDTO.seasonNum!!, seasonDTO.getWeek(), list)
+            }
+            else -> {
+                (activity as MainActivity?)?.loadingEnd()
+            }
+        }
+    }
+
+    private fun showPopular() {
+        isViewType = FirebaseRepository.CheeringBoardType.POPULAR
+        //firebaseViewModel.lastVisibleRemove()
+
+        setTextColor()
+
+        setAdapter(firebaseViewModel.boardDTOsPopular.value!!, false)
+    }
+
+    private fun showNew() {
+        isViewType = FirebaseRepository.CheeringBoardType.NEW
+        //firebaseViewModel.lastVisibleRemove()
+
+        setTextColor()
+
+        setAdapter(firebaseViewModel.boardDTOsNew.value!!, false)
+    }
+
+    private fun showStatistics() {
+        isViewType = FirebaseRepository.CheeringBoardType.STATISTICS
+        //firebaseViewModel.lastVisibleRemove()
+
+        setTextColor()
+
+        recyclerView.adapter = RecyclerViewAdapterCheeringTotal(firebaseViewModel.rankDTOsStatistics.value!!)
+    }
+
+    private fun setTextColor() {
+        var popularColor = ContextCompat.getColor(requireContext(), R.color.unselect_text)
+        var popularFlag = Paint.ANTI_ALIAS_FLAG
+        var newColor = ContextCompat.getColor(requireContext(), R.color.unselect_text)
+        var newFlag = Paint.ANTI_ALIAS_FLAG
+        var statisticsColor = ContextCompat.getColor(requireContext(), R.color.unselect_text)
+        var statisticsFlag = Paint.ANTI_ALIAS_FLAG
+        when (isViewType) {
+            FirebaseRepository.CheeringBoardType.POPULAR -> {
+                popularColor = ContextCompat.getColor(requireContext(), R.color.select_text)
+                popularFlag = binding.textPopular.paintFlags or Paint.UNDERLINE_TEXT_FLAG or Paint.FAKE_BOLD_TEXT_FLAG
+            }
+            FirebaseRepository.CheeringBoardType.NEW -> {
+                newColor = ContextCompat.getColor(requireContext(), R.color.select_text)
+                newFlag = binding.textPopular.paintFlags or Paint.UNDERLINE_TEXT_FLAG or Paint.FAKE_BOLD_TEXT_FLAG
+            }
+            FirebaseRepository.CheeringBoardType.STATISTICS -> {
+                statisticsColor = ContextCompat.getColor(requireContext(), R.color.select_text)
+                statisticsFlag = binding.textPopular.paintFlags or Paint.UNDERLINE_TEXT_FLAG or Paint.FAKE_BOLD_TEXT_FLAG
+            }
+        }
+
+        binding.textPopular.setTextColor(popularColor)
+        binding.textPopular.paintFlags = popularFlag
+
+        binding.textNew.setTextColor(newColor)
+        binding.textNew.paintFlags = newFlag
+
+        binding.textStatistics.setTextColor(statisticsColor)
+        binding.textStatistics.paintFlags = statisticsFlag
     }
 
     override fun onItemClick(item: BoardDTO, position: Int) {
-        if (isViewType != ViewType.STATISTICS) {
-            val dialog = BoardDialog(requireContext(), item, getActivity()!!)
-            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-            dialog.setCanceledOnTouchOutside(false)
-            dialog.show()
-            dialog.button_cancel.setOnClickListener {
-                // No
-                dialog.dismiss()
-                if (dialog.isReport == true) {
-                    lastVisible = null
-                    if (isViewType == ViewType.STATISTICS) {
-                        refreshPeople()
-                    } else {
-                        if (isViewType == ViewType.POPULAR) {
-                            refreshData(posts_popular)
-                        } else if (isViewType == ViewType.NEW) {
-                            refreshData(posts_new)
-                        }
-                    }
-                }
+        if (isViewType != FirebaseRepository.CheeringBoardType.STATISTICS) {
+            val fragment = FragmentBoard()
+            fragment.item = item
+            fragment.itemPosition = position
+            parentFragmentManager.beginTransaction().apply {
+                add(R.id.layout_fragment, fragment)
+                setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                addToBackStack(null)
+                commit()
             }
-            /*dialog.button_block.setOnClickListener {
-                var question = QuestionDTO(
-                    QuestionDTO.STAT.ERROR,
-                    "응원글 차단",
-                    "해당 응원글을 차단 하시겠습니까?"
-                )
-                if (item.isBlock) {
-                    question.title = "응원글 차단 해제"
-                    question.content = "해당 응원글을 차단 해제 하시겠습니까?"
-                }
-
-                val questionDialog = QuestionDialog(requireContext(), question)
-                questionDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-                questionDialog.setCanceledOnTouchOutside(false)
-                questionDialog.show()
-                questionDialog.button_question_cancel.setOnClickListener { // No
-                    questionDialog.dismiss()
-                }
-                questionDialog.button_question_ok.setOnClickListener { // Ok
-                    questionDialog.dismiss()
-                    dialog.dismiss()
-                    if (dbHandler?.getblock(item.docname.toString()) == false) {
-                        dbHandler?.updateBlock(item.docname.toString(), 1)
-                        Toast.makeText(context,"응원글 차단", Toast.LENGTH_SHORT).show()
-                    } else {
-                        dbHandler?.updateBlock(item.docname.toString(), 0)
-                        Toast.makeText(context,"응원글 차단 해제", Toast.LENGTH_SHORT).show()
-                    }
-
-                    lastVisible = null
-                    if (isViewType == ViewType.STATISTICS) {
-                        refreshPeople()
-                    } else {
-                        if (isViewType == ViewType.POPULAR) {
-                            refreshData(posts_popular)
-                        } else if (isViewType == ViewType.NEW) {
-                            refreshData(posts_new)
-                        }
-                    }
-                }
-            }*/
         }
     }
 
-    override fun onItemClick_like(item: BoardDTO, like: TextView) {
-        if (dbHandler?.getlike(item.docname.toString()) == false) {
+    override fun onItemClickLike(item: BoardDTO, like: TextView) {
+        if (dbHandler?.getLike(item.docname.toString()) == false) {
             dbHandler?.updateLike(item.docname.toString(), 1)
 
             item.likeCount = item.likeCount!! + 1
             like.text = "${item.likeCount}"
             like.paintFlags = like.paintFlags or Paint.UNDERLINE_TEXT_FLAG
 
-            Toast.makeText(getActivity(),"좋아요", Toast.LENGTH_SHORT).show()
+            callToast("좋아요")
         } else {
             dbHandler?.updateLike(item.docname.toString(), 0)
 
@@ -588,249 +708,31 @@ class FragmentPageCheering : Fragment(), OnCheeringItemClickListener {
             like.text = "${item.likeCount}"
             like.paintFlags = Paint.ANTI_ALIAS_FLAG
 
-            Toast.makeText(getActivity(),"좋아요 취소", Toast.LENGTH_SHORT).show()
+            callToast("좋아요 취소")
         }
-
-
     }
 
-    override fun onItemClick_dislike(item: BoardDTO, dislike: TextView) {
-        if (dbHandler?.getdislike(item.docname.toString()) == false) {
-            dbHandler?.updateDislike(item.docname.toString(), 1)
+    private fun refreshPeople() {
+        (activity as MainActivity?)?.loading()
+        firebaseViewModel.getCheeringStatistics()
+    }
 
-            item.dislikeCount = item.dislikeCount!! + 1
-            dislike.text = "${item.dislikeCount}"
-            dislike.paintFlags = dislike.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+    private fun refreshStatistics() {
+        callToast("데이터 취합 시작")
+        (activity as MainActivity?)?.loading()
+        val seasonDTO = (activity as MainActivity?)?.getSeason()!!
+        firebaseViewModel.updateCheeringStatistics(seasonDTO.seasonNum!!, seasonDTO.getWeek()) {
+            callToast("데이터 취합 완료")
+            (activity as MainActivity?)?.loadingEnd()
+        }
+    }
 
-            Toast.makeText(getActivity(),"싫어요", Toast.LENGTH_SHORT).show()
+    private fun callToast(message: String) {
+        if (toast == null) {
+            toast = Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT)
         } else {
-            dbHandler?.updateDislike(item.docname.toString(), 0)
-
-            item.dislikeCount = item.dislikeCount!! - 1
-            dislike.text = "${item.dislikeCount}"
-            dislike.paintFlags = Paint.ANTI_ALIAS_FLAG
-
-            Toast.makeText(getActivity(),"싫어요 취소", Toast.LENGTH_SHORT).show()
+            toast?.setText(message)
         }
-    }
-
-    fun showAd() {
-        // 광고 종류 획득
-        var firestore = FirebaseFirestore.getInstance()
-        firestore?.collection("preferences")?.document("ad_policy")?.get()?.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                var ad_interstitial = task.result!!["ad_interstitial"]
-                callInterstitial(ad_interstitial as String)
-            }
-        }
-    }
-
-    fun callInterstitial(interstitial : String) {
-        when (interstitial) {
-            getString(R.string.adtype_admob) -> {
-                interstitialAdmob(true)
-            }
-            getString(R.string.adtype_cauly) -> {
-                interstitialCauly(true)
-            }
-            else -> {
-
-            }
-        }
-    }
-
-    fun interstitialAdmob(isFirst : Boolean) {
-        // 애드몹 - 전면
-        var InterstitialAd = InterstitialAd(context)
-        InterstitialAd.adUnitId = getString(R.string.admob_Interstitial_ad_unit_id)
-        InterstitialAd.loadAd(AdRequest.Builder().build())
-
-        InterstitialAd.adListener = object : AdListener() {
-            override fun onAdLoaded() {
-                if (InterstitialAd.isLoaded) {
-                    InterstitialAd.show()
-                } else {
-                    // 광고 호출 실패
-                    if (isFirst) {
-                        interstitialCauly(false)
-                    }
-                }
-            }
-
-            override fun onAdFailedToLoad(errorCode: Int) {
-                // Code to be executed when an ad request fails.
-                if (isFirst) {
-                    interstitialCauly(false)
-                }
-            }
-
-            override fun onAdOpened() {
-                // Code to be executed when the ad is displayed.
-            }
-
-            override fun onAdClicked() {
-                // Code to be executed when the user clicks on an ad.
-            }
-
-            override fun onAdLeftApplication() {
-                // Code to be executed when the user has left the app.
-            }
-
-            override fun onAdClosed() {
-
-            }
-        }
-    }
-
-    fun interstitialCauly(isFirst : Boolean) {
-        var adInfo: CaulyAdInfo
-        adInfo = CaulyAdInfoBuilder("avhXxFUQ").build()
-        var interstial = CaulyInterstitialAd()
-        interstial.setAdInfo(adInfo)
-
-        val adCallback = object : CaulyInterstitialAdListener {
-            override fun onReceiveInterstitialAd(p0: CaulyInterstitialAd?, p1: Boolean) {
-                p0?.show()
-            }
-
-            override fun onFailedToReceiveInterstitialAd(p0: CaulyInterstitialAd?, p1: Int, p2: String?) {
-                if (isFirst) {
-                    interstitialAdmob(false)
-                }
-            }
-
-            override fun onClosedInterstitialAd(p0: CaulyInterstitialAd?) {
-
-            }
-
-            override fun onLeaveInterstitialAd(p0: CaulyInterstitialAd?) {
-
-            }
-
-        }
-
-        interstial.setInterstialAdListener(adCallback)
-        interstial.requestInterstitialAd(getActivity())
-    }
-
-    fun loading() {
-        android.os.Handler().postDelayed({
-            if (loadingDialog == null) {
-                loadingDialog = LoadingDialog(requireContext())
-                loadingDialog?.requestWindowFeature(Window.FEATURE_NO_TITLE)
-                loadingDialog?.setCanceledOnTouchOutside(false)
-            }
-            loadingDialog?.show()
-        }, 0)
-    }
-
-    fun loadingEnd() {
-        android.os.Handler().postDelayed({
-            loadingDialog?.dismiss()
-        }, 400)
-    }
-
-    fun refreshPeople() {
-        firestore?.collection(peopleCollectionName)?.orderBy("cheeringCountTotal", Query.Direction.DESCENDING)
-            ?.get()?.addOnSuccessListener { result ->
-                people.clear()
-                statistics.clear()
-                var index = 0
-                for (document in result) {
-                    var person = document.toObject(RankDTO::class.java)!!
-                    people.add(person)
-                    if (index == 0 && layout_top1 != null) {
-                        layout_top1.visibility = View.VISIBLE
-                        layout_top1.text_name.text = person.name
-                        layout_top1.text_count.text = "응원글:${decimalFormat.format(person.cheeringCount)}"
-                        layout_top1.text_count2.text = "좋아요:${decimalFormat.format(person.likeCount)}"
-                    } else if (index == 1 && layout_top2 != null) {
-                        layout_top2.visibility = View.VISIBLE
-                        layout_top2.text_name.text = person.name
-                        layout_top2.text_count.text = "응원글:${decimalFormat.format(person.cheeringCount)}"
-                        layout_top2.text_count2.text = "좋아요:${decimalFormat.format(person.likeCount)}"
-                    } else if (index == 2 && layout_top3 != null) {
-                        layout_top3.visibility = View.VISIBLE
-                        layout_top3.text_name.text = person.name
-                        layout_top3.text_count.text = "응원글:${decimalFormat.format(person.cheeringCount)}"
-                        layout_top3.text_count2.text = "좋아요:${decimalFormat.format(person.likeCount)}"
-                    }
-
-                    var board = BoardDTO()
-                    board.image = person.image
-                    board.title = "${index+1}등 ${person.name}"
-                    board.content = "합계 점수 : ${decimalFormat.format(person.cheeringCountTotal)}"
-                    board.name = "응원글 : ${decimalFormat.format(person.cheeringCount)}"
-                    board.likeCount = person.likeCount
-                    board.dislikeCount = person.dislikeCount
-                    statistics.add(board)
-                    index++
-                }
-            }?.addOnFailureListener { exception ->
-
-            }
-    }
-
-    fun refreshStatistics() {
-        Toast.makeText(getActivity(),"데이터 취합 시작", Toast.LENGTH_SHORT).show()
-        // 01시에서 03시 사이에 최신폰에서 업데이트 하도록 처리
-        var nowTime = SimpleDateFormat("HHmm").format(Date()).toInt()
-        //if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P && (nowTime >= 0 && nowTime <= 2400)) {
-            println("카운트 획득 시작")
-            var nowDate = SimpleDateFormat("yyyy-MM-dd").format(Date())
-            firestore?.collection(peopleCollectionName)?.get()?.addOnSuccessListener { result ->
-                for (document in result) {
-                    var person = document.toObject(RankDTO::class.java)!!
-                    println("$person 처리 시작")
-                    // 업데이트가 안된 항목만 처리
-                    var updateDate = ""
-                    if (person.updateDate != null) {
-                        updateDate = SimpleDateFormat("yyyy-MM-dd").format(person.updateDate)
-                    }
-                    println("현재시간 : $nowDate, 업데이트시간 : $updateDate")
-
-                    SystemClock.sleep(300)
-                    if (number_picker.value == 0 || person.image.equals("profile${String.format("%03d",number_picker.value)}")) {
-                    //if (nowDate != updateDate) {
-                        loading()
-                        println("업데이트 시작")
-                        firestore?.collection(cheeringboardCollectionName)?.whereEqualTo("image", person.image)
-                            ?.get()?.addOnSuccessListener { result ->
-                                person.cheeringCount = result.size()
-                                person.likeCount = 0
-                                person.dislikeCount = 0
-                                person.updateDate = Date()
-                                for (document in result) {
-                                    var post = document.toObject(BoardDTO::class.java)!!
-                                    if (post.likeCount!! < 55555) {
-                                        person.likeCount = person.likeCount!! + post.likeCount!!
-                                        person.dislikeCount =
-                                            person.dislikeCount!! + post.dislikeCount!!
-                                    }
-                                }
-
-                                // 전체 점수는 응원글 50점, 좋아요 1점
-                                person.cheeringCountTotal = (person.cheeringCount!! * 50) + person.likeCount!!
-
-                                firestore?.collection(peopleCollectionName)
-                                    ?.document(person.docname.toString())
-                                    ?.set(person)
-
-                                loadingEnd()
-                                println("$person 카운트 변경")
-                                Toast.makeText(getActivity(),"[${person.name} 완료.]", Toast.LENGTH_SHORT).show()
-                            }
-                            ?.addOnFailureListener { exception ->
-
-                            }
-                    }
-                }
-            }
-                ?.addOnFailureListener { exception ->
-
-                }
-
-            println("카운트 획득 끝")
-        //}
+        toast?.show()
     }
 }
